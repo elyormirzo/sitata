@@ -256,7 +256,12 @@ const $ = (id) => document.getElementById(id);
 
 // ===== 3. BUGUNGI IQTIBOS =====
 // 1970-yildan beri o'tgan kunlar soni bo'yicha: hamma odamda bir kunda bir xil iqtibos chiqadi.
-const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000); // Toshkent vaqti (UTC+5)
+// Sinov rejimi: manzil oxiriga ?sinov qo'shilsa, o'yin har safar boshidan boshlanadi (natija saqlanmaydi).
+// ?sinov&kun=1 — ertangi iqtibos, ?sinov&kun=2 — indinginisi va hokazo.
+const parametrlar = new URLSearchParams(location.search);
+const SINOV = parametrlar.has("sinov");
+const KUN_SURISH = SINOV ? (parseInt(parametrlar.get("kun"), 10) || 0) : 0;
+const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000) + KUN_SURISH; // Toshkent vaqti (UTC+5)
 const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
 const muallif = MUALLIFLAR[bugungi.muallif];
 const ISM = bugungi.muallif.toUpperCase();
@@ -297,11 +302,12 @@ const KLAVIATURA = [...ismHarflari, ...chalgituvchilar].sort();
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
 let holat = { kun: bugungiKun, harflar: [], tugadi: false, yutdi: false };
 try {
-  const saqlangan = JSON.parse(localStorage.getItem("kimAytganHarf"));
+  const saqlangan = SINOV ? null : JSON.parse(localStorage.getItem("kimAytganHarf"));
   if (saqlangan && saqlangan.kun === bugungiKun) holat = saqlangan;
 } catch (e) { /* xotira ishlamasa, oddiy davom etamiz */ }
 
 function saqlash() {
+  if (SINOV) return;
   try { localStorage.setItem("kimAytganHarf", JSON.stringify(holat)); } catch (e) {}
 }
 
