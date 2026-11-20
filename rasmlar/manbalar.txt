@@ -1,0 +1,18 @@
+Portretlar Wikimedia Commons'dan olingan. Har bir rasmning muallifi va litsenziyasi
+quyidagi sahifalarda ko'rsatilgan.
+
+bobur.jpg: https://commons.wikimedia.org/wiki/File:Humayun_and_Babur_%28Late_Shah_Jahan_Album%29_Babur_detail.jpg
+ulugbek.jpg: https://commons.wikimedia.org/wiki/File:Ulugh_Beg%2C_Timurid_painting_1425-50.jpg
+ibn-sino.jpg: https://commons.wikimedia.org/wiki/File:Avicenna_Bust%2C_left_profile_%28cropped%29.jpg
+beruniy.jpg: https://commons.wikimedia.org/wiki/File:Ab%C5%AB_Al-Ray%E1%B8%A5%C4%81n_Al-B%C4%ABr%C5%ABn%C4%AB%2C_Sayr_mulhimah_min_al-Sharq_wa-al-Gharb.png
+suqrot.jpg: https://commons.wikimedia.org/wiki/File:Socrates_Louvre.jpg
+aristotel.jpg: https://commons.wikimedia.org/wiki/File:Aristotle_Altemps_Inv8575.jpg
+konfutsiy.jpg: https://commons.wikimedia.org/wiki/File:Confucius%2C_fresco_from_a_Western_Han_tomb_of_Dongping_County%2C_Shandong_province%2C_China_%28cropped%29.jpg
+dekart.jpg: https://commons.wikimedia.org/wiki/File:Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg
+bekon.jpg: https://commons.wikimedia.org/wiki/File:Somer_Francis_Bacon.jpg
+nyuton.jpg: https://commons.wikimedia.org/wiki/File:Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg
+shekspir.jpg: https://commons.wikimedia.org/wiki/File:William_Shakespeare_by_John_Taylor%2C_edited.jpg
+tolstoy.jpg: https://commons.wikimedia.org/wiki/File:Leo_Tolstoy_1908_Portrait_%283x4_cropped%29.jpg
+dostoyevskiy.jpg: https://commons.wikimedia.org/wiki/File:Vasily_Perov_-_%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82_%D0%A4.%D0%9C.%D0%94%D0%BE%D1%81%D1%82%D0%BE%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_-_Google_Art_Project.jpg
+pushkin.jpg: https://commons.wikimedia.org/wiki/File:Orest_Kiprensky_-_%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82_%D0%BF%D0%BE%D1%8D%D1%82%D0%B0_%D0%90.%D0%A1.%D0%9F%D1%83%D1%88%D0%BA%D0%B8%D0%BD%D0%B0_-_Google_Art_Project.jpg
+eynshteyn.jpg: https://commons.wikimedia.org/wiki/File:Albert_Einstein_Head_cleaned.jpg

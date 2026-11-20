@@ -15,7 +15,6 @@
     --kulrang: #5B6170;
     --yashil: #0F6E5C;
     --yashil-och: #D7EEE6;
-    --sariq-och: #FBEFC9;
     --qizil-och: #FBE3D6;
     --chegara: #E2E2DD;
   }
@@ -35,66 +34,85 @@
   /* Iqtibos kartasi */
   .karta {
     background: var(--qora); color: #fff;
-    border-radius: 20px; padding: 22px 20px; margin-bottom: 16px;
+    border-radius: 20px; padding: 20px; margin-bottom: 16px;
   }
   .karta small { color: #9FD8C8; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; font-size: 12px; }
   .karta blockquote {
-    margin: 12px 0 16px; font-family: Lora, Georgia, serif;
-    font-size: 21px; line-height: 1.45; white-space: pre-line;
+    margin: 10px 0 16px; font-family: Lora, Georgia, serif;
+    font-size: 20px; line-height: 1.45; white-space: pre-line;
   }
-  .urinishlar { display: flex; gap: 6px; }
-  .urinishlar span { flex: 1; height: 6px; border-radius: 3px; background: #3A3F4B; }
-  .urinishlar span.ishlatildi { background: #E0703A; }
-  .urinishlar span.topildi { background: #3FB58F; }
 
-  /* Kiritish va tugmalar */
-  .kiritish { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
-  label { font-size: 13px; color: var(--kulrang); }
-  input {
-    width: 100%; height: 50px; border: 1px solid #D5D5CF; border-radius: 14px;
-    padding: 0 16px; font: 16px Inter, sans-serif; color: var(--qora); background: #fff; margin-top: 6px;
+  /* Portret: ism harflari soniga teng bo'laklarga bo'lingan */
+  .portret {
+    position: relative; width: 100%; max-width: 240px; aspect-ratio: 4 / 5;
+    margin: 0 auto; border-radius: 14px; overflow: hidden; background: #2A2E37;
   }
-  button {
+  .portret img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .portret .bosh-harf {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font: 600 72px Lora, Georgia, serif; color: #fff;
+    background: linear-gradient(160deg, #0F6E5C, #16181D);
+  }
+  .bolak {
+    position: absolute; display: flex; align-items: center; justify-content: center;
+    font: 700 13px Inter, sans-serif; color: rgba(22,24,29,.45);
+    border: 1px solid rgba(22,24,29,.35);
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  .bolak.ochiq { opacity: 0; transform: scale(.4) rotate(8deg); pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .bolak { transition: opacity .2s; } .bolak.ochiq { transform: none; } }
+
+  /* Xatolar chizig'i */
+  .xatolar { display: flex; gap: 6px; margin-top: 16px; }
+  .xatolar span { flex: 1; height: 6px; border-radius: 3px; background: #3A3F4B; }
+  .xatolar span.ishlatildi { background: #E0703A; }
+  .xato-matn { margin-top: 6px; font-size: 12px; color: #B7BCC7; }
+
+  /* Ism katakchalari */
+  .ism { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 4px 0 14px; }
+  .soz { display: flex; gap: 4px; }
+  .harf-katak {
+    width: 26px; height: 34px; border-radius: 7px; background: #fff; border: 1px solid #D5D5CF;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 17px Inter, sans-serif; text-transform: uppercase;
+  }
+  .harf-katak.topildi { background: var(--yashil-och); border-color: #A9D9C9; color: #0A5243; }
+  .harf-katak.korsatildi { background: var(--qizil-och); border-color: #F2C9B5; color: #8A2E0A; }
+  .harf-katak.belgi { width: 10px; border: 0; background: none; }
+
+  /* Ishoralar */
+  .ishoralar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 26px; margin-bottom: 12px; }
+  .ishora { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 8px; background: #E3F1EC; color: #0A5243; }
+
+  /* Harflar klaviaturasi */
+  .klaviatura { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  .tugma {
+    height: 46px; border-radius: 10px; border: 1px solid var(--chegara); background: #fff; color: var(--qora);
+    font: 600 16px Inter, sans-serif; cursor: pointer; padding: 0;
+    transition: background .15s, transform .1s;
+  }
+  .tugma:active:not(:disabled) { transform: scale(.94); }
+  .tugma:disabled { cursor: default; }
+  .tugma.togri { background: var(--yashil); border-color: var(--yashil); color: #fff; }
+  .tugma.xato { background: #E4E4DF; border-color: #E4E4DF; color: #A3A6AE; }
+  .izoh-satr { font-size: 12px; color: var(--kulrang); margin: 10px 0 0; text-align: center; line-height: 1.5; }
+
+  button.asosiy {
     height: 52px; border-radius: 26px; border: 0; cursor: pointer;
     background: var(--yashil); color: #fff; font: 600 16px Inter, sans-serif;
   }
-  button.ikkinchi { background: #fff; color: var(--qora); border: 1px solid var(--chegara); }
-  /* Mualliflar tugmalari */
-  .mualliflar { display: flex; flex-direction: column; gap: 8px; }
-  .sarlavha-kichik { font-size: 13px; color: var(--kulrang); margin: 0 0 8px; }
-  .muallif {
-    height: auto; min-height: 52px; padding: 12px 16px; border-radius: 14px; text-align: left;
-    background: #fff; color: var(--qora); border: 1px solid var(--chegara);
-    font: 500 15px Inter, sans-serif; transition: background .15s, border-color .15s, transform .1s;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .muallif:active:not(:disabled) { transform: scale(.98); }
-  .muallif:disabled { cursor: default; }
-  .muallif.xato-javob { background: #FDF3EE; border-color: #F2C9B5; color: #8A2E0A; }
-  .muallif.togri-javob { background: var(--yashil); border-color: var(--yashil); color: #fff; }
-  .muallif.ochiq { opacity: .45; }
-  .muallif .ism-qator { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
-  .muallif .belgi { font-size: 13px; font-weight: 600; }
-  /* Xato javob ostidagi ishoralar: davr, faoliyat, hudud */
-  .teglar { display: flex; flex-wrap: wrap; gap: 6px; }
-  .teg { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px; }
-  .teg.togri { background: var(--yashil-och); color: #0A5243; }
-  .teg.yaqin { background: var(--sariq-och); color: #6B4A00; }
-  .teg.xato  { background: #fff; color: #8A2E0A; border: 1px solid #F2C9B5; }
-  .izoh-satr { font-size: 12px; color: var(--kulrang); margin-top: 10px; line-height: 1.5; }
-  @keyframes silkinish { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-  @keyframes sakrash { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
-  .silkin { animation: silkinish .3s ease 2; }
-  .sakra { animation: sakrash .4s ease; }
-  @media (prefers-reduced-motion: reduce) { .silkin, .sakra { animation: none; } }
-  .xabar { min-height: 20px; font-size: 14px; color: #8A2E0A; }
-
   .natija {
-    margin-top: 16px; padding: 18px; border-radius: 20px; background: #fff;
+    margin-top: 4px; padding: 18px; border-radius: 20px; background: #fff;
     border: 1px solid #E8E8E3; text-align: center; display: flex; flex-direction: column; gap: 12px;
   }
   .natija h2 { margin: 0; font-family: Lora, Georgia, serif; font-size: 22px; }
+  .manba { margin-top: 24px; text-align: center; font-size: 11px; color: #9A9EA8; }
+  .manba a { color: inherit; }
   .yashirin { display: none !important; }
+
+  @keyframes silkinish { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  .silkin { animation: silkinish .25s ease 2; }
+  @media (prefers-reduced-motion: reduce) { .silkin { animation: none; } }
 </style>
 </head>
 <body>
@@ -102,53 +120,58 @@
 
   <header>
     <h1>Kim aytgan?</h1>
-    <p>Iqtibos muallifini 3 urinishda toping</p>
+    <p>Muallif ismini harfma-harf toping — har bir harf suratning bir bo'lagini ochadi</p>
   </header>
 
   <section class="karta">
     <small>Bugungi iqtibos</small>
     <blockquote id="iqtibosMatni"></blockquote>
-    <div class="urinishlar" id="urinishlar"></div>
+    <div class="portret" id="portret"></div>
+    <div class="xatolar" id="xatolar"></div>
+    <div class="xato-matn" id="xatoMatn"></div>
   </section>
 
-  <p class="sarlavha-kichik" id="variantSarlavha">Muallifni bosing — 3 ta urinish</p>
-  <div class="mualliflar" id="mualliflar"></div>
-  <p class="izoh-satr" id="izoh">Xato javob ostida ishora chiqadi: <b>davr</b>, <b>faoliyat</b> va <b>hudud</b>.
-    Yashil — to'g'ri muallif bilan bir xil, sariq — yaqin, oq — boshqacha.</p>
+  <div class="ism" id="ism"></div>
+  <div class="ishoralar" id="ishoralar"></div>
 
-  <div class="xabar" id="xabar"></div>
+  <div id="oyin">
+    <div class="klaviatura" id="klaviatura"></div>
+    <p class="izoh-satr">Har bir xato harfdan keyin ishora ochiladi: faoliyat, davr, hudud.</p>
+  </div>
 
   <section class="natija yashirin" id="natija">
     <h2 id="natijaSarlavha"></h2>
     <div id="natijaMatn"></div>
-    <button type="button" id="ulashish">Natijani ulashish</button>
+    <button type="button" class="asosiy" id="ulashish">Natijani ulashish</button>
     <div style="font-size: 13px; color: var(--kulrang)">Ertaga yangi iqtibos chiqadi</div>
   </section>
 
+  <p class="manba">Portretlar: <a href="rasmlar/manbalar.txt">Wikimedia Commons</a></p>
 </div>
 
 <script>
 // ===== 2. MA'LUMOTLAR =====
-// Har bir muallif: davr (asr; miloddan avvalgi bo'lsa manfiy son), kasb, yurt.  (Ekranda: Faoliyat, Hudud)
+// Har bir muallif: davr (asr; miloddan avvalgi bo'lsa manfiy son), kasb (faoliyat), yurt (hudud), rasm.
 // Yangi muallif qo'shish uchun shu ro'yxatga yana bitta qator yozing.
+// Rasm bo'lmasa (null), suratda muallif ismining bosh harflari chiqadi.
 const MUALLIFLAR = {
-  "Alisher Navoiy":     { davr: 15,  kasb: "Shoir",    yurt: "O'rta Osiyo" },
-  "Zahiriddin Bobur":   { davr: 16,  kasb: "Shoir",    yurt: "O'rta Osiyo" },
-  "Mirzo Ulug'bek":     { davr: 15,  kasb: "Olim",     yurt: "O'rta Osiyo" },
-  "Ibn Sino":           { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo" },
-  "Abu Rayhon Beruniy": { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo" },
-  "Abdulla Qodiriy":    { davr: 20,  kasb: "Yozuvchi", yurt: "O'rta Osiyo" },
-  "Suqrot":             { davr: -5,  kasb: "Faylasuf", yurt: "Yunoniston" },
-  "Aristotel":          { davr: -4,  kasb: "Faylasuf", yurt: "Yunoniston" },
-  "Konfutsiy":          { davr: -6,  kasb: "Faylasuf", yurt: "Xitoy" },
-  "Rene Dekart":        { davr: 17,  kasb: "Faylasuf", yurt: "Fransiya" },
-  "Frensis Bekon":      { davr: 16,  kasb: "Faylasuf", yurt: "Angliya" },
-  "Isaak Nyuton":       { davr: 17,  kasb: "Olim",     yurt: "Angliya" },
-  "Uilyam Shekspir":    { davr: 16,  kasb: "Yozuvchi", yurt: "Angliya" },
-  "Lev Tolstoy":        { davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya" },
-  "Fyodor Dostoyevskiy":{ davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya" },
-  "Aleksandr Pushkin":  { davr: 19,  kasb: "Shoir",    yurt: "Rossiya" },
-  "Albert Eynshteyn":   { davr: 20,  kasb: "Olim",     yurt: "Germaniya" },
+  "Alisher Navoiy":     { davr: 15,  kasb: "Shoir",    yurt: "O'rta Osiyo", rasm: null },
+  "Zahiriddin Bobur":   { davr: 16,  kasb: "Shoir",    yurt: "O'rta Osiyo", rasm: "rasmlar/bobur.jpg" },
+  "Mirzo Ulug'bek":     { davr: 15,  kasb: "Olim",     yurt: "O'rta Osiyo", rasm: "rasmlar/ulugbek.jpg" },
+  "Ibn Sino":           { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo", rasm: "rasmlar/ibn-sino.jpg" },
+  "Abu Rayhon Beruniy": { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo", rasm: "rasmlar/beruniy.jpg" },
+  "Abdulla Qodiriy":    { davr: 20,  kasb: "Yozuvchi", yurt: "O'rta Osiyo", rasm: null },
+  "Suqrot":             { davr: -5,  kasb: "Faylasuf", yurt: "Yunoniston",  rasm: "rasmlar/suqrot.jpg" },
+  "Aristotel":          { davr: -4,  kasb: "Faylasuf", yurt: "Yunoniston",  rasm: "rasmlar/aristotel.jpg" },
+  "Konfutsiy":          { davr: -6,  kasb: "Faylasuf", yurt: "Xitoy",       rasm: "rasmlar/konfutsiy.jpg" },
+  "Rene Dekart":        { davr: 17,  kasb: "Faylasuf", yurt: "Fransiya",    rasm: "rasmlar/dekart.jpg" },
+  "Frensis Bekon":      { davr: 16,  kasb: "Faylasuf", yurt: "Angliya",     rasm: "rasmlar/bekon.jpg" },
+  "Isaak Nyuton":       { davr: 17,  kasb: "Olim",     yurt: "Angliya",     rasm: "rasmlar/nyuton.jpg" },
+  "Uilyam Shekspir":    { davr: 16,  kasb: "Yozuvchi", yurt: "Angliya",     rasm: "rasmlar/shekspir.jpg" },
+  "Lev Tolstoy":        { davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya",     rasm: "rasmlar/tolstoy.jpg" },
+  "Fyodor Dostoyevskiy":{ davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya",     rasm: "rasmlar/dostoyevskiy.jpg" },
+  "Aleksandr Pushkin":  { davr: 19,  kasb: "Shoir",    yurt: "Rossiya",     rasm: "rasmlar/pushkin.jpg" },
+  "Albert Eynshteyn":   { davr: 20,  kasb: "Olim",     yurt: "Germaniya",   rasm: "rasmlar/eynshteyn.jpg" },
 };
 
 // Iqtiboslar. Har kuni ro'yxatdan navbatdagisi chiqadi.
@@ -167,19 +190,27 @@ const IQTIBOSLAR = [
   { matn: "Inson tabiatan ijtimoiy mavjudotdir.", muallif: "Aristotel" },
 ];
 
-const MAX_URINISH = 3;
+const MAX_XATO = 5;
+// O'zbek lotin alifbosidagi harflar (C va W yo'q)
+const ALIFBO = "ABDEFGHIJKLMNOPQRSTUVXYZ".split("");
+// Surat ustidagi bo'laklar ranglari
+const BOLAK_RANGLARI = ["#E9C46A", "#F2D388", "#DDB55A", "#EFCB78", "#E4BC60"];
 
-// ===== 3. BUGUNGI IQTIBOSNI TANLASH =====
-// 1970-yildan beri o'tgan kunlar sonini hisoblab, ro'yxat uzunligiga bo'lamiz.
-// Shunda hamma odamda bir kunda bir xil iqtibos chiqadi.
+const $ = (id) => document.getElementById(id);
+
+// ===== 3. BUGUNGI IQTIBOS =====
+// 1970-yildan beri o'tgan kunlar soni bo'yicha: hamma odamda bir kunda bir xil iqtibos chiqadi.
 const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000); // Toshkent vaqti (UTC+5)
 const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
-const togriMuallif = MUALLIFLAR[bugungi.muallif];
+const muallif = MUALLIFLAR[bugungi.muallif];
+const ISM = bugungi.muallif.toUpperCase();
 
-// ===== 3a. BUGUNGI 5 TA VARIANT =====
-// To'g'ri muallif + unga eng o'xshash 4 ta muallif (faoliyati, hududi yoki davri yaqin).
-// Tasodif kun raqamiga bog'liq, shuning uchun hamma odamda bir kunda bir xil 5 ta variant chiqadi.
-const VARIANTLAR_SONI = 5;
+// Ismdagi harflar o'rni (bo'sh joy va tutuq belgisi hisobga olinmaydi)
+const harfOrinlari = [];
+for (let i = 0; i < ISM.length; i++) if (/[A-Z]/.test(ISM[i])) harfOrinlari.push(i);
+const BOLAKLAR_SONI = harfOrinlari.length; // ismda nechta harf bo'lsa, surat shuncha bo'lakka bo'linadi
+
+// Kun raqamiga bog'liq tasodif: bo'laklar har kuni boshqacha joylashadi, lekin hammada bir xil.
 function urugliTasodif(urug) {
   return () => {
     urug = (urug + 0x6D2B79F5) | 0;
@@ -196,175 +227,179 @@ function aralashtir(royxat, tasodif) {
   }
   return a;
 }
-const tasodif = urugliTasodif(bugungiKun);
-function oxshashlik(ism) {
-  const m = MUALLIFLAR[ism];
-  let ball = 0;
-  if (m.kasb === togriMuallif.kasb) ball += 1;
-  if (m.yurt === togriMuallif.yurt) ball += 1;
-  if (Math.abs(m.davr - togriMuallif.davr) <= 2) ball += 1;
-  return ball;
-}
-const chalgituvchilar = Object.keys(MUALLIFLAR)
-  .filter((ism) => ism !== bugungi.muallif)
-  .map((ism) => ({ ism, ball: oxshashlik(ism) + tasodif() * 1.5 })) // biroz tasodif: har safar eng o'xshashlar emas
-  .sort((a, b) => b.ball - a.ball)
-  .slice(0, VARIANTLAR_SONI - 1)
-  .map((x) => x.ism);
-const bugungiVariantlar = aralashtir([bugungi.muallif, ...chalgituvchilar], tasodif);
+// harfBolagi[k] — ismning k-harfi suratning qaysi bo'lagini ochadi
+const harfBolagi = aralashtir([...Array(BOLAKLAR_SONI).keys()], urugliTasodif(bugungiKun));
 
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
-let holat = { kun: bugungiKun, taxminlar: [], tugadi: false, yutdi: false };
+let holat = { kun: bugungiKun, harflar: [], tugadi: false, yutdi: false };
 try {
-  const saqlangan = JSON.parse(localStorage.getItem("kimAytgan"));
+  const saqlangan = JSON.parse(localStorage.getItem("kimAytganHarf"));
   if (saqlangan && saqlangan.kun === bugungiKun) holat = saqlangan;
 } catch (e) { /* xotira ishlamasa, oddiy davom etamiz */ }
 
 function saqlash() {
-  try { localStorage.setItem("kimAytgan", JSON.stringify(holat)); } catch (e) {}
+  try { localStorage.setItem("kimAytganHarf", JSON.stringify(holat)); } catch (e) {}
 }
 
-// ===== 5. TAXMINNI SOLISHTIRISH =====
-function davrMatni(asr) {
-  const rim = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
-  return asr < 0 ? "Mil. av. " + rim[-asr] : rim[asr] + " asr";
+const ismdami = (h) => ISM.includes(h);
+const xatolarSoni = () => holat.harflar.filter((h) => !ismdami(h)).length;
+const hammasiTopildimi = () => harfOrinlari.every((i) => holat.harflar.includes(ISM[i]));
+
+// ===== 5. SURATNI BO'LAKLARGA BO'LISH =====
+// N ta bo'lakni qatorlarga teng taqsimlaymiz (masalan 13 → 4+3+3+3), har qator ichida teng kenglikda.
+function bolakJoylari(n) {
+  const qatorlar = Math.max(1, Math.round(Math.sqrt(n * 5 / 4)));
+  const joylar = [];
+  let qolgan = n;
+  for (let q = 0; q < qatorlar; q++) {
+    const bu = Math.ceil(qolgan / (qatorlar - q));
+    for (let u = 0; u < bu; u++) {
+      joylar.push({ chap: (u / bu) * 100, yuqori: (q / qatorlar) * 100, en: 100 / bu, boy: 100 / qatorlar });
+    }
+    qolgan -= bu;
+  }
+  return joylar;
 }
 
-function solishtir(ism) {
-  const m = MUALLIFLAR[ism];
-  const farq = m.davr - togriMuallif.davr;
-  let davr;
-  if (farq === 0) davr = { sinf: "togri", izoh: "" };
-  else if (Math.abs(farq) === 1) davr = { sinf: "yaqin", izoh: farq > 0 ? "biroz avvalroq" : "biroz keyinroq" };
-  else davr = { sinf: "xato", izoh: farq > 0 ? "avvalroq" : "keyinroq" };
-
-  return {
-    ism,
-    davr: { matn: davrMatni(m.davr), ...davr },
-    kasb: { matn: m.kasb, sinf: m.kasb === togriMuallif.kasb ? "togri" : "xato" },
-    yurt: { matn: m.yurt, sinf: m.yurt === togriMuallif.yurt ? "togri" : "xato" },
-  };
+function portretniQur() {
+  const p = $("portret");
+  p.innerHTML = "";
+  const boshHarf = document.createElement("div");
+  boshHarf.className = "bosh-harf";
+  boshHarf.textContent = bugungi.muallif.split(" ").map((s) => s[0]).join("");
+  p.appendChild(boshHarf);
+  if (muallif.rasm) {
+    const img = document.createElement("img");
+    img.src = muallif.rasm;
+    img.alt = ""; // ism yashirin qolsin
+    img.onload = () => boshHarf.remove();
+    img.onerror = () => img.remove();
+    p.appendChild(img);
+  }
+  bolakJoylari(BOLAKLAR_SONI).forEach((j, i) => {
+    const b = document.createElement("div");
+    b.className = "bolak";
+    b.id = "bolak" + i;
+    Object.assign(b.style, {
+      left: j.chap + "%", top: j.yuqori + "%", width: j.en + "%", height: j.boy + "%",
+      background: BOLAK_RANGLARI[i % BOLAK_RANGLARI.length],
+    });
+    b.textContent = "?";
+    p.appendChild(b);
+  });
 }
 
 // ===== 6. EKRANGA CHIQARISH =====
-const $ = (id) => document.getElementById(id);
+function davrMatni(asr) {
+  const rim = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+  return asr < 0 ? "Mil. av. " + rim[-asr] + " asr" : rim[asr] + " asr";
+}
 
 function chiz() {
   $("iqtibosMatni").textContent = bugungi.matn;
 
-  // Urinishlar chizig'i
-  $("urinishlar").innerHTML = "";
-  for (let i = 0; i < MAX_URINISH; i++) {
-    const s = document.createElement("span");
-    if (i < holat.taxminlar.length) {
-      s.className = (holat.yutdi && i === holat.taxminlar.length - 1) ? "topildi" : "ishlatildi";
-    }
-    $("urinishlar").appendChild(s);
-  }
+  // Surat bo'laklari: topilgan harflarning bo'laklari ochiladi, o'yin tugasa hammasi
+  harfOrinlari.forEach((orin, k) => {
+    const ochiq = holat.tugadi || holat.harflar.includes(ISM[orin]);
+    $("bolak" + harfBolagi[k]).classList.toggle("ochiq", ochiq);
+  });
 
-  mualliflarniChiz();
+  // Xatolar chizig'i
+  const xato = xatolarSoni();
+  $("xatolar").innerHTML = "";
+  for (let i = 0; i < MAX_XATO; i++) {
+    const s = document.createElement("span");
+    if (i < xato) s.className = "ishlatildi";
+    $("xatolar").appendChild(s);
+  }
+  $("xatoMatn").textContent = `Xato harflar: ${xato} / ${MAX_XATO}`;
+
+  // Ism katakchalari (har bir so'z alohida guruh)
+  $("ism").innerHTML = "";
+  bugungi.muallif.toUpperCase().split(" ").forEach((soz) => {
+    const guruh = document.createElement("div");
+    guruh.className = "soz";
+    [...soz].forEach((h) => {
+      const k = document.createElement("div");
+      k.className = "harf-katak";
+      if (!/[A-Z]/.test(h)) { k.classList.add("belgi"); k.textContent = h; }
+      else if (holat.harflar.includes(h)) { k.classList.add("topildi"); k.textContent = h; }
+      else if (holat.tugadi) { k.classList.add("korsatildi"); k.textContent = h; }
+      guruh.appendChild(k);
+    });
+    $("ism").appendChild(guruh);
+  });
+
+  // Ishoralar: har bir xato harfdan keyin bittadan
+  const ishoralar = [
+    "Faoliyat: " + muallif.kasb,
+    "Davr: " + davrMatni(muallif.davr),
+    "Hudud: " + muallif.yurt,
+  ];
+  $("ishoralar").innerHTML = "";
+  ishoralar.slice(0, holat.tugadi ? 0 : xato).forEach((matn) => {
+    const s = document.createElement("span");
+    s.className = "ishora";
+    s.textContent = matn;
+    $("ishoralar").appendChild(s);
+  });
+
+  // Klaviatura
+  $("klaviatura").innerHTML = "";
+  ALIFBO.forEach((h) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tugma";
+    b.textContent = h;
+    b.dataset.harf = h;
+    if (holat.harflar.includes(h)) { b.classList.add(ismdami(h) ? "togri" : "xato"); b.disabled = true; }
+    if (holat.tugadi) b.disabled = true;
+    b.addEventListener("click", () => harfBos(h));
+    $("klaviatura").appendChild(b);
+  });
 
   // O'yin tugaganmi?
   if (holat.tugadi) {
-    $("izoh").classList.add("yashirin");
-    $("variantSarlavha").textContent = "Bugungi variantlar";
+    $("oyin").classList.add("yashirin");
     $("natija").classList.remove("yashirin");
     $("natijaSarlavha").textContent = holat.yutdi ? "Barakalla!" : "Bu safar topilmadi";
     $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
   }
 }
 
-// ===== 7. JAVOB YUBORILGANDA =====
-// Variant bosilishi bilan javob yuboriladi.
-function javobBer(ism) {
-  $("xabar").textContent = "";
-  if (holat.tugadi || !MUALLIFLAR[ism]) return;
-  if (holat.taxminlar.includes(ism)) { $("xabar").textContent = "Bu muallifni allaqachon tanlagansiz."; return; }
-  oxirgiTaxmin = ism;
-
-  holat.taxminlar.push(ism);
-  if (ism === bugungi.muallif) { holat.yutdi = true; holat.tugadi = true; }
-  else if (holat.taxminlar.length >= MAX_URINISH) { holat.tugadi = true; }
-
+// ===== 7. HARF BOSILGANDA =====
+function harfBos(h) {
+  if (holat.tugadi || holat.harflar.includes(h)) return;
+  holat.harflar.push(h);
+  if (hammasiTopildimi()) { holat.yutdi = true; holat.tugadi = true; }
+  else if (xatolarSoni() >= MAX_XATO) { holat.tugadi = true; }
   saqlash();
   chiz();
+  if (!ismdami(h) && !holat.tugadi) {
+    const t = $("klaviatura").querySelector(`[data-harf="${h}"]`);
+    if (t) t.classList.add("silkin");
+  }
 }
+
+// Kompyuter klaviaturasidan ham yozish mumkin
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const h = e.key.toUpperCase();
+  if (ALIFBO.includes(h)) harfBos(h);
+});
 
 // ===== 8. NATIJANI ULASHISH =====
 $("ulashish").addEventListener("click", async () => {
-  const belgi = { togri: "🟩", yaqin: "🟨", xato: "🟥" };
-  const qatorlar = holat.taxminlar.map((ism) => {
-    const n = solishtir(ism);
-    return belgi[n.davr.sinf] + belgi[n.kasb.sinf] + belgi[n.yurt.sinf];
-  });
-  const hisob = holat.yutdi ? holat.taxminlar.length : "X";
-  const matn = `Kim aytgan? ${hisob}/${MAX_URINISH}\n${qatorlar.join("\n")}\nsitata.uz`;
-
+  const qator = holat.harflar.map((h) => (ismdami(h) ? "🟩" : "🟥")).join("");
+  const hisob = holat.yutdi ? `topildi, ${xatolarSoni()} xato` : "topilmadi";
+  const matn = `Kim aytgan? — ${hisob}\n${qator}\nsitata.uz`;
   try {
     if (navigator.share) await navigator.share({ text: matn });
     else { await navigator.clipboard.writeText(matn); $("ulashish").textContent = "Nusxa olindi!"; }
   } catch (e) { /* foydalanuvchi bekor qildi */ }
 });
 
-// ===== 9. MUALLIFLAR TUGMALARI =====
-// Bugungi 5 ta variantdan birini bosish bilan javob beriladi. Xato javob tugmaning o'zida ishora bilan qoladi.
-let oxirgiTaxmin = null; // animatsiya faqat yangi javobda o'ynasin
-
-function teg(matn, sinf) {
-  const t = document.createElement("span");
-  t.className = "teg " + sinf;
-  t.textContent = matn;
-  return t;
-}
-
-function mualliflarniChiz() {
-  const quti = $("mualliflar");
-  quti.innerHTML = "";
-  bugungiVariantlar.forEach((ism) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    const taxminQilingan = holat.taxminlar.includes(ism);
-    const togri = ism === bugungi.muallif;
-
-    const qator = document.createElement("span");
-    qator.className = "ism-qator";
-    const nom = document.createElement("span");
-    nom.textContent = ism;
-    qator.appendChild(nom);
-    b.appendChild(qator);
-
-    let sinf = "muallif";
-    if (togri && (holat.yutdi || holat.tugadi)) {
-      sinf += " togri-javob";
-      const belgi = document.createElement("span");
-      belgi.className = "belgi";
-      belgi.textContent = holat.yutdi ? "✓ To'g'ri" : "To'g'ri javob";
-      qator.appendChild(belgi);
-      if (oxirgiTaxmin === ism) sinf += " sakra";
-    } else if (taxminQilingan) {
-      sinf += " xato-javob";
-      const belgi = document.createElement("span");
-      belgi.className = "belgi";
-      belgi.textContent = "✗";
-      qator.appendChild(belgi);
-      const n = solishtir(ism);
-      const teglar = document.createElement("span");
-      teglar.className = "teglar";
-      teglar.appendChild(teg(n.davr.matn + (n.davr.izoh ? " · " + n.davr.izoh : ""), n.davr.sinf));
-      teglar.appendChild(teg(n.kasb.matn, n.kasb.sinf));
-      teglar.appendChild(teg(n.yurt.matn, n.yurt.sinf));
-      b.appendChild(teglar);
-      if (oxirgiTaxmin === ism) sinf += " silkin";
-    } else if (holat.tugadi) {
-      sinf += " ochiq";
-    }
-    b.className = sinf;
-    b.disabled = taxminQilingan || holat.tugadi;
-    b.addEventListener("click", () => javobBer(ism));
-    quti.appendChild(b);
-  });
-}
-
+portretniQur();
 chiz();
 </script>
 </body>
