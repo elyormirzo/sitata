@@ -150,11 +150,6 @@
     width: 100%; max-width: 300px; margin: 0 auto; display: block; border-radius: 4px;
     box-shadow: 0 6px 16px rgba(80,50,20,.2);
   }
-  .tugmalar-qator { display: flex; gap: 8px; }
-  button.ikkinchi {
-    flex: 1; height: 44px; border-radius: 6px; cursor: pointer; background: transparent; color: var(--teri);
-    border: 1px solid #C9A887; font: 500 14px Lora, Georgia, serif;
-  }
   .ulash-xabar { min-height: 18px; font: italic 14px Lora, Georgia, serif; color: var(--zaytun); }
   .ulash-matn {
     width: 100%; resize: none; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--chegara);
@@ -198,11 +193,7 @@
     <h2 id="natijaSarlavha"></h2>
     <div id="natijaMatn"></div>
     <img class="natija-rasm yashirin" id="natijaRasm" alt="Natija rasmi: iqtibos, portret va natija">
-    <button type="button" class="asosiy" id="ulashish">Rasm bilan ulashish</button>
-    <div class="tugmalar-qator">
-      <button type="button" class="ikkinchi" id="yuklab">Rasmni yuklab olish</button>
-      <button type="button" class="ikkinchi" id="matnNusxa">Matnni nusxalash</button>
-    </div>
+    <button type="button" class="asosiy" id="ulashish">Natijani ulashish</button>
     <div class="ulash-xabar" id="ulashXabar" role="status"></div>
     <textarea class="ulash-matn yashirin" id="ulashMatn" readonly rows="4"></textarea>
     <div class="izoh">Ertaga yangi sahifa ochiladi</div>
@@ -659,18 +650,6 @@ $("ulashish").addEventListener("click", async () => {
     catch (e) { if (e.name === "AbortError") return; }
   }
   if (await nusxaOl(matn)) xabar.textContent = "Natija matni nusxalandi.";
-  else matnniKorsat(matn);
-});
-
-$("yuklab").addEventListener("click", async () => {
-  const blob = await natijaRasminiTayyorla();
-  if (blob) { rasmniYuklabOl(blob); $("ulashXabar").textContent = "Rasm yuklab olindi."; }
-  else $("ulashXabar").textContent = "Rasmni tayyorlab bo'lmadi — sahifani sayt manzili orqali oching.";
-});
-
-$("matnNusxa").addEventListener("click", async () => {
-  const matn = ulashMatni();
-  if (await nusxaOl(matn)) $("ulashXabar").textContent = "Natija matni nusxalandi.";
   else matnniKorsat(matn);
 });
 
