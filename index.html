@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kim aytgan? — sitata.uz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+
+<style>
+  /* ===== 1. RANGLAR VA ASOSIY USLUB ===== */
+  :root {
+    --fon: #F7F7F5;
+    --qora: #16181D;
+    --kulrang: #5B6170;
+    --yashil: #0F6E5C;
+    --yashil-och: #D7EEE6;
+    --sariq-och: #FBEFC9;
+    --qizil-och: #FBE3D6;
+    --chegara: #E2E2DD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fon);
+    color: var(--qora);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .ilova { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  header { text-align: center; margin-bottom: 16px; }
+  header h1 { font-family: Lora, Georgia, serif; font-size: 30px; margin: 0; }
+  header p { margin: 4px 0 0; color: var(--kulrang); font-size: 14px; }
+
+  /* Iqtibos kartasi */
+  .karta {
+    background: var(--qora); color: #fff;
+    border-radius: 20px; padding: 22px 20px; margin-bottom: 16px;
+  }
+  .karta small { color: #9FD8C8; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; font-size: 12px; }
+  .karta blockquote {
+    margin: 12px 0 16px; font-family: Lora, Georgia, serif;
+    font-size: 21px; line-height: 1.45; white-space: pre-line;
+  }
+  .urinishlar { display: flex; gap: 6px; }
+  .urinishlar span { flex: 1; height: 6px; border-radius: 3px; background: #3A3F4B; }
+  .urinishlar span.ishlatildi { background: #E0703A; }
+  .urinishlar span.topildi { background: #3FB58F; }
+
+  /* Taxminlar jadvali */
+  .jadval-sarlavha, .qator {
+    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 6px;
+  }
+  .jadval-sarlavha {
+    font-size: 11px; font-weight: 600; color: var(--kulrang);
+    text-transform: uppercase; letter-spacing: .4px; padding: 0 2px 6px;
+  }
+  .qator { margin-bottom: 6px; }
+  .katak {
+    min-height: 50px; border-radius: 12px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    font-size: 12px; font-weight: 600; padding: 4px;
+  }
+  .katak.ism { background: #fff; border: 1px solid #E8E8E3; justify-content: flex-start; flex-direction: row; text-align: left; padding: 0 10px; font-size: 13px; }
+  .katak.togri { background: var(--yashil-och); color: #0A5243; }
+  .katak.yaqin { background: var(--sariq-och); color: #6B4A00; }
+  .katak.xato  { background: var(--qizil-och); color: #8A2E0A; }
+  .katak span { font-size: 11px; font-weight: 500; }
+
+  /* Kiritish va tugmalar */
+  .kiritish { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  label { font-size: 13px; color: var(--kulrang); }
+  input {
+    width: 100%; height: 50px; border: 1px solid #D5D5CF; border-radius: 14px;
+    padding: 0 16px; font: 16px Inter, sans-serif; color: var(--qora); background: #fff; margin-top: 6px;
+  }
+  button {
+    height: 52px; border-radius: 26px; border: 0; cursor: pointer;
+    background: var(--yashil); color: #fff; font: 600 16px Inter, sans-serif;
+  }
+  button.ikkinchi { background: #fff; color: var(--qora); border: 1px solid var(--chegara); }
+  .xabar { min-height: 20px; font-size: 14px; color: #8A2E0A; }
+
+  .ishora {
+    margin-top: 12px; padding: 12px 14px; border-radius: 14px;
+    background: #E3F1EC; color: #0A5243; font-size: 14px;
+  }
+  .natija {
+    margin-top: 16px; padding: 18px; border-radius: 20px; background: #fff;
+    border: 1px solid #E8E8E3; text-align: center; display: flex; flex-direction: column; gap: 12px;
+  }
+  .natija h2 { margin: 0; font-family: Lora, Georgia, serif; font-size: 22px; }
+  .yashirin { display: none !important; }
+</style>
+</head>
+<body>
+<div class="ilova">
+
+  <header>
+    <h1>Kim aytgan?</h1>
+    <p>Iqtibos muallifini 5 urinishda toping</p>
+  </header>
+
+  <section class="karta">
+    <small>Bugungi iqtibos</small>
+    <blockquote id="iqtibosMatni"></blockquote>
+    <div class="urinishlar" id="urinishlar"></div>
+  </section>
+
+  <div class="jadval-sarlavha">
+    <div>Taxmin</div><div>Davr</div><div>Kasb</div><div>Yurt</div>
+  </div>
+  <div id="taxminlar"></div>
+
+  <div class="ishora yashirin" id="ishora"></div>
+
+  <form class="kiritish" id="forma">
+    <label>Muallif ismi
+      <input id="javob" list="mualliflarRoyxati" placeholder="Masalan: Alisher Navoiy" autocomplete="off">
+    </label>
+    <datalist id="mualliflarRoyxati"></datalist>
+    <div class="xabar" id="xabar"></div>
+    <button type="submit">Javob berish</button>
+  </form>
+
+  <section class="natija yashirin" id="natija">
+    <h2 id="natijaSarlavha"></h2>
+    <div id="natijaMatn"></div>
+    <button type="button" id="ulashish">Natijani ulashish</button>
+    <div style="font-size: 13px; color: var(--kulrang)">Ertaga yangi iqtibos chiqadi</div>
+  </section>
+
+</div>
+
+<script>
+// ===== 2. MA'LUMOTLAR =====
+// Har bir muallif: davr (asr; miloddan avvalgi bo'lsa manfiy son), kasb, yurt.
+// Yangi muallif qo'shish uchun shu ro'yxatga yana bitta qator yozing.
+const MUALLIFLAR = {
+  "Alisher Navoiy":     { davr: 15,  kasb: "Shoir",    yurt: "O'rta Osiyo" },
+  "Zahiriddin Bobur":   { davr: 16,  kasb: "Shoir",    yurt: "O'rta Osiyo" },
+  "Mirzo Ulug'bek":     { davr: 15,  kasb: "Olim",     yurt: "O'rta Osiyo" },
+  "Ibn Sino":           { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo" },
+  "Abu Rayhon Beruniy": { davr: 11,  kasb: "Olim",     yurt: "O'rta Osiyo" },
+  "Abdulla Qodiriy":    { davr: 20,  kasb: "Yozuvchi", yurt: "O'rta Osiyo" },
+  "Suqrot":             { davr: -5,  kasb: "Faylasuf", yurt: "Yunoniston" },
+  "Aristotel":          { davr: -4,  kasb: "Faylasuf", yurt: "Yunoniston" },
+  "Konfutsiy":          { davr: -6,  kasb: "Faylasuf", yurt: "Xitoy" },
+  "Rene Dekart":        { davr: 17,  kasb: "Faylasuf", yurt: "Fransiya" },
+  "Frensis Bekon":      { davr: 16,  kasb: "Faylasuf", yurt: "Angliya" },
+  "Isaak Nyuton":       { davr: 17,  kasb: "Olim",     yurt: "Angliya" },
+  "Uilyam Shekspir":    { davr: 16,  kasb: "Yozuvchi", yurt: "Angliya" },
+  "Lev Tolstoy":        { davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya" },
+  "Fyodor Dostoyevskiy":{ davr: 19,  kasb: "Yozuvchi", yurt: "Rossiya" },
+  "Aleksandr Pushkin":  { davr: 19,  kasb: "Shoir",    yurt: "Rossiya" },
+  "Albert Eynshteyn":   { davr: 20,  kasb: "Olim",     yurt: "Germaniya" },
+};
+
+// Iqtiboslar. Har kuni ro'yxatdan navbatdagisi chiqadi.
+// Muhim: ishga tushirishdan oldin har bir iqtibosni manbadan tekshiring!
+const IQTIBOSLAR = [
+  { matn: "Odami ersang, demagil odami,\nOniki yo'q xalq g'amidin g'ami.", muallif: "Alisher Navoiy" },
+  { matn: "Fikrlayapman, demak, mavjudman.", muallif: "Rene Dekart" },
+  { matn: "Har kimki vafo qilsa, vafo topqusidir,\nHar kimki jafo qilsa, jafo topqusidir.", muallif: "Zahiriddin Bobur" },
+  { matn: "Men faqat bir narsani bilaman: hech narsa bilmayman.", muallif: "Suqrot" },
+  { matn: "Tasavvur bilimdan muhimroq.", muallif: "Albert Eynshteyn" },
+  { matn: "Bo'lish yoki bo'lmaslik — mana masala.", muallif: "Uilyam Shekspir" },
+  { matn: "Bilganingni bilaman de, bilmaganingni bilmayman de — mana shu bilimdir.", muallif: "Konfutsiy" },
+  { matn: "Hamma baxtli oilalar bir-biriga o'xshaydi, har bir baxtsiz oila esa o'zicha baxtsiz.", muallif: "Lev Tolstoy" },
+  { matn: "Bilim — kuch.", muallif: "Frensis Bekon" },
+  { matn: "Go'zallik dunyoni qutqaradi.", muallif: "Fyodor Dostoyevskiy" },
+  { matn: "Inson tabiatan ijtimoiy mavjudotdir.", muallif: "Aristotel" },
+];
+
+const MAX_URINISH = 5;
+
+// ===== 3. BUGUNGI IQTIBOSNI TANLASH =====
+// 1970-yildan beri o'tgan kunlar sonini hisoblab, ro'yxat uzunligiga bo'lamiz.
+// Shunda hamma odamda bir kunda bir xil iqtibos chiqadi.
+const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000); // Toshkent vaqti (UTC+5)
+const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
+const togriMuallif = MUALLIFLAR[bugungi.muallif];
+
+// ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
+let holat = { kun: bugungiKun, taxminlar: [], tugadi: false, yutdi: false };
+try {
+  const saqlangan = JSON.parse(localStorage.getItem("kimAytgan"));
+  if (saqlangan && saqlangan.kun === bugungiKun) holat = saqlangan;
+} catch (e) { /* xotira ishlamasa, oddiy davom etamiz */ }
+
+function saqlash() {
+  try { localStorage.setItem("kimAytgan", JSON.stringify(holat)); } catch (e) {}
+}
+
+// ===== 5. TAXMINNI SOLISHTIRISH =====
+function davrMatni(asr) {
+  const rim = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+  return asr < 0 ? "Mil. av. " + rim[-asr] : rim[asr] + " asr";
+}
+
+function solishtir(ism) {
+  const m = MUALLIFLAR[ism];
+  const farq = m.davr - togriMuallif.davr;
+  let davr;
+  if (farq === 0) davr = { sinf: "togri", izoh: "" };
+  else if (Math.abs(farq) === 1) davr = { sinf: "yaqin", izoh: farq > 0 ? "biroz avvalroq" : "biroz keyinroq" };
+  else davr = { sinf: "xato", izoh: farq > 0 ? "avvalroq" : "keyinroq" };
+
+  return {
+    ism,
+    davr: { matn: davrMatni(m.davr), ...davr },
+    kasb: { matn: m.kasb, sinf: m.kasb === togriMuallif.kasb ? "togri" : "xato" },
+    yurt: { matn: m.yurt, sinf: m.yurt === togriMuallif.yurt ? "togri" : "xato" },
+  };
+}
+
+// ===== 6. EKRANGA CHIQARISH =====
+const $ = (id) => document.getElementById(id);
+
+function chiz() {
+  $("iqtibosMatni").textContent = bugungi.matn;
+
+  // Urinishlar chizig'i
+  $("urinishlar").innerHTML = "";
+  for (let i = 0; i < MAX_URINISH; i++) {
+    const s = document.createElement("span");
+    if (i < holat.taxminlar.length) {
+      s.className = (holat.yutdi && i === holat.taxminlar.length - 1) ? "topildi" : "ishlatildi";
+    }
+    $("urinishlar").appendChild(s);
+  }
+
+  // Taxminlar jadvali
+  $("taxminlar").innerHTML = "";
+  holat.taxminlar.forEach((ism) => {
+    const n = solishtir(ism);
+    const qator = document.createElement("div");
+    qator.className = "qator";
+    qator.innerHTML = `
+      <div class="katak ism"></div>
+      <div class="katak ${n.davr.sinf}">${n.davr.matn}<span>${n.davr.izoh}</span></div>
+      <div class="katak ${n.kasb.sinf}">${n.kasb.matn}</div>
+      <div class="katak ${n.yurt.sinf}">${n.yurt.matn}</div>`;
+    qator.querySelector(".ism").textContent = ism;
+    $("taxminlar").appendChild(qator);
+  });
+
+  // 3 ta xatodan keyin ishora: ismning birinchi harfi
+  const xatolar = holat.taxminlar.length - (holat.yutdi ? 1 : 0);
+  if (!holat.tugadi && xatolar >= 3) {
+    $("ishora").textContent = "Ishora: muallif ismi «" + bugungi.muallif[0] + "» harfidan boshlanadi.";
+    $("ishora").classList.remove("yashirin");
+  } else {
+    $("ishora").classList.add("yashirin");
+  }
+
+  // O'yin tugaganmi?
+  if (holat.tugadi) {
+    $("forma").classList.add("yashirin");
+    $("natija").classList.remove("yashirin");
+    $("natijaSarlavha").textContent = holat.yutdi ? "Barakalla!" : "Bu safar topilmadi";
+    $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
+  }
+}
+
+// ===== 7. JAVOB YUBORILGANDA =====
+$("forma").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const ism = $("javob").value.trim();
+  $("xabar").textContent = "";
+
+  if (!MUALLIFLAR[ism]) { $("xabar").textContent = "Ro'yxatdagi mualliflardan birini tanlang."; return; }
+  if (holat.taxminlar.includes(ism)) { $("xabar").textContent = "Bu muallifni allaqachon yozgansiz."; return; }
+
+  holat.taxminlar.push(ism);
+  if (ism === bugungi.muallif) { holat.yutdi = true; holat.tugadi = true; }
+  else if (holat.taxminlar.length >= MAX_URINISH) { holat.tugadi = true; }
+
+  $("javob").value = "";
+  saqlash();
+  chiz();
+});
+
+// ===== 8. NATIJANI ULASHISH =====
+$("ulashish").addEventListener("click", async () => {
+  const belgi = { togri: "🟩", yaqin: "🟨", xato: "🟥" };
+  const qatorlar = holat.taxminlar.map((ism) => {
+    const n = solishtir(ism);
+    return belgi[n.davr.sinf] + belgi[n.kasb.sinf] + belgi[n.yurt.sinf];
+  });
+  const hisob = holat.yutdi ? holat.taxminlar.length : "X";
+  const matn = `Kim aytgan? ${hisob}/${MAX_URINISH}\n${qatorlar.join("\n")}\nsitata.uz`;
+
+  try {
+    if (navigator.share) await navigator.share({ text: matn });
+    else { await navigator.clipboard.writeText(matn); $("ulashish").textContent = "Nusxa olindi!"; }
+  } catch (e) { /* foydalanuvchi bekor qildi */ }
+});
+
+// Mualliflar ro'yxatini kiritish maydoniga ulaymiz (yozganda taklif chiqadi)
+Object.keys(MUALLIFLAR).sort().forEach((ism) => {
+  const o = document.createElement("option");
+  o.value = ism;
+  $("mualliflarRoyxati").appendChild(o);
+});
+
+chiz();
+</script>
+</body>
+</html>
