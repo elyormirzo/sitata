@@ -118,7 +118,8 @@
   }
 
   /* Harflar klaviaturasi */
-  .klaviatura { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  .klaviatura { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .klaviatura .tugma { width: calc((100% - 36px) / 7); max-width: 56px; }
   .tugma {                                       /* harf-qoliplar */
     height: 46px; border-radius: 4px; background: var(--qogoz); color: var(--qora);
     border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
@@ -243,7 +244,8 @@ const IQTIBOSLAR = [
   { matn: "Inson tabiatan ijtimoiy mavjudotdir.", muallif: "Aristotel" },
 ];
 
-const MAX_XATO = 5;
+const CHALGITUVCHI_SONI = 3; // klaviaturada ismda yo'q nechta begona harf chiqadi
+const MAX_XATO = 3;           // shuncha xato harfdan keyin o'yin tugaydi
 // O'zbek lotin alifbosidagi harflar (C va W yo'q)
 const ALIFBO = "ABDEFGHIJKLMNOPQRSTUVXYZ".split("");
 // Surat ustidagi bo'laklar ranglari
@@ -282,7 +284,15 @@ function aralashtir(royxat, tasodif) {
   return a;
 }
 // harfBolagi[k] — ismning k-harfi suratning qaysi bo'lagini ochadi
-const harfBolagi = aralashtir([...Array(BOLAKLAR_SONI).keys()], urugliTasodif(bugungiKun));
+const kunTasodifi = urugliTasodif(bugungiKun);
+const harfBolagi = aralashtir([...Array(BOLAKLAR_SONI).keys()], kunTasodifi);
+
+// Bugungi klaviatura: ismdagi harflar + 3 ta chalg'ituvchi harf (alifbo tartibida).
+// Chalg'ituvchilar kunga bog'liq — hammada bir xil.
+const ismHarflari = [...new Set(harfOrinlari.map((i) => ISM[i]))];
+const chalgituvchilar = aralashtir(ALIFBO.filter((h) => !ismHarflari.includes(h)), kunTasodifi)
+  .slice(0, CHALGITUVCHI_SONI);
+const KLAVIATURA = [...ismHarflari, ...chalgituvchilar].sort();
 
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
 let holat = { kun: bugungiKun, harflar: [], tugadi: false, yutdi: false };
@@ -400,7 +410,7 @@ function chiz() {
 
   // Klaviatura
   $("klaviatura").innerHTML = "";
-  ALIFBO.forEach((h) => {
+  KLAVIATURA.forEach((h) => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "tugma";
@@ -440,7 +450,7 @@ function harfBos(h) {
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const h = e.key.toUpperCase();
-  if (ALIFBO.includes(h)) harfBos(h);
+  if (KLAVIATURA.includes(h)) harfBos(h);
 });
 
 // ===== 8. NATIJANI ULASHISH =====
