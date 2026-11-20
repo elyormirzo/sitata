@@ -146,6 +146,15 @@
   .natija h2::before, .natija h2::after { content: "❦"; font-size: 16px; color: #B98A55; margin: 0 10px; vertical-align: middle; }
   #natijaMatn { font: italic 16px Lora, Georgia, serif; }
   .natija .izoh { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+  .natija-rasm {
+    width: 100%; max-width: 300px; margin: 0 auto; display: block; border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(80,50,20,.2);
+  }
+  .tugmalar-qator { display: flex; gap: 8px; }
+  button.ikkinchi {
+    flex: 1; height: 44px; border-radius: 6px; cursor: pointer; background: transparent; color: var(--teri);
+    border: 1px solid #C9A887; font: 500 14px Lora, Georgia, serif;
+  }
   .ulash-xabar { min-height: 18px; font: italic 14px Lora, Georgia, serif; color: var(--zaytun); }
   .ulash-matn {
     width: 100%; resize: none; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--chegara);
@@ -188,7 +197,12 @@
   <section class="natija yashirin" id="natija">
     <h2 id="natijaSarlavha"></h2>
     <div id="natijaMatn"></div>
-    <button type="button" class="asosiy" id="ulashish">Natijani ulashish</button>
+    <img class="natija-rasm yashirin" id="natijaRasm" alt="Natija rasmi: iqtibos, portret va natija">
+    <button type="button" class="asosiy" id="ulashish">Rasm bilan ulashish</button>
+    <div class="tugmalar-qator">
+      <button type="button" class="ikkinchi" id="yuklab">Rasmni yuklab olish</button>
+      <button type="button" class="ikkinchi" id="matnNusxa">Matnni nusxalash</button>
+    </div>
     <div class="ulash-xabar" id="ulashXabar" role="status"></div>
     <textarea class="ulash-matn yashirin" id="ulashMatn" readonly rows="4"></textarea>
     <div class="izoh">Ertaga yangi sahifa ochiladi</div>
@@ -413,6 +427,7 @@ function chiz() {
     $("natija").classList.remove("yashirin");
     $("natijaSarlavha").textContent = holat.yutdi ? "Barakalla!" : "Bu safar topilmadi";
     $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
+    natijaRasminiTayyorla();
   }
 }
 
@@ -438,10 +453,10 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ===== 8. NATIJANI ULASHISH =====
-// Telefonda — tizimning "Ulashish" oynasi; kompyuterda — nusxa olish.
-// Ikkalasi ham ishlamasa (masalan, brauzer ruxsat bermasa), matn qutida ko'rsatiladi.
+// Natija rasm sifatida chiziladi (iqtibos + portret + natija), Instagram, Telegram, Facebook uchun.
+// O'lcham 1080×1350 (4:5) — Instagram lentasiga to'liq sig'adi, Telegram va Facebook'da ham chiroyli.
 const SAYT_MANZILI = location.protocol.startsWith("http")
-  ? location.origin + location.pathname
+  ? location.origin + location.pathname.replace(/index\.html$/, "")
   : "https://elyormirzo.github.io/sitata/";
 
 function ulashMatni() {
@@ -450,11 +465,144 @@ function ulashMatni() {
   return `Kim aytgan? — ${hisob}\n${qator}\n${SAYT_MANZILI}`;
 }
 
+function rasmYukla(src) {
+  return new Promise((ok) => {
+    if (!src) return ok(null);
+    const img = new Image();
+    img.onload = () => ok(img);
+    img.onerror = () => ok(null);
+    img.src = src;
+  });
+}
+
+// Matnni berilgan kenglikka sig'diradigan qatorlarga bo'lish
+function qatorlargaBol(ctx, matn, kenglik) {
+  const natija = [];
+  matn.split("\n").forEach((paragraf) => {
+    let qator = "";
+    paragraf.split(" ").forEach((soz) => {
+      const sinov = qator ? qator + " " + soz : soz;
+      if (ctx.measureText(sinov).width > kenglik && qator) { natija.push(qator); qator = soz; }
+      else qator = sinov;
+    });
+    natija.push(qator);
+  });
+  return natija;
+}
+
+let natijaFayli = null; // tayyor PNG (Blob)
+
+async function natijaRasminiChiz() {
+  try {
+    await Promise.all([
+      document.fonts.load('500 48px "Lora"'), document.fonts.load('italic 500 32px "Lora"'),
+      document.fonts.load('600 56px "Lora"'),
+    ]);
+  } catch (e) { /* shriftsiz ham chizamiz */ }
+
+  const W = 1080, H = 1350, c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  const serif = '"Lora", Georgia, serif';
+
+  // Fon: zig'ir mato va kitob sahifasi
+  ctx.fillStyle = "#E9DFCA"; ctx.fillRect(0, 0, W, H);
+  const X = 60, Y = 60, PW = W - 120, PH = H - 120;
+  ctx.fillStyle = "#D5C095"; ctx.fillRect(X + 14, Y + 14, PW, PH);   // orqadagi varaqlar
+  ctx.fillStyle = "#EADBB9"; ctx.fillRect(X + 7, Y + 7, PW, PH);
+  let g = ctx.createRadialGradient(W / 2, H * .4, 100, W / 2, H * .4, 900);
+  g.addColorStop(0, "#FBF4E3"); g.addColorStop(1, "#EBDDBE");
+  ctx.fillStyle = g; ctx.fillRect(X, Y, PW, PH);
+  g = ctx.createLinearGradient(X, 0, X + 50, 0);                     // kitob umurtqasi soyasi
+  g.addColorStop(0, "rgba(110,70,30,.25)"); g.addColorStop(1, "rgba(110,70,30,0)");
+  ctx.fillStyle = g; ctx.fillRect(X, Y, 50, PH);
+  ctx.strokeStyle = "#D8C7A3"; ctx.lineWidth = 2; ctx.strokeRect(X, Y, PW, PH);
+
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  let y = Y + 90;
+  ctx.fillStyle = "#8C5A2B"; ctx.font = `italic 500 32px ${serif}`;
+  ctx.fillText("— Kim aytgan? —", W / 2, y);
+
+  // Iqtibos: sig'guncha shrift kichrayadi
+  let olcham = 50, qatorlar;
+  do {
+    ctx.font = `500 ${olcham}px ${serif}`;
+    qatorlar = qatorlargaBol(ctx, "“" + bugungi.matn + "”", PW - 160);
+    olcham -= 2;
+  } while (qatorlar.length * olcham * 1.4 > 300 && olcham > 28);
+  olcham += 2;
+  const qatorBalandligi = olcham * 1.4;
+  y += 50 + olcham;
+  ctx.fillStyle = "#3B2A1A";
+  qatorlar.forEach((q) => { ctx.fillText(q, W / 2, y); y += qatorBalandligi; });
+
+  // Portret ramkada
+  // Portret balandligi qolgan joyga moslashadi (uzun iqtibosda kichrayadi)
+  const pastkiQism = 330;                                   // ism, ma'lumot, natija, sayt manzili
+  const ph = Math.max(300, Math.min(500, (Y + PH) - pastkiQism - (y + 10) - 14));
+  const pw = Math.round(ph * 0.8), px = (W - pw) / 2, py = y + 10;
+  ctx.save();
+  ctx.shadowColor = "rgba(80,50,20,.3)"; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  ctx.fillStyle = "#FBF5E6"; ctx.fillRect(px - 14, py - 14, pw + 28, ph + 28);
+  ctx.restore();
+  ctx.strokeStyle = "#CDB68A"; ctx.lineWidth = 2; ctx.strokeRect(px - 14, py - 14, pw + 28, ph + 28);
+  const img = await rasmYukla(muallif.rasm);
+  if (img) {
+    const k = Math.max(pw / img.width, ph / img.height);             // "cover", yuqori qismi
+    const sw = pw / k, sh = ph / k;
+    ctx.drawImage(img, (img.width - sw) / 2, 0, sw, sh, px, py, pw, ph);
+  } else {
+    g = ctx.createLinearGradient(px, py, px + pw, py + ph);
+    g.addColorStop(0, "#8C4A2F"); g.addColorStop(1, "#4A2A18");
+    ctx.fillStyle = g; ctx.fillRect(px, py, pw, ph);
+    ctx.fillStyle = "#FBF5E6"; ctx.font = `600 150px ${serif}`;
+    ctx.fillText(bugungi.muallif.split(" ").map((s) => s[0]).join(""), W / 2, py + ph / 2 + 55);
+  }
+  y = py + ph + 86;
+
+  // Muallif va ma'lumot
+  ctx.fillStyle = "#3B2A1A"; ctx.font = `600 54px ${serif}`;
+  ctx.fillText(bugungi.muallif, W / 2, y);
+  y += 48;
+  ctx.fillStyle = "#7A6448"; ctx.font = `italic 500 30px ${serif}`;
+  ctx.fillText(`${muallif.kasb} · ${davrMatni(muallif.davr)} · ${muallif.yurt}`, W / 2, y);
+
+  // Natija: kvadratchalar va matn
+  y += 50;
+  const kv = 30, oraliq = 8, n = holat.harflar.length;
+  let kx = (W - (n * kv + (n - 1) * oraliq)) / 2;
+  holat.harflar.forEach((h) => {
+    ctx.fillStyle = ismdami(h) ? "#4F5B3A" : "#B5502A";
+    ctx.fillRect(kx, y, kv, kv); kx += kv + oraliq;
+  });
+  y += kv + 46;
+  ctx.fillStyle = holat.yutdi ? "#4F5B3A" : "#8C4A2F"; ctx.font = `600 34px ${serif}`;
+  ctx.fillText(holat.yutdi ? `Topdim — ${xatolarSoni()} ta xato bilan` : "Bu safar topa olmadim", W / 2, y);
+
+  // Pastki qism: sayt manzili
+  ctx.fillStyle = "#9A8466"; ctx.font = `italic 500 26px ${serif}`;
+  ctx.fillText(SAYT_MANZILI.replace(/^https?:\/\//, "").replace(/\/$/, ""), W / 2, Y + PH - 36);
+
+  return new Promise((ok) => c.toBlob(ok, "image/png"));
+}
+
+async function natijaRasminiTayyorla() {
+  if (natijaFayli) return natijaFayli;
+  try {
+    natijaFayli = await natijaRasminiChiz();
+    if (natijaFayli) {
+      $("natijaRasm").src = URL.createObjectURL(natijaFayli);
+      $("natijaRasm").classList.remove("yashirin");
+    }
+  } catch (e) { natijaFayli = null; }   // masalan, fayl kompyuterdan ochilganda brauzer rasmga ruxsat bermaydi
+  return natijaFayli;
+}
+
 async function nusxaOl(matn) {
   try {
     if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(matn); return true; }
   } catch (e) { /* pastdagi usulni sinaymiz */ }
-  try {                                    // eski brauzerlar uchun
+  try {
     const t = document.createElement("textarea");
     t.value = matn; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
     document.body.appendChild(t); t.select();
@@ -464,25 +612,66 @@ async function nusxaOl(matn) {
   } catch (e) { return false; }
 }
 
-$("ulashish").addEventListener("click", async () => {
-  const matn = ulashMatni();
-  const xabar = $("ulashXabar");
-  xabar.textContent = "";
-  const telefon = window.matchMedia("(pointer: coarse)").matches;
+function rasmniYuklabOl(blob) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kim-aytgan.png";
+  document.body.appendChild(a); a.click(); a.remove();
+}
 
-  if (telefon && navigator.share) {
-    try { await navigator.share({ text: matn }); return; }
-    catch (e) { if (e.name === "AbortError") return; /* bekor qilindi */ }
-  }
-  if (await nusxaOl(matn)) {
-    xabar.textContent = "Nusxa olindi — endi xohlagan joyingizga joylashtiring.";
-    return;
-  }
+function matnniKorsat(matn) {
   const quti = $("ulashMatn");
   quti.value = matn;
   quti.classList.remove("yashirin");
   quti.focus(); quti.select();
-  xabar.textContent = "Matnni belgilab, o'zingiz nusxa oling:";
+  $("ulashXabar").textContent = "Matnni belgilab, o'zingiz nusxa oling:";
+}
+
+// Asosiy tugma: telefonda rasm + matn bilan ulashish oynasi (Instagram, Telegram, Facebook...),
+// kompyuterda rasm nusxalanadi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtirasiz.
+$("ulashish").addEventListener("click", async () => {
+  const xabar = $("ulashXabar");
+  xabar.textContent = "Rasm tayyorlanmoqda…";
+  const blob = await natijaRasminiTayyorla();
+  const matn = ulashMatni();
+  xabar.textContent = "";
+
+  if (blob) {
+    const fayl = new File([blob], "kim-aytgan.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [fayl] })) {
+      try { await navigator.share({ files: [fayl], text: matn }); return; }
+      catch (e) { if (e.name === "AbortError") return; }
+    }
+    try {
+      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        xabar.textContent = "Rasm nusxalandi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtiring.";
+        return;
+      }
+    } catch (e) { /* yuklab olishga o'tamiz */ }
+    rasmniYuklabOl(blob);
+    xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang.";
+    return;
+  }
+  // Rasm chizib bo'lmasa — faqat matn
+  if (navigator.share) {
+    try { await navigator.share({ text: matn }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  if (await nusxaOl(matn)) xabar.textContent = "Natija matni nusxalandi.";
+  else matnniKorsat(matn);
+});
+
+$("yuklab").addEventListener("click", async () => {
+  const blob = await natijaRasminiTayyorla();
+  if (blob) { rasmniYuklabOl(blob); $("ulashXabar").textContent = "Rasm yuklab olindi."; }
+  else $("ulashXabar").textContent = "Rasmni tayyorlab bo'lmadi — sahifani sayt manzili orqali oching.";
+});
+
+$("matnNusxa").addEventListener("click", async () => {
+  const matn = ulashMatni();
+  if (await nusxaOl(matn)) $("ulashXabar").textContent = "Natija matni nusxalandi.";
+  else matnniKorsat(matn);
 });
 
 portretniQur();
