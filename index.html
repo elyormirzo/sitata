@@ -79,6 +79,19 @@
     background: var(--yashil); color: #fff; font: 600 16px Inter, sans-serif;
   }
   button.ikkinchi { background: #fff; color: var(--qora); border: 1px solid var(--chegara); }
+  /* Mualliflar tugmalari */
+  .qidiruv { height: 44px; margin-top: 0; font-size: 15px; }
+  .mualliflar { display: flex; flex-wrap: wrap; gap: 8px; }
+  .muallif {
+    height: auto; min-height: 40px; padding: 8px 14px; border-radius: 20px;
+    background: #fff; color: var(--qora); border: 1px solid var(--chegara);
+    font: 500 14px Inter, sans-serif; transition: background .15s, border-color .15s, transform .1s;
+  }
+  .muallif:active { transform: scale(.96); }
+  .muallif.tanlandi { background: var(--yashil); color: #fff; border-color: var(--yashil); }
+  .muallif:disabled { cursor: default; background: #EDEDEA; color: #A3A6AE; text-decoration: line-through; border-color: #EDEDEA; }
+  .muallif-bosh { width: 100%; font-size: 13px; color: var(--kulrang); padding: 8px 0; text-align: center; }
+  button:disabled.asosiy { opacity: .45; cursor: default; }
   .xabar { min-height: 20px; font-size: 14px; color: #8A2E0A; }
 
   .ishora {
@@ -115,12 +128,11 @@
   <div class="ishora yashirin" id="ishora"></div>
 
   <form class="kiritish" id="forma">
-    <label>Muallif ismi
-      <input id="javob" list="mualliflarRoyxati" placeholder="Masalan: Alisher Navoiy" autocomplete="off">
-    </label>
-    <datalist id="mualliflarRoyxati"></datalist>
+    <label for="qidiruv">Muallifni tanlang</label>
+    <input id="qidiruv" class="qidiruv" type="search" placeholder="Qidirish…" autocomplete="off">
+    <div class="mualliflar" id="mualliflar"></div>
     <div class="xabar" id="xabar"></div>
-    <button type="submit">Javob berish</button>
+    <button type="submit" class="asosiy" id="yuborish" disabled>Javob berish</button>
   </form>
 
   <section class="natija yashirin" id="natija">
@@ -254,6 +266,8 @@ function chiz() {
     $("ishora").classList.add("yashirin");
   }
 
+  mualliflarniChiz();
+
   // O'yin tugaganmi?
   if (holat.tugadi) {
     $("forma").classList.add("yashirin");
@@ -266,17 +280,18 @@ function chiz() {
 // ===== 7. JAVOB YUBORILGANDA =====
 $("forma").addEventListener("submit", (e) => {
   e.preventDefault();
-  const ism = $("javob").value.trim();
+  const ism = tanlangan;
   $("xabar").textContent = "";
 
-  if (!MUALLIFLAR[ism]) { $("xabar").textContent = "Ro'yxatdagi mualliflardan birini tanlang."; return; }
+  if (!ism || !MUALLIFLAR[ism]) { $("xabar").textContent = "Avval muallifni tanlang."; return; }
   if (holat.taxminlar.includes(ism)) { $("xabar").textContent = "Bu muallifni allaqachon yozgansiz."; return; }
 
   holat.taxminlar.push(ism);
   if (ism === bugungi.muallif) { holat.yutdi = true; holat.tugadi = true; }
   else if (holat.taxminlar.length >= MAX_URINISH) { holat.tugadi = true; }
 
-  $("javob").value = "";
+  tanlangan = null;
+  $("qidiruv").value = "";
   saqlash();
   chiz();
 });
@@ -297,12 +312,34 @@ $("ulashish").addEventListener("click", async () => {
   } catch (e) { /* foydalanuvchi bekor qildi */ }
 });
 
-// Mualliflar ro'yxatini kiritish maydoniga ulaymiz (yozganda taklif chiqadi)
-Object.keys(MUALLIFLAR).sort().forEach((ism) => {
-  const o = document.createElement("option");
-  o.value = ism;
-  $("mualliflarRoyxati").appendChild(o);
-});
+// ===== 9. MUALLIFLAR TUGMALARI =====
+// Ismni yozish o'rniga bosib tanlanadi. Qidiruv maydoni ro'yxatni qisqartiradi.
+let tanlangan = null;
+
+function mualliflarniChiz() {
+  const soz = $("qidiruv").value.trim().toLowerCase();
+  const quti = $("mualliflar");
+  quti.innerHTML = "";
+  const ismlar = Object.keys(MUALLIFLAR).sort().filter((ism) => ism.toLowerCase().includes(soz));
+  ismlar.forEach((ism) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "muallif" + (ism === tanlangan ? " tanlandi" : "");
+    b.textContent = ism;
+    b.disabled = holat.taxminlar.includes(ism);
+    b.addEventListener("click", () => {
+      tanlangan = (tanlangan === ism) ? null : ism;
+      $("xabar").textContent = "";
+      mualliflarniChiz();
+    });
+    quti.appendChild(b);
+  });
+  if (!ismlar.length) quti.innerHTML = '<div class="muallif-bosh">Hech kim topilmadi</div>';
+  $("yuborish").disabled = !tanlangan;
+  $("yuborish").textContent = tanlangan ? "Javob berish: " + tanlangan : "Javob berish";
+}
+
+$("qidiruv").addEventListener("input", mualliflarniChiz);
 
 chiz();
 </script>
