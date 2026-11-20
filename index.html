@@ -697,12 +697,18 @@ async function natijaRasminiChiz() {
   return new Promise((ok) => c.toBlob(ok, "image/png"));
 }
 
+let natijaFaylObj = null; // ulashish uchun tayyor File (bosilganda kutmasdan darhol ulashamiz)
+
 async function natijaRasminiTayyorla() {
   if (natijaFayli) return natijaFayli;
   try {
     natijaFayli = await natijaRasminiChiz();
     if (natijaFayli) {
-      $("natijaRasm").src = URL.createObjectURL(natijaFayli);
+      natijaFaylObj = new File([natijaFayli], "kim-aytgan.png", { type: "image/png" });
+      // data: manzil — ilova ichidagi brauzerlarda ham rasmni bosib turib saqlash mumkin bo'lsin
+      $("natijaRasm").src = await new Promise((ok) => {
+        const o = new FileReader(); o.onload = () => ok(o.result); o.readAsDataURL(natijaFayli);
+      });
       $("natijaRasm").classList.remove("yashirin");
     }
   } catch (e) { natijaFayli = null; }   // masalan, fayl kompyuterdan ochilganda brauzer rasmga ruxsat bermaydi
@@ -738,39 +744,64 @@ function matnniKorsat(matn) {
   $("ulashXabar").textContent = "Matnni belgilab, o'zingiz nusxa oling:";
 }
 
-// Asosiy tugma: telefonda rasm + matn bilan ulashish oynasi (Instagram, Telegram, Facebook...),
-// kompyuterda rasm nusxalanadi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtirasiz.
-$("ulashish").addEventListener("click", async () => {
+// Telegram, Instagram, Facebook ichidagi brauzerlar ulashish va yuklab olishga ko'pincha ruxsat bermaydi
+const ILOVA_ICHIDA = /Telegram|Instagram|FBAN|FBAV|FB_IAB|Line\/|WhatsApp/i.test(navigator.userAgent);
+const TELEFON = window.matchMedia("(pointer: coarse)").matches;
+
+// Hech narsa ishlamasa: rasmni bosib turib saqlash yo'lini ko'rsatamiz (har qanday telefonda ishlaydi)
+function qolbolaYol(sabab) {
   const xabar = $("ulashXabar");
-  xabar.textContent = "Rasm tayyorlanmoqda…";
-  const blob = await natijaRasminiTayyorla();
-  const matn = ulashMatni();
+  const rasm = $("natijaRasm");
+  if (natijaFayli && !rasm.classList.contains("yashirin")) {
+    xabar.textContent = (sabab ? sabab + " " : "") +
+      (TELEFON ? "Rasmni barmoq bilan bosib turing va «Rasmni saqlash»ni tanlang, keyin Instagram, Telegram yoki Facebook'ga joylang."
+               : "Rasm ustida sichqonchaning o'ng tugmasini bosib, «Rasmni saqlash» yoki «Rasmdan nusxa olish»ni tanlang.");
+    rasm.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else {
+    const matn = ulashMatni();
+    nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = "Natija matni nusxalandi."; else matnniKorsat(matn); });
+  }
+}
+
+// Asosiy tugma: telefonda rasm bilan ulashish oynasi (Instagram, Telegram, Facebook...),
+// kompyuterda rasm nusxalanadi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtirasiz.
+// Muhim: ulashish oynasi faqat bosishning o'zida ochiladi, shuning uchun bu yerda oldin hech narsani kutmaymiz.
+$("ulashish").addEventListener("click", () => {
+  const xabar = $("ulashXabar");
   xabar.textContent = "";
 
-  if (blob) {
-    const fayl = new File([blob], "kim-aytgan.png", { type: "image/png" });
-    if (navigator.canShare && navigator.canShare({ files: [fayl] })) {
-      try { await navigator.share({ files: [fayl], text: matn }); return; }
-      catch (e) { if (e.name === "AbortError") return; }
-    }
-    try {
-      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        xabar.textContent = "Rasm nusxalandi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtiring.";
-        return;
-      }
-    } catch (e) { /* yuklab olishga o'tamiz */ }
-    rasmniYuklabOl(blob);
-    xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang.";
+  if (!natijaFayli) {                       // rasm hali tayyor emas
+    xabar.textContent = "Rasm tayyorlanmoqda…";
+    natijaRasminiTayyorla().then((b) => {
+      xabar.textContent = b ? "Rasm tayyor — «Natijani ulashish»ni yana bir bor bosing." : "";
+      if (!b) qolbolaYol();
+    });
     return;
   }
-  // Rasm chizib bo'lmasa — faqat matn
-  if (navigator.share) {
-    try { await navigator.share({ text: matn }); return; }
-    catch (e) { if (e.name === "AbortError") return; }
+
+  if (ILOVA_ICHIDA) {
+    qolbolaYol("Ilova ichidagi brauzer ulashishga ruxsat bermaydi — saytni Chrome yoki Safari'da oching, yoki:");
+    return;
   }
-  if (await nusxaOl(matn)) xabar.textContent = "Natija matni nusxalandi.";
-  else matnniKorsat(matn);
+
+  const fayl = natijaFaylObj;
+  if (TELEFON && navigator.share && navigator.canShare && navigator.canShare({ files: [fayl] })) {
+    navigator.share({ files: [fayl] })     // faqat rasm: matn qo'shilsa, Instagram ba'zan ulashmaydi
+      .catch((e) => { if (e.name !== "AbortError") qolbolaYol("Ulashish oynasi ochilmadi."); });
+    return;
+  }
+
+  if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+    navigator.clipboard.write([new ClipboardItem({ "image/png": natijaFayli })])
+      .then(() => { xabar.textContent = "Rasm nusxalandi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtiring."; })
+      .catch(() => {
+        try { rasmniYuklabOl(natijaFayli); xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."; }
+        catch (e) { qolbolaYol(); }
+      });
+    return;
+  }
+  try { rasmniYuklabOl(natijaFayli); xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."; }
+  catch (e) { qolbolaYol(); }
 });
 
 portretniQur();
