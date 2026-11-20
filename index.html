@@ -47,26 +47,6 @@
   .urinishlar span.ishlatildi { background: #E0703A; }
   .urinishlar span.topildi { background: #3FB58F; }
 
-  /* Taxminlar jadvali */
-  .jadval-sarlavha, .qator {
-    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 6px;
-  }
-  .jadval-sarlavha {
-    font-size: 11px; font-weight: 600; color: var(--kulrang);
-    text-transform: uppercase; letter-spacing: .4px; padding: 0 2px 6px;
-  }
-  .qator { margin-bottom: 6px; }
-  .katak {
-    min-height: 50px; border-radius: 12px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center;
-    font-size: 12px; font-weight: 600; padding: 4px;
-  }
-  .katak.ism { background: #fff; border: 1px solid #E8E8E3; justify-content: flex-start; flex-direction: row; text-align: left; padding: 0 10px; font-size: 13px; }
-  .katak.togri { background: var(--yashil-och); color: #0A5243; }
-  .katak.yaqin { background: var(--sariq-och); color: #6B4A00; }
-  .katak.xato  { background: var(--qizil-och); color: #8A2E0A; }
-  .katak span { font-size: 11px; font-weight: 500; }
-
   /* Kiritish va tugmalar */
   .kiritish { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
   label { font-size: 13px; color: var(--kulrang); }
@@ -81,21 +61,34 @@
   button.ikkinchi { background: #fff; color: var(--qora); border: 1px solid var(--chegara); }
   /* Mualliflar tugmalari */
   .mualliflar { display: flex; flex-direction: column; gap: 8px; }
+  .sarlavha-kichik { font-size: 13px; color: var(--kulrang); margin: 0 0 8px; }
   .muallif {
-    height: auto; min-height: 48px; padding: 10px 16px; border-radius: 14px; text-align: left;
+    height: auto; min-height: 52px; padding: 12px 16px; border-radius: 14px; text-align: left;
     background: #fff; color: var(--qora); border: 1px solid var(--chegara);
-    font: 500 14px Inter, sans-serif; transition: background .15s, border-color .15s, transform .1s;
+    font: 500 15px Inter, sans-serif; transition: background .15s, border-color .15s, transform .1s;
+    display: flex; flex-direction: column; gap: 8px;
   }
-  .muallif:active { transform: scale(.96); }
-  .muallif.tanlandi { background: var(--yashil); color: #fff; border-color: var(--yashil); }
-  .muallif:disabled { cursor: default; background: #EDEDEA; color: #A3A6AE; text-decoration: line-through; border-color: #EDEDEA; }
-  button:disabled.asosiy { opacity: .45; cursor: default; }
+  .muallif:active:not(:disabled) { transform: scale(.98); }
+  .muallif:disabled { cursor: default; }
+  .muallif.xato-javob { background: #FDF3EE; border-color: #F2C9B5; color: #8A2E0A; }
+  .muallif.togri-javob { background: var(--yashil); border-color: var(--yashil); color: #fff; }
+  .muallif.ochiq { opacity: .45; }
+  .muallif .ism-qator { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
+  .muallif .belgi { font-size: 13px; font-weight: 600; }
+  /* Xato javob ostidagi ishoralar: davr, faoliyat, hudud */
+  .teglar { display: flex; flex-wrap: wrap; gap: 6px; }
+  .teg { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px; }
+  .teg.togri { background: var(--yashil-och); color: #0A5243; }
+  .teg.yaqin { background: var(--sariq-och); color: #6B4A00; }
+  .teg.xato  { background: #fff; color: #8A2E0A; border: 1px solid #F2C9B5; }
+  .izoh-satr { font-size: 12px; color: var(--kulrang); margin-top: 10px; line-height: 1.5; }
+  @keyframes silkinish { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  @keyframes sakrash { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  .silkin { animation: silkinish .3s ease 2; }
+  .sakra { animation: sakrash .4s ease; }
+  @media (prefers-reduced-motion: reduce) { .silkin, .sakra { animation: none; } }
   .xabar { min-height: 20px; font-size: 14px; color: #8A2E0A; }
 
-  .ishora {
-    margin-top: 12px; padding: 12px 14px; border-radius: 14px;
-    background: #E3F1EC; color: #0A5243; font-size: 14px;
-  }
   .natija {
     margin-top: 16px; padding: 18px; border-radius: 20px; background: #fff;
     border: 1px solid #E8E8E3; text-align: center; display: flex; flex-direction: column; gap: 12px;
@@ -109,7 +102,7 @@
 
   <header>
     <h1>Kim aytgan?</h1>
-    <p>Iqtibos muallifini 5 urinishda toping</p>
+    <p>Iqtibos muallifini 3 urinishda toping</p>
   </header>
 
   <section class="karta">
@@ -118,19 +111,12 @@
     <div class="urinishlar" id="urinishlar"></div>
   </section>
 
-  <div class="jadval-sarlavha">
-    <div>Taxmin</div><div>Davr</div><div>Faoliyat</div><div>Hudud</div>
-  </div>
-  <div id="taxminlar"></div>
+  <p class="sarlavha-kichik" id="variantSarlavha">Muallifni bosing — 3 ta urinish</p>
+  <div class="mualliflar" id="mualliflar"></div>
+  <p class="izoh-satr" id="izoh">Xato javob ostida ishora chiqadi: <b>davr</b>, <b>faoliyat</b> va <b>hudud</b>.
+    Yashil — to'g'ri muallif bilan bir xil, sariq — yaqin, oq — boshqacha.</p>
 
-  <div class="ishora yashirin" id="ishora"></div>
-
-  <form class="kiritish" id="forma">
-    <label>Muallifni tanlang</label>
-    <div class="mualliflar" id="mualliflar"></div>
-    <div class="xabar" id="xabar"></div>
-    <button type="submit" class="asosiy" id="yuborish" disabled>Javob berish</button>
-  </form>
+  <div class="xabar" id="xabar"></div>
 
   <section class="natija yashirin" id="natija">
     <h2 id="natijaSarlavha"></h2>
@@ -181,7 +167,7 @@ const IQTIBOSLAR = [
   { matn: "Inson tabiatan ijtimoiy mavjudotdir.", muallif: "Aristotel" },
 ];
 
-const MAX_URINISH = 5;
+const MAX_URINISH = 3;
 
 // ===== 3. BUGUNGI IQTIBOSNI TANLASH =====
 // 1970-yildan beri o'tgan kunlar sonini hisoblab, ro'yxat uzunligiga bo'lamiz.
@@ -191,8 +177,8 @@ const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
 const togriMuallif = MUALLIFLAR[bugungi.muallif];
 
 // ===== 3a. BUGUNGI 5 TA VARIANT =====
-// To'g'ri muallif + 4 ta tasodifiy boshqa muallif. Tasodif kun raqamiga bog'liq,
-// shuning uchun hamma odamda bir kunda bir xil 5 ta variant chiqadi.
+// To'g'ri muallif + unga eng o'xshash 4 ta muallif (faoliyati, hududi yoki davri yaqin).
+// Tasodif kun raqamiga bog'liq, shuning uchun hamma odamda bir kunda bir xil 5 ta variant chiqadi.
 const VARIANTLAR_SONI = 5;
 function urugliTasodif(urug) {
   return () => {
@@ -211,10 +197,21 @@ function aralashtir(royxat, tasodif) {
   return a;
 }
 const tasodif = urugliTasodif(bugungiKun);
-const bugungiVariantlar = aralashtir([
-  bugungi.muallif,
-  ...aralashtir(Object.keys(MUALLIFLAR).filter((ism) => ism !== bugungi.muallif), tasodif).slice(0, VARIANTLAR_SONI - 1),
-], tasodif);
+function oxshashlik(ism) {
+  const m = MUALLIFLAR[ism];
+  let ball = 0;
+  if (m.kasb === togriMuallif.kasb) ball += 1;
+  if (m.yurt === togriMuallif.yurt) ball += 1;
+  if (Math.abs(m.davr - togriMuallif.davr) <= 2) ball += 1;
+  return ball;
+}
+const chalgituvchilar = Object.keys(MUALLIFLAR)
+  .filter((ism) => ism !== bugungi.muallif)
+  .map((ism) => ({ ism, ball: oxshashlik(ism) + tasodif() * 1.5 })) // biroz tasodif: har safar eng o'xshashlar emas
+  .sort((a, b) => b.ball - a.ball)
+  .slice(0, VARIANTLAR_SONI - 1)
+  .map((x) => x.ism);
+const bugungiVariantlar = aralashtir([bugungi.muallif, ...chalgituvchilar], tasodif);
 
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
 let holat = { kun: bugungiKun, taxminlar: [], tugadi: false, yutdi: false };
@@ -265,35 +262,12 @@ function chiz() {
     $("urinishlar").appendChild(s);
   }
 
-  // Taxminlar jadvali
-  $("taxminlar").innerHTML = "";
-  holat.taxminlar.forEach((ism) => {
-    const n = solishtir(ism);
-    const qator = document.createElement("div");
-    qator.className = "qator";
-    qator.innerHTML = `
-      <div class="katak ism"></div>
-      <div class="katak ${n.davr.sinf}">${n.davr.matn}<span>${n.davr.izoh}</span></div>
-      <div class="katak ${n.kasb.sinf}">${n.kasb.matn}</div>
-      <div class="katak ${n.yurt.sinf}">${n.yurt.matn}</div>`;
-    qator.querySelector(".ism").textContent = ism;
-    $("taxminlar").appendChild(qator);
-  });
-
-  // 3 ta xatodan keyin ishora: ismning birinchi harfi
-  const xatolar = holat.taxminlar.length - (holat.yutdi ? 1 : 0);
-  if (!holat.tugadi && xatolar >= 3) {
-    $("ishora").textContent = "Ishora: muallif ismi «" + bugungi.muallif[0] + "» harfidan boshlanadi.";
-    $("ishora").classList.remove("yashirin");
-  } else {
-    $("ishora").classList.add("yashirin");
-  }
-
   mualliflarniChiz();
 
   // O'yin tugaganmi?
   if (holat.tugadi) {
-    $("forma").classList.add("yashirin");
+    $("izoh").classList.add("yashirin");
+    $("variantSarlavha").textContent = "Bugungi variantlar";
     $("natija").classList.remove("yashirin");
     $("natijaSarlavha").textContent = holat.yutdi ? "Barakalla!" : "Bu safar topilmadi";
     $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
@@ -301,22 +275,20 @@ function chiz() {
 }
 
 // ===== 7. JAVOB YUBORILGANDA =====
-$("forma").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const ism = tanlangan;
+// Variant bosilishi bilan javob yuboriladi.
+function javobBer(ism) {
   $("xabar").textContent = "";
-
-  if (!ism || !MUALLIFLAR[ism]) { $("xabar").textContent = "Avval muallifni tanlang."; return; }
-  if (holat.taxminlar.includes(ism)) { $("xabar").textContent = "Bu muallifni allaqachon yozgansiz."; return; }
+  if (holat.tugadi || !MUALLIFLAR[ism]) return;
+  if (holat.taxminlar.includes(ism)) { $("xabar").textContent = "Bu muallifni allaqachon tanlagansiz."; return; }
+  oxirgiTaxmin = ism;
 
   holat.taxminlar.push(ism);
   if (ism === bugungi.muallif) { holat.yutdi = true; holat.tugadi = true; }
   else if (holat.taxminlar.length >= MAX_URINISH) { holat.tugadi = true; }
 
-  tanlangan = null;
   saqlash();
   chiz();
-});
+}
 
 // ===== 8. NATIJANI ULASHISH =====
 $("ulashish").addEventListener("click", async () => {
@@ -335,8 +307,15 @@ $("ulashish").addEventListener("click", async () => {
 });
 
 // ===== 9. MUALLIFLAR TUGMALARI =====
-// Ismni yozish o'rniga bugungi 5 ta variantdan biri bosib tanlanadi.
-let tanlangan = null;
+// Bugungi 5 ta variantdan birini bosish bilan javob beriladi. Xato javob tugmaning o'zida ishora bilan qoladi.
+let oxirgiTaxmin = null; // animatsiya faqat yangi javobda o'ynasin
+
+function teg(matn, sinf) {
+  const t = document.createElement("span");
+  t.className = "teg " + sinf;
+  t.textContent = matn;
+  return t;
+}
 
 function mualliflarniChiz() {
   const quti = $("mualliflar");
@@ -344,18 +323,46 @@ function mualliflarniChiz() {
   bugungiVariantlar.forEach((ism) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "muallif" + (ism === tanlangan ? " tanlandi" : "");
-    b.textContent = ism;
-    b.disabled = holat.taxminlar.includes(ism);
-    b.addEventListener("click", () => {
-      tanlangan = (tanlangan === ism) ? null : ism;
-      $("xabar").textContent = "";
-      mualliflarniChiz();
-    });
+    const taxminQilingan = holat.taxminlar.includes(ism);
+    const togri = ism === bugungi.muallif;
+
+    const qator = document.createElement("span");
+    qator.className = "ism-qator";
+    const nom = document.createElement("span");
+    nom.textContent = ism;
+    qator.appendChild(nom);
+    b.appendChild(qator);
+
+    let sinf = "muallif";
+    if (togri && (holat.yutdi || holat.tugadi)) {
+      sinf += " togri-javob";
+      const belgi = document.createElement("span");
+      belgi.className = "belgi";
+      belgi.textContent = holat.yutdi ? "✓ To'g'ri" : "To'g'ri javob";
+      qator.appendChild(belgi);
+      if (oxirgiTaxmin === ism) sinf += " sakra";
+    } else if (taxminQilingan) {
+      sinf += " xato-javob";
+      const belgi = document.createElement("span");
+      belgi.className = "belgi";
+      belgi.textContent = "✗";
+      qator.appendChild(belgi);
+      const n = solishtir(ism);
+      const teglar = document.createElement("span");
+      teglar.className = "teglar";
+      teglar.appendChild(teg(n.davr.matn + (n.davr.izoh ? " · " + n.davr.izoh : ""), n.davr.sinf));
+      teglar.appendChild(teg(n.kasb.matn, n.kasb.sinf));
+      teglar.appendChild(teg(n.yurt.matn, n.yurt.sinf));
+      b.appendChild(teglar);
+      if (oxirgiTaxmin === ism) sinf += " silkin";
+    } else if (holat.tugadi) {
+      sinf += " ochiq";
+    }
+    b.className = sinf;
+    b.disabled = taxminQilingan || holat.tugadi;
+    b.addEventListener("click", () => javobBer(ism));
     quti.appendChild(b);
   });
-  $("yuborish").disabled = !tanlangan;
-  $("yuborish").textContent = tanlangan ? "Javob berish: " + tanlangan : "Javob berish";
 }
 
 chiz();
