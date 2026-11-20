@@ -10,26 +10,33 @@
 <style>
   /* ===== 1. RANGLAR VA ASOSIY USLUB ===== */
   :root {
-    --fon: #F7F7F5;
-    --qora: #16181D;
-    --kulrang: #5B6170;
-    --yashil: #0F6E5C;
-    --yashil-och: #D7EEE6;
-    --qizil-och: #FBE3D6;
-    --chegara: #E2E2DD;
+    --fon: #E9DFCA;          /* kitob javoni / zig'ir mato */
+    --qogoz: #F8F1E1;        /* yangi qog'oz */
+    --qora: #3B2A1A;         /* siyoh */
+    --kulrang: #7A6448;
+    --teri: #8C4A2F;         /* teri muqova */
+    --teri-toq: #6B3E26;
+    --zaytun: #4F5B3A;       /* to'q yashil muqova */
+    --zaytun-och: #E1E4CF;
+    --qizil-och: #F3D9C6;
+    --chegara: #D8C7A3;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--fon);
+    margin: 0; min-height: 100vh;
+    background-color: var(--fon);
+    background-image:                              /* zig'ir mato teksturasi */
+      repeating-linear-gradient(0deg, rgba(120,90,50,.035) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(120,90,50,.035) 0 1px, transparent 1px 3px);
     color: var(--qora);
     font-family: Inter, system-ui, sans-serif;
   }
   .ilova { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
 
   header { text-align: center; margin-bottom: 16px; }
-  header h1 { font-family: Lora, Georgia, serif; font-size: 30px; margin: 0; }
-  header p { margin: 4px 0 0; color: var(--kulrang); font-size: 14px; }
+  header h1 { font-family: Lora, Georgia, serif; font-size: 32px; margin: 0; color: var(--qora); }
+  header h1::after { content: "❧"; display: block; font-size: 16px; color: #B98A55; margin-top: 2px; }
+  header p { margin: 4px 0 0; color: var(--kulrang); font: italic 14px Lora, Georgia, serif; }
 
   /* Iqtibos kartasi: eski kitob sahifasi ko'rinishida */
   .karta {
@@ -92,42 +99,54 @@
   /* Ism katakchalari */
   .ism { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 4px 0 14px; }
   .soz { display: flex; gap: 4px; }
-  .harf-katak {
-    width: 26px; height: 34px; border-radius: 7px; background: #fff; border: 1px solid #D5D5CF;
+  .harf-katak {                                  /* bosmaxona harf-qoliplari */
+    width: 26px; height: 36px; border-radius: 3px; background: var(--qogoz);
+    border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
     display: flex; align-items: center; justify-content: center;
-    font: 700 17px Inter, sans-serif; text-transform: uppercase;
+    font: 600 19px Lora, Georgia, serif; text-transform: uppercase; color: var(--qora);
   }
-  .harf-katak.topildi { background: var(--yashil-och); border-color: #A9D9C9; color: #0A5243; }
-  .harf-katak.korsatildi { background: var(--qizil-och); border-color: #F2C9B5; color: #8A2E0A; }
+  .harf-katak.topildi { background: var(--zaytun-och); border-color: #B7BE98; border-bottom-color: var(--zaytun); color: var(--zaytun); }
+  .harf-katak.korsatildi { background: var(--qizil-och); border-color: #E2B89C; border-bottom-color: var(--teri); color: var(--teri); }
   .harf-katak.belgi { width: 10px; border: 0; background: none; }
 
   /* Ishoralar */
   .ishoralar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 26px; margin-bottom: 12px; }
-  .ishora { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 8px; background: #E3F1EC; color: #0A5243; }
+  .ishora {                                      /* kitob xatcho'pi */
+    font: italic 500 13px Lora, Georgia, serif; padding: 5px 14px 5px 10px; color: #FBF5E6;
+    background: var(--teri); border-radius: 2px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+  }
 
   /* Harflar klaviaturasi */
   .klaviatura { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
-  .tugma {
-    height: 46px; border-radius: 10px; border: 1px solid var(--chegara); background: #fff; color: var(--qora);
-    font: 600 16px Inter, sans-serif; cursor: pointer; padding: 0;
-    transition: background .15s, transform .1s;
+  .tugma {                                       /* harf-qoliplar */
+    height: 46px; border-radius: 4px; background: var(--qogoz); color: var(--qora);
+    border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
+    font: 600 18px Lora, Georgia, serif; cursor: pointer; padding: 0;
+    transition: background .15s, transform .1s, border-color .15s;
   }
-  .tugma:active:not(:disabled) { transform: scale(.94); }
+  .tugma:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 1px; }
   .tugma:disabled { cursor: default; }
-  .tugma.togri { background: var(--yashil); border-color: var(--yashil); color: #fff; }
-  .tugma.xato { background: #E4E4DF; border-color: #E4E4DF; color: #A3A6AE; }
-  .izoh-satr { font-size: 12px; color: var(--kulrang); margin: 10px 0 0; text-align: center; line-height: 1.5; }
+  .tugma.togri { background: var(--zaytun); border-color: var(--zaytun); border-bottom-color: #353D26; color: #F8F1E1; }
+  .tugma.xato { background: transparent; border-color: #D9CBAE; border-bottom-width: 1px; color: #B9A88A; text-decoration: line-through; }
+  .izoh-satr { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); margin: 12px 0 0; text-align: center; line-height: 1.5; }
 
-  button.asosiy {
-    height: 52px; border-radius: 26px; border: 0; cursor: pointer;
-    background: var(--yashil); color: #fff; font: 600 16px Inter, sans-serif;
+  button.asosiy {                                /* teri muqovali tugma */
+    height: 52px; border-radius: 6px; cursor: pointer;
+    background: linear-gradient(180deg, var(--teri), var(--teri-toq)); color: #FBF5E6;
+    border: 1px solid #5A3220; box-shadow: inset 0 0 0 3px rgba(251,245,230,.12);
+    font: 600 17px Lora, Georgia, serif; letter-spacing: .3px;
   }
-  .natija {
-    margin-top: 4px; padding: 18px; border-radius: 20px; background: #fff;
-    border: 1px solid #E8E8E3; text-align: center; display: flex; flex-direction: column; gap: 12px;
+  .natija {                                      /* yakuniy sahifa */
+    margin-top: 4px; padding: 20px 20px 18px; border-radius: 4px; background: var(--qogoz);
+    border: 1px solid var(--chegara); box-shadow: 0 8px 20px rgba(80,50,20,.12);
+    text-align: center; display: flex; flex-direction: column; gap: 12px;
   }
-  .natija h2 { margin: 0; font-family: Lora, Georgia, serif; font-size: 22px; }
-  .manba { margin-top: 24px; text-align: center; font-size: 11px; color: #9A9EA8; }
+  .natija h2 { margin: 0; font-family: Lora, Georgia, serif; font-size: 24px; color: var(--qora); }
+  .natija h2::before, .natija h2::after { content: "❦"; font-size: 16px; color: #B98A55; margin: 0 10px; vertical-align: middle; }
+  #natijaMatn { font: italic 16px Lora, Georgia, serif; }
+  .natija .izoh { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+  .manba { margin-top: 24px; text-align: center; font: italic 12px Lora, Georgia, serif; color: #9A8466; }
   .manba a { color: inherit; }
   .yashirin { display: none !important; }
 
@@ -165,7 +184,7 @@
     <h2 id="natijaSarlavha"></h2>
     <div id="natijaMatn"></div>
     <button type="button" class="asosiy" id="ulashish">Natijani ulashish</button>
-    <div style="font-size: 13px; color: var(--kulrang)">Ertaga yangi iqtibos chiqadi</div>
+    <div class="izoh">Ertaga yangi sahifa ochiladi</div>
   </section>
 
   <p class="manba">Portretlar: <a href="rasmlar/manbalar.txt">Wikimedia Commons</a></p>
