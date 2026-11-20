@@ -108,6 +108,12 @@
   .harf-katak.topildi { background: var(--zaytun-och); border-color: #B7BE98; border-bottom-color: var(--zaytun); color: var(--zaytun); }
   .harf-katak.korsatildi { background: var(--qizil-och); border-color: #E2B89C; border-bottom-color: var(--teri); color: var(--teri); }
   .harf-katak.belgi { width: 10px; border: 0; background: none; }
+  .harf-katak.bosh { cursor: pointer; }
+  .tanlov-bor .harf-katak.bosh { background: #FFFDF6; border-style: dashed; border-color: #C9A887; }
+  .harf-katak.ustida { background: #fff !important; outline: 2px solid var(--teri); outline-offset: 1px; }
+  .harf-katak.notogri { background: var(--qizil-och); border-color: #E2B89C; border-bottom-color: var(--teri); color: var(--teri); }
+  .harf-katak.pop { animation: sakrash .35s ease; }
+  @keyframes sakrash { 0% { transform: scale(1); } 50% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
   /* Ishoralar */
   .ishoralar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 26px; margin-bottom: 12px; }
@@ -129,7 +135,16 @@
   .tugma:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 1px; }
   .tugma:disabled { cursor: default; }
   .tugma.togri { background: var(--zaytun); border-color: var(--zaytun); border-bottom-color: #353D26; color: #F8F1E1; }
-  .tugma.xato { background: transparent; border-color: #D9CBAE; border-bottom-width: 1px; color: #B9A88A; text-decoration: line-through; }
+  .tugma { touch-action: none; user-select: none; -webkit-user-select: none; }
+  .tugma.tanlangan { transform: translateY(-4px); border-color: var(--teri); border-bottom-color: var(--teri-toq); box-shadow: 0 6px 12px rgba(80,50,20,.2); }
+  .tugma.ishlatildi { display: none; }
+  .tugma.sudralmoqda { opacity: .3; }
+  .soya-harf {                                   /* sudralayotgan harf */
+    position: fixed; z-index: 50; pointer-events: none; transform: translate(-50%, -60%) scale(1.15);
+    width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+    background: var(--qogoz); color: var(--qora); border: 1px solid var(--teri); border-bottom: 3px solid var(--teri-toq);
+    border-radius: 4px; font: 600 20px Lora, Georgia, serif; box-shadow: 0 10px 20px rgba(80,50,20,.3);
+  }
   .izoh-satr { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); margin: 12px 0 0; text-align: center; line-height: 1.5; }
 
   button.asosiy {                                /* teri muqovali tugma */
@@ -170,7 +185,7 @@
 
   <header>
     <h1>Kim aytgan?</h1>
-    <p>Muallif ismini harfma-harf toping — har bir harf suratning bir bo'lagini ochadi</p>
+    <p>Harflarni o'z joyiga qo'yib, muallif ismini toping — har bir to'g'ri harf suratning bir bo'lagini ochadi</p>
   </header>
 
   <section class="karta">
@@ -187,7 +202,8 @@
 
   <div id="oyin">
     <div class="klaviatura" id="klaviatura"></div>
-    <p class="izoh-satr">Har bir xato harfdan keyin ishora ochiladi: faoliyat, davr, hudud.</p>
+    <p class="izoh-satr">Harfni sudrab, katakka olib boring — yoki avval harfni, keyin katakni bosing.<br>
+      Xato qo'yilgan harfdan keyin ishora ochiladi: faoliyat, davr, hudud.</p>
   </div>
 
   <section class="natija yashirin" id="natija">
@@ -244,8 +260,8 @@ const IQTIBOSLAR = [
   { matn: "Inson tabiatan ijtimoiy mavjudotdir.", muallif: "Aristotel" },
 ];
 
-const CHALGITUVCHI_SONI = 3; // klaviaturada ismda yo'q nechta begona harf chiqadi
-const MAX_XATO = 3;           // shuncha xato harfdan keyin o'yin tugaydi
+const CHALGITUVCHI_SONI = 3; // harflar orasida ismda yo'q nechta begona harf bo'ladi
+const MAX_XATO = 5;           // shuncha xato qo'yishdan keyin o'yin tugaydi
 // O'zbek lotin alifbosidagi harflar (C va W yo'q)
 const ALIFBO = "ABDEFGHIJKLMNOPQRSTUVXYZ".split("");
 // Surat ustidagi bo'laklar ranglari
@@ -292,28 +308,35 @@ function aralashtir(royxat, tasodif) {
 const kunTasodifi = urugliTasodif(bugungiKun);
 const harfBolagi = aralashtir([...Array(BOLAKLAR_SONI).keys()], kunTasodifi);
 
-// Bugungi klaviatura: ismdagi harflar + 3 ta chalg'ituvchi harf (alifbo tartibida).
+// Bugungi harflar: ismdagi har bir harf (takrorlanganlari ham) + 3 ta chalg'ituvchi, alifbo tartibida.
 // Chalg'ituvchilar kunga bog'liq — hammada bir xil.
 const ismHarflari = [...new Set(harfOrinlari.map((i) => ISM[i]))];
 const chalgituvchilar = aralashtir(ALIFBO.filter((h) => !ismHarflari.includes(h)), kunTasodifi)
   .slice(0, CHALGITUVCHI_SONI);
-const KLAVIATURA = [...ismHarflari, ...chalgituvchilar].sort();
+const HARFLAR = [...harfOrinlari.map((i) => ISM[i]), ...chalgituvchilar].sort();
 
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
-let holat = { kun: bugungiKun, harflar: [], tugadi: false, yutdi: false };
+// joylangan — to'g'ri to'ldirilgan kataklar raqami; urinishlar — har bir qo'yish to'g'ri (true) yoki xato (false)
+let holat = { kun: bugungiKun, joylangan: [], urinishlar: [], tugadi: false, yutdi: false };
 try {
-  const saqlangan = SINOV ? null : JSON.parse(localStorage.getItem("kimAytganHarf"));
+  const saqlangan = SINOV ? null : JSON.parse(localStorage.getItem("kimAytganJoy"));
   if (saqlangan && saqlangan.kun === bugungiKun) holat = saqlangan;
 } catch (e) { /* xotira ishlamasa, oddiy davom etamiz */ }
 
 function saqlash() {
   if (SINOV) return;
-  try { localStorage.setItem("kimAytganHarf", JSON.stringify(holat)); } catch (e) {}
+  try { localStorage.setItem("kimAytganJoy", JSON.stringify(holat)); } catch (e) {}
 }
 
-const ismdami = (h) => ISM.includes(h);
-const xatolarSoni = () => holat.harflar.filter((h) => !ismdami(h)).length;
-const hammasiTopildimi = () => harfOrinlari.every((i) => holat.harflar.includes(ISM[i]));
+const xatolarSoni = () => holat.urinishlar.filter((t) => !t).length;
+const katakHarfi = (k) => ISM[harfOrinlari[k]];
+
+// Qaysi harf-qoliplar ishlatib bo'lingan (to'g'ri joyga qo'yilgan)
+function ishlatilganlar() {
+  const kerak = {};
+  holat.joylangan.forEach((k) => { const h = katakHarfi(k); kerak[h] = (kerak[h] || 0) + 1; });
+  return HARFLAR.map((h) => (kerak[h] > 0 ? (kerak[h]--, true) : false));
+}
 
 // ===== 5. SURATNI BO'LAKLARGA BO'LISH =====
 // N ta bo'lakni qatorlarga teng taqsimlaymiz (masalan 13 → 4+3+3+3), har qator ichida teng kenglikda.
@@ -368,11 +391,11 @@ function davrMatni(asr) {
 function chiz() {
   $("iqtibosMatni").textContent = bugungi.matn;
 
-  // Surat bo'laklari: topilgan harflarning bo'laklari ochiladi, o'yin tugasa hammasi
-  harfOrinlari.forEach((orin, k) => {
-    const ochiq = holat.tugadi || holat.harflar.includes(ISM[orin]);
+  // Surat bo'laklari: to'g'ri to'ldirilgan katakning bo'lagi ochiladi, o'yin tugasa hammasi
+  for (let k = 0; k < BOLAKLAR_SONI; k++) {
+    const ochiq = holat.tugadi || holat.joylangan.includes(k);
     $("bolak" + harfBolagi[k]).classList.toggle("ochiq", ochiq);
-  });
+  }
 
   // Xatolar chizig'i
   const xato = xatolarSoni();
@@ -382,25 +405,37 @@ function chiz() {
     if (i < xato) s.className = "ishlatildi";
     $("xatolar").appendChild(s);
   }
-  $("xatoMatn").textContent = `Xato harflar: ${xato} / ${MAX_XATO}`;
+  $("xatoMatn").textContent = `Xatolar: ${xato} / ${MAX_XATO}`;
 
-  // Ism katakchalari (har bir so'z alohida guruh)
+  // Ism kataklari (har bir so'z alohida guruh). Bo'sh kataklarga harf qo'yiladi.
   $("ism").innerHTML = "";
+  let k = 0;
   bugungi.muallif.toUpperCase().split(" ").forEach((soz) => {
     const guruh = document.createElement("div");
     guruh.className = "soz";
     [...soz].forEach((h) => {
-      const k = document.createElement("div");
-      k.className = "harf-katak";
-      if (!/[A-Z]/.test(h)) { k.classList.add("belgi"); k.textContent = h; }
-      else if (holat.harflar.includes(h)) { k.classList.add("topildi"); k.textContent = h; }
-      else if (holat.tugadi) { k.classList.add("korsatildi"); k.textContent = h; }
-      guruh.appendChild(k);
+      const katak = document.createElement("div");
+      katak.className = "harf-katak";
+      if (!/[A-Z]/.test(h)) { katak.classList.add("belgi"); katak.textContent = h; }
+      else {
+        const raqam = k++;
+        katak.dataset.k = raqam;
+        if (holat.joylangan.includes(raqam)) { katak.classList.add("topildi"); katak.textContent = h; }
+        else if (holat.tugadi) { katak.classList.add("korsatildi"); katak.textContent = h; }
+        else {
+          katak.classList.add("bosh");
+          katak.addEventListener("click", () => {
+            if (tanlanganId !== null) joyla(raqam, HARFLAR[tanlanganId]);
+          });
+        }
+      }
+      guruh.appendChild(katak);
     });
     $("ism").appendChild(guruh);
   });
+  $("ism").classList.toggle("tanlov-bor", tanlanganId !== null);
 
-  // Ishoralar: har bir xato harfdan keyin bittadan
+  // Ishoralar: har bir xatodan keyin bittadan
   const ishoralar = [
     "Faoliyat: " + muallif.kasb,
     "Davr: " + davrMatni(muallif.davr),
@@ -414,17 +449,19 @@ function chiz() {
     $("ishoralar").appendChild(s);
   });
 
-  // Klaviatura
+  // Harf-qoliplar
+  const ishlatilgan = ishlatilganlar();
   $("klaviatura").innerHTML = "";
-  KLAVIATURA.forEach((h) => {
+  HARFLAR.forEach((h, id) => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "tugma";
     b.textContent = h;
-    b.dataset.harf = h;
-    if (holat.harflar.includes(h)) { b.classList.add(ismdami(h) ? "togri" : "xato"); b.disabled = true; }
-    if (holat.tugadi) b.disabled = true;
-    b.addEventListener("click", () => harfBos(h));
+    b.dataset.id = id;
+    if (ishlatilgan[id]) b.classList.add("ishlatildi");
+    if (id === tanlanganId) b.classList.add("tanlangan");
+    b.disabled = holat.tugadi || ishlatilgan[id];
+    b.addEventListener("pointerdown", (e) => sudrashBoshla(e, id));
     $("klaviatura").appendChild(b);
   });
 
@@ -438,25 +475,92 @@ function chiz() {
   }
 }
 
-// ===== 7. HARF BOSILGANDA =====
-function harfBos(h) {
-  if (holat.tugadi || holat.harflar.includes(h)) return;
-  holat.harflar.push(h);
-  if (hammasiTopildimi()) { holat.yutdi = true; holat.tugadi = true; }
+// ===== 7. HARFNI JOYIGA QO'YISH =====
+let tanlanganId = null; // bosib tanlangan harf-qolip
+
+function joyla(k, h) {
+  if (holat.tugadi || holat.joylangan.includes(k)) return;
+  const togri = katakHarfi(k) === h;
+  holat.urinishlar.push(togri);
+  if (togri) holat.joylangan.push(k);
+  tanlanganId = null;
+  if (holat.joylangan.length === BOLAKLAR_SONI) { holat.yutdi = true; holat.tugadi = true; }
   else if (xatolarSoni() >= MAX_XATO) { holat.tugadi = true; }
   saqlash();
   chiz();
-  if (!ismdami(h) && !holat.tugadi) {
-    const t = $("klaviatura").querySelector(`[data-harf="${h}"]`);
-    if (t) t.classList.add("silkin");
+
+  // Natijani katakning o'zida ko'rsatamiz
+  const katak = $("ism").querySelector(`[data-k="${k}"]`);
+  if (!katak) return;
+  if (togri) katak.classList.add("pop");
+  else if (!holat.tugadi) {
+    katak.textContent = h;
+    katak.classList.add("notogri", "silkin");
+    setTimeout(() => {
+      if (!katak.isConnected) return;
+      katak.textContent = "";
+      katak.classList.remove("notogri", "silkin");
+    }, 900);
   }
 }
 
-// Kompyuter klaviaturasidan ham yozish mumkin
+// Sudrash: barmoq yoki sichqoncha bilan harfni katakka olib borish.
+// Joyidan deyarli qimirlamasa — oddiy bosish deb hisoblanadi (harf tanlanadi).
+function sudrashBoshla(e, id) {
+  if (holat.tugadi) return;
+  e.preventDefault();
+  const tugma = e.currentTarget;
+  const x0 = e.clientX, y0 = e.clientY;
+  let soya = null, ustidagi = null;
+
+  const katakTop = (x, y) => {
+    const el = document.elementFromPoint(x, y);
+    return el && el.closest ? el.closest(".harf-katak.bosh") : null;
+  };
+  const harakat = (ev) => {
+    if (!soya && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 6) {
+      soya = document.createElement("div");
+      soya.className = "soya-harf";
+      soya.textContent = HARFLAR[id];
+      document.body.appendChild(soya);
+      tugma.classList.add("sudralmoqda");
+    }
+    if (!soya) return;
+    soya.style.left = ev.clientX + "px";
+    soya.style.top = ev.clientY + "px";
+    const yangi = katakTop(ev.clientX, ev.clientY);
+    if (yangi !== ustidagi) {
+      if (ustidagi) ustidagi.classList.remove("ustida");
+      if (yangi) yangi.classList.add("ustida");
+      ustidagi = yangi;
+    }
+  };
+  const tugash = (ev) => {
+    document.removeEventListener("pointermove", harakat);
+    document.removeEventListener("pointerup", tugash);
+    document.removeEventListener("pointercancel", tugash);
+    if (soya) {
+      soya.remove();
+      tugma.classList.remove("sudralmoqda");
+      if (ustidagi) { ustidagi.classList.remove("ustida"); joyla(Number(ustidagi.dataset.k), HARFLAR[id]); }
+    } else if (ev.type === "pointerup") {
+      tanlanganId = tanlanganId === id ? null : id;  // bosish: tanlash / bekor qilish
+      chiz();
+    }
+  };
+  document.addEventListener("pointermove", harakat);
+  document.addEventListener("pointerup", tugash);
+  document.addEventListener("pointercancel", tugash);
+}
+
+// Kompyuterda: harf tugmasini yozsangiz, o'sha harf tanlanadi; keyin katakni bosasiz
 document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || holat.tugadi) return;
+  if (e.key === "Escape") { tanlanganId = null; chiz(); return; }
   const h = e.key.toUpperCase();
-  if (KLAVIATURA.includes(h)) harfBos(h);
+  const ishlatilgan = ishlatilganlar();
+  const id = HARFLAR.findIndex((x, i) => x === h && !ishlatilgan[i]);
+  if (id >= 0) { tanlanganId = id; chiz(); }
 });
 
 // ===== 8. NATIJANI ULASHISH =====
@@ -467,7 +571,7 @@ const SAYT_MANZILI = location.protocol.startsWith("http")
   : "https://elyormirzo.github.io/sitata/";
 
 function ulashMatni() {
-  const qator = holat.harflar.map((h) => (ismdami(h) ? "🟩" : "🟥")).join("");
+  const qator = holat.urinishlar.map((t) => (t ? "🟩" : "🟥")).join("");
   const hisob = holat.yutdi ? `topdim, ${xatolarSoni()} ta xato bilan` : "topa olmadim";
   return `Kim aytgan? — ${hisob}\n${qator}\n${SAYT_MANZILI}`;
 }
@@ -576,10 +680,10 @@ async function natijaRasminiChiz() {
 
   // Natija: kvadratchalar va matn
   y += 50;
-  const kv = 30, oraliq = 8, n = holat.harflar.length;
+  const n = holat.urinishlar.length, oraliq = 8, kv = Math.min(30, Math.floor((PW - 120 - (n - 1) * oraliq) / n));
   let kx = (W - (n * kv + (n - 1) * oraliq)) / 2;
-  holat.harflar.forEach((h) => {
-    ctx.fillStyle = ismdami(h) ? "#4F5B3A" : "#B5502A";
+  holat.urinishlar.forEach((t) => {
+    ctx.fillStyle = t ? "#4F5B3A" : "#B5502A";
     ctx.fillRect(kx, y, kv, kv); kx += kv + oraliq;
   });
   y += kv + 46;
