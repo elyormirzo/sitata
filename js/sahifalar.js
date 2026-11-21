@@ -14,7 +14,29 @@ function havola(href, sinf, matn) { const a = yarat("a", sinf, matn); a.href = h
 // Bugungi o'yin iqtibosi o'yin tugaguncha boshqa bo'limlarda muallifi bilan ko'rinmasin (javobni oshkor qilmaslik uchun)
 const yashirinmi = (iq) => iq === bugungi && !holat.tugadi;
 const ochiqIqtiboslar = () => IQTIBOSLAR.filter((iq) => !yashirinmi(iq));
-const muallifIqtiboslari = (ism) => IQTIBOSLAR.filter((iq) => iq.muallif === ism);
+// Foydalanuvchilar taklif qilib, admin tasdiqlagan iqtiboslar (bazadan yuklanadi, kunlik o'yinga kirmaydi)
+let jamoaIqtiboslari = [];
+let jamoaYuklanishi = null;
+function jamoaniYukla() {
+  if (!BAZA_YOQIQ) return Promise.resolve(false);
+  if (!jamoaYuklanishi) jamoaYuklanishi = (async () => {
+    try {
+      const m = await mijozOl();
+      const { data, error } = await m.from("takliflar").select("id,matn,muallif,asar,yuboruvchi_ism")
+        .eq("holat", "tasdiqlandi").order("yaratilgan", { ascending: false }).limit(300);
+      if (error) return false;
+      jamoaIqtiboslari = (data || []).map((t) => ({ id: t.id, matn: t.matn, muallif: t.muallif, asar: t.asar || undefined, yuboruvchi: t.yuboruvchi_ism }));
+      return jamoaIqtiboslari.length > 0;
+    } catch (e) { return false; }
+  })();
+  return jamoaYuklanishi;
+}
+const barchaIqtiboslar = () => [...IQTIBOSLAR, ...jamoaIqtiboslari];
+const ochiqHammasi = () => barchaIqtiboslar().filter((iq) => !yashirinmi(iq));
+const iqKalit = (iq) => (iq.id ? "t" + iq.id : String(IQTIBOSLAR.indexOf(iq)));
+const iqKalitdan = (k) => barchaIqtiboslar().find((iq) => iqKalit(iq) === String(k));
+const sevimlilarOl = () => xotiradanOl("sitataSevimli", []).map(String);
+const muallifIqtiboslari = (ism) => barchaIqtiboslar().filter((iq) => iq.muallif === ism);
 const boshHarflar = (ism) => ism.split(" ").map((s) => s[0]).join("");
 const ismniSlugdan = (slug) => Object.keys(MUALLIFLAR).find((ism) => muallifSlug(ism) === slug);
 
@@ -74,7 +96,7 @@ const SARLAVHALAR = {
   bosh: "sitata.uz — iqtiboslar, mualliflar va o'yinlar", "kim-aytgan": "Kim aytgan? — sitata.uz",
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
-  profil: "Profil — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
+  profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
 function joriyYol() {
@@ -101,10 +123,18 @@ function sahifaniKor() {
   const chizuvchilar = {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
-    profilim: profilimniChiz, profil: () => profilSahifasiniKor(param),
+    profilim: profilimniChiz, profil: () => profilSahifasiniKor(param), admin: adminniChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
   window.scrollTo(0, 0);
+  // O'quvchilar iqtiboslari birinchi marta yuklanganda sahifani yangilaymiz
+  if (["bosh", "lenta", "muallif", "karta"].includes(nom) && !jamoaYuklanishi) {
+    jamoaniYukla().then((bor) => {
+      if (!bor || joriyYol().nom !== nom) return;
+      if (nom === "karta" && karta.manba === "ozim") return;   // yozilayotgan matnni buzmaymiz
+      const y = window.scrollY; chizuvchilar[nom](); window.scrollTo(0, y);
+    });
+  }
 }
 window.addEventListener("hashchange", sahifaniKor);
 
@@ -134,7 +164,7 @@ function boshniChiz() {
   const enYaxshi = xotiradanOl("sitataViktorina", 0);
   const bolimlar = [
     ["#viktorina", "Viktorina", enYaxshi ? `Eng yaxshi natijangiz: ${enYaxshi} ball` : "10 savol, vaqtga qarshi", "?"],
-    ["#lenta", "Iqtiboslar lentasi", `${IQTIBOSLAR.length} ta iqtibos`, "“"],
+    ["#lenta", "Iqtiboslar lentasi", `${barchaIqtiboslar().length} ta iqtibos`, "“"],
     ["#mualliflar", "Mualliflar", `${Object.keys(MUALLIFLAR).length} ta muallif`, "✒"],
     ["#karta", "Karta yaratish", "Story, post yoki kvadrat", "▣"],
     ["#reyting", "Reyting", "Eng yaxshi o'yinchilar", "★"],
@@ -159,7 +189,7 @@ function boshniChiz() {
 
 // ---------- Iqtibos kartasi (lenta, muallif sahifasi, bosh sahifa) ----------
 function iqtibosKartasi(iq) {
-  const raqam = IQTIBOSLAR.indexOf(iq);
+  const raqam = iqKalit(iq);
   const k = yarat("article", "iqtibos-karta");
   k.appendChild(yarat("blockquote", "", iq.matn));
   const meta = yarat("div", "iqtibos-meta");
@@ -173,17 +203,20 @@ function iqtibosKartasi(iq) {
   }
   meta.appendChild(portretEl(iq.muallif));
   const m = yarat("div");
-  m.appendChild(havola("#muallif/" + muallifSlug(iq.muallif), "muallif-havola", iq.muallif));
+  m.appendChild(MUALLIFLAR[iq.muallif]
+    ? havola("#muallif/" + muallifSlug(iq.muallif), "muallif-havola", iq.muallif)
+    : yarat("b", "muallif-havola", iq.muallif));
   if (iq.asar) m.appendChild(yarat("span", "asar", iq.asar));
+  if (iq.id) m.appendChild(yarat("span", "asar", "Taklif qildi: " + (iq.yuboruvchi || "o'quvchi")));
   meta.appendChild(m);
   k.appendChild(meta);
 
   const amallar = yarat("div", "amallar");
-  const sevimlilar = xotiradanOl("sitataSevimli", []);
+  const sevimlilar = sevimlilarOl();
   const yurak = yarat("button", "amal" + (sevimlilar.includes(raqam) ? " tanlangan" : ""), sevimlilar.includes(raqam) ? "♥ Sevimli" : "♡ Sevimli");
   yurak.type = "button";
   yurak.addEventListener("click", () => {
-    const r = xotiradanOl("sitataSevimli", []);
+    const r = sevimlilarOl();
     const bor = r.includes(raqam);
     xotiragaYoz("sitataSevimli", bor ? r.filter((x) => x !== raqam) : [...r, raqam]);
     yurak.classList.toggle("tanlangan", !bor);
@@ -233,10 +266,10 @@ function lentaniChiz() {
   const royxatniChiz = () => {
     royxat.innerHTML = "";
     const soz = lentaFiltri.soz.trim().toLowerCase();
-    const sevimlilar = xotiradanOl("sitataSevimli", []);
-    const topilgan = IQTIBOSLAR.filter((iq) => {
-      if (lentaFiltri.sevimli && !sevimlilar.includes(IQTIBOSLAR.indexOf(iq))) return false;
-      if (lentaFiltri.kasb && (yashirinmi(iq) || MUALLIFLAR[iq.muallif].kasb !== lentaFiltri.kasb)) return false;
+    const sevimlilar = sevimlilarOl();
+    const topilgan = barchaIqtiboslar().filter((iq) => {
+      if (lentaFiltri.sevimli && !sevimlilar.includes(iqKalit(iq))) return false;
+      if (lentaFiltri.kasb && (yashirinmi(iq) || (MUALLIFLAR[iq.muallif] || {}).kasb !== lentaFiltri.kasb)) return false;
       if (soz) {
         const qayerda = (iq.matn + " " + (yashirinmi(iq) ? "" : iq.muallif + " " + (iq.asar || ""))).toLowerCase();
         if (!qayerda.includes(soz)) return false;
@@ -247,8 +280,8 @@ function lentaniChiz() {
       royxat.appendChild(yarat("p", "bosh-holat", lentaFiltri.sevimli ? "Hali sevimli iqtibos yo'q — ♡ belgisini bosing." : "Hech narsa topilmadi."));
       return;
     }
-    // Bugungi iqtibos tepada, qolganlari yangilari birinchi
-    [...topilgan].reverse().sort((a, b) => (b === bugungi) - (a === bugungi)).forEach((iq) => royxat.appendChild(iqtibosKartasi(iq)));
+    // Bugungi iqtibos tepada, keyin o'quvchilar takliflari va asosiy to'plam (yangilari birinchi)
+    [...topilgan.filter((iq) => iq.id), ...topilgan.filter((iq) => !iq.id).reverse()].sort((a, b) => (b === bugungi) - (a === bugungi)).sort((a, b) => (b === bugungi) - (a === bugungi)).forEach((iq) => royxat.appendChild(iqtibosKartasi(iq)));
   };
   qidiruv.addEventListener("input", () => { lentaFiltri.soz = qidiruv.value; royxatniChiz(); });
   royxatniChiz();
@@ -422,10 +455,17 @@ const KARTA_FONLARI = {
   terakota: { nom: "Terakota", bg: ["#B9673C", "#7E3F27"], matn: "#FFF7EC", ikkinchi: "#F6DCC6", aksent: "#FFE3A3" },
 };
 const KARTA_SHRIFTLARI = { lora: ['"Lora", Georgia, serif', "Lora"], playfair: ['"Playfair Display", Georgia, serif', "Playfair"], inter: ['"Inter", system-ui, sans-serif', "Inter"] };
-const karta = { raqam: null, olcham: "post", fon: "qogoz", shrift: "lora", portret: true, blob: null };
+// manba: "baza" — lentadagi iqtibos (kalit bo'yicha), "ozim" — foydalanuvchi o'zi yozgan iqtibos
+const karta = {
+  manba: "baza", kalit: null, olcham: "post", fon: "qogoz", shrift: "lora", portret: true, blob: null,
+  ozim: { matn: "", muallif: "", asar: "" }, taklif: true, yuborilgan: new Set(),
+};
+const kartaIqtibosi = () => (karta.manba === "ozim"
+  ? { matn: karta.ozim.matn.trim() || "Iqtibos matnini yozing…", muallif: karta.ozim.muallif.trim() || "Muallif", asar: karta.ozim.asar.trim() || undefined }
+  : iqKalitdan(karta.kalit));
 
 async function kartaRasminiChiz() {
-  const iq = IQTIBOSLAR[karta.raqam];
+  const iq = kartaIqtibosi();
   const [W, H] = KARTA_OLCHAMLARI[karta.olcham];
   const f = KARTA_FONLARI[karta.fon];
   const shrift = KARTA_SHRIFTLARI[karta.shrift][0];
@@ -452,7 +492,7 @@ async function kartaRasminiChiz() {
   // Iqtibos matni — sig'guncha kichrayadi va bo'sh joyning o'rtasiga joylashadi
   let o = { story: 96, post: 88, kvadrat: 76 }[karta.olcham], qatorlar;
   do { ctx.font = `500 ${o}px ${shrift}`; qatorlar = qatorlargaBol(ctx, iq.matn, kenglik); o -= 2; }
-  while (qatorlar.length * o * 1.35 > matnBalandligi && o > 30);
+  while (qatorlar.length * o * 1.35 > matnBalandligi && o > 26);
   o += 2;
   const blokBalandligi = qatorlar.length * o * 1.35;
   ctx.fillStyle = f.matn; ctx.textAlign = "left";
@@ -460,12 +500,13 @@ async function kartaRasminiChiz() {
   qatorlar.forEach((q) => { ctx.fillText(q, P, y); y += o * 1.35; });
 
   // Muallif bloki
+  const m = MUALLIFLAR[iq.muallif];
   y = H - pastBlok;
   ctx.fillStyle = f.aksent; ctx.fillRect(P, y, 80, 4);
   y += 30;
   let ismX = P;
   if (portretOlchami) {
-    const img = await rasmYukla(MUALLIFLAR[iq.muallif].rasm);
+    const img = await rasmYukla(m ? m.rasm : null);
     const r = portretOlchami / 2, cx = P + r, cy = y + r;
     ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
     if (img) {
@@ -475,7 +516,7 @@ async function kartaRasminiChiz() {
     } else {
       ctx.fillStyle = f.aksent; ctx.fillRect(P, y, portretOlchami, portretOlchami);
       ctx.fillStyle = f.bg[1]; ctx.textAlign = "center"; ctx.font = `600 ${r * 0.8}px ${shrift}`;
-      ctx.fillText(boshHarflar(iq.muallif), cx, cy + r * 0.28); ctx.textAlign = "left";
+      ctx.fillText(boshHarflar(iq.muallif).slice(0, 3), cx, cy + r * 0.28); ctx.textAlign = "left";
     }
     ctx.restore();
     ctx.strokeStyle = f.aksent; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
@@ -484,9 +525,8 @@ async function kartaRasminiChiz() {
   }
   ctx.fillStyle = f.matn; ctx.font = `600 52px ${shrift}`;
   ctx.fillText(iq.muallif, ismX, y + 20);
-  const m = MUALLIFLAR[iq.muallif];
-  ctx.fillStyle = f.ikkinchi; ctx.font = `italic 500 30px ${shrift}`;
-  ctx.fillText(iq.asar ? iq.asar : `${m.kasb} · ${m.yillar || davrMatni(m.davr)}`, ismX, y + 68);
+  const izoh = iq.asar || (m ? `${m.kasb} · ${m.yillar || davrMatni(m.davr)}` : "");
+  if (izoh) { ctx.fillStyle = f.ikkinchi; ctx.font = `italic 500 30px ${shrift}`; ctx.fillText(izoh, ismX, y + 68); }
 
   ctx.fillStyle = f.ikkinchi; ctx.textAlign = "right"; ctx.font = `600 30px ${shrift}`;
   ctx.fillText("sitata.uz", W - P, H - 80);
@@ -494,25 +534,106 @@ async function kartaRasminiChiz() {
   return new Promise((ok) => c.toBlob(ok, "image/png"));
 }
 
+// O'zi yozgan iqtibos lentada yo'q bo'lsa — adminga taklif sifatida yuboriladi
+const sozlarniTozala = (t) => t.toLowerCase().replace(/[‘’ʻʼ`']/g, "'").replace(/[^a-z0-9'а-яёўқғҳ]+/gi, " ").trim();
+function lentadaBormi(matn) {
+  const t = sozlarniTozala(matn);
+  return barchaIqtiboslar().some((iq) => sozlarniTozala(iq.matn) === t);
+}
+
+async function taklifYubor(xabar) {
+  const { matn, muallif, asar } = karta.ozim;
+  const kalit = sozlarniTozala(matn) + "|" + sozlarniTozala(muallif);
+  if (!karta.taklif || !BAZA_YOQIQ || karta.yuborilgan.has(kalit)) return;
+  if (matn.trim().length < 3 || muallif.trim().length < 2) return;
+  if (lentadaBormi(matn)) { xabar.textContent += (xabar.textContent ? " " : "") + "Bu iqtibos lentada allaqachon bor — taklif yuborilmadi."; return; }
+  karta.yuborilgan.add(kalit);
+  try {
+    const m = await mijozOl();
+    await kirish();
+    const { error } = await m.from("takliflar").insert({
+      matn: matn.trim(), muallif: muallif.trim(), asar: asar.trim() || null, yuboruvchi_ism: mening ? mening.ism : null,
+    });
+    if (error) throw error;
+    xabar.textContent += (xabar.textContent ? " " : "") + "Iqtibosingiz adminga taklif sifatida yuborildi — tasdiqlangach lentada hammaga ko'rinadi.";
+  } catch (e) {
+    karta.yuborilgan.delete(kalit);
+    xabar.textContent += (xabar.textContent ? " " : "") + "Taklif yuborilmadi — keyinroq qayta urinib ko'ring.";
+  }
+}
+
 function kartaniChiz(param) {
   const s = $("kartaSahifa");
   s.innerHTML = "";
   s.appendChild(yarat("h2", "sahifa-sarlavha", "Karta yaratish"));
-  const ochiq = ochiqIqtiboslar();
-  const soralgan = IQTIBOSLAR[parseInt(param, 10)];
-  if (soralgan && !yashirinmi(soralgan)) karta.raqam = IQTIBOSLAR.indexOf(soralgan);
-  if (karta.raqam == null || yashirinmi(IQTIBOSLAR[karta.raqam])) karta.raqam = IQTIBOSLAR.indexOf(ochiq[0]);
+  const ochiq = ochiqHammasi();
+  const soralgan = param ? iqKalitdan(param) : null;
+  if (soralgan && !yashirinmi(soralgan)) { karta.kalit = iqKalit(soralgan); karta.manba = "baza"; }
+  if (!iqKalitdan(karta.kalit) || yashirinmi(iqKalitdan(karta.kalit))) karta.kalit = iqKalit(ochiq[0]);
+
+  // Manba: lentadan tanlash yoki o'zim yozaman
+  const manbalar = yarat("div", "manba-tablar");
+  [["baza", "Lentadan tanlash"], ["ozim", "O'zim yozaman"]].forEach(([k, nom]) => {
+    const b = yarat("button", "manba-tab" + (karta.manba === k ? " faol" : ""), nom); b.type = "button";
+    b.addEventListener("click", () => { if (karta.manba !== k) { karta.manba = k; kartaniChiz(); } });
+    manbalar.appendChild(b);
+  });
+  s.appendChild(manbalar);
 
   const sozlama = yarat("div", "karta-sozlama");
-  // Iqtibos tanlash
-  const tanla = yarat("select", "tanlash");
-  ochiq.forEach((iq) => {
-    const o = yarat("option", "", `${iq.matn.replace(/\n/g, " ").slice(0, 48)}${iq.matn.length > 48 ? "…" : ""} — ${iq.muallif}`);
-    o.value = IQTIBOSLAR.indexOf(iq); o.selected = o.value == karta.raqam;
-    tanla.appendChild(o);
-  });
-  const qator = (nom, ichi) => { const q = yarat("div", "sozlama-qator"); q.append(yarat("span", "sozlama-nom", nom), ichi); return q; };
-  sozlama.appendChild(qator("Iqtibos", tanla));
+  const qator = (nom, ...ichi) => { const q = yarat("div", "sozlama-qator"); q.append(yarat("span", "sozlama-nom", nom), ...ichi); return q; };
+  let kechiktirish = null;
+  const kechikibYangila = () => { clearTimeout(kechiktirish); kechiktirish = setTimeout(yangila, 350); };
+
+  if (karta.manba === "baza") {
+    const tanla = yarat("select", "tanlash");
+    ochiq.forEach((iq) => {
+      const o = yarat("option", "", `${iq.matn.replace(/\n/g, " ").slice(0, 48)}${iq.matn.length > 48 ? "…" : ""} — ${iq.muallif}`);
+      o.value = iqKalit(iq); o.selected = o.value === String(karta.kalit);
+      tanla.appendChild(o);
+    });
+    tanla.addEventListener("change", () => { karta.kalit = tanla.value; yangila(); });
+    sozlama.appendChild(qator("Iqtibos", tanla));
+  } else {
+    const matn = yarat("textarea", "matn-maydon"); matn.rows = 4; matn.maxLength = 400;
+    matn.placeholder = "Iqtibos matnini shu yerga yozing…"; matn.value = karta.ozim.matn;
+    matn.addEventListener("input", () => { karta.ozim.matn = matn.value; kechikibYangila(); });
+    sozlama.appendChild(qator("Iqtibos matni", matn));
+
+    // Muallif: ro'yxatdan tanlash yoki o'zi yozish
+    const muallifTanla = yarat("select", "tanlash");
+    const ismlar = Object.keys(MUALLIFLAR).sort((a, b) => a.localeCompare(b));
+    const boshqa = "__boshqa__";
+    [["", "— Muallifni tanlang —"], ...ismlar.map((i) => [i, i]), [boshqa, "Boshqa muallif (o'zim yozaman)…"]].forEach(([v, t]) => {
+      const o = yarat("option", "", t); o.value = v; muallifTanla.appendChild(o);
+    });
+    const muallifYoz = yarat("input", "matn-maydon bir-qator"); muallifYoz.placeholder = "Muallifning to'liq ismi"; muallifYoz.maxLength = 60;
+    const royxatda = MUALLIFLAR[karta.ozim.muallif];
+    muallifTanla.value = karta.ozim.muallif ? (royxatda ? karta.ozim.muallif : boshqa) : "";
+    muallifYoz.value = royxatda ? "" : karta.ozim.muallif;
+    muallifYoz.classList.toggle("yashirin", muallifTanla.value !== boshqa);
+    muallifTanla.addEventListener("change", () => {
+      const v = muallifTanla.value;
+      muallifYoz.classList.toggle("yashirin", v !== boshqa);
+      karta.ozim.muallif = v === boshqa ? muallifYoz.value : v;
+      if (v === boshqa) muallifYoz.focus();
+      yangila();
+    });
+    muallifYoz.addEventListener("input", () => { karta.ozim.muallif = muallifYoz.value; kechikibYangila(); });
+    sozlama.appendChild(qator("Muallif", muallifTanla, muallifYoz));
+
+    const asar = yarat("input", "matn-maydon bir-qator"); asar.placeholder = "Asar yoki manba (ixtiyoriy)"; asar.maxLength = 80; asar.value = karta.ozim.asar;
+    asar.addEventListener("input", () => { karta.ozim.asar = asar.value; kechikibYangila(); });
+    sozlama.appendChild(qator("Asar", asar));
+
+    if (BAZA_YOQIQ) {
+      const taklifQuti = yarat("label", "belgilash");
+      const tcb = yarat("input"); tcb.type = "checkbox"; tcb.checked = karta.taklif;
+      tcb.addEventListener("change", () => { karta.taklif = tcb.checked; });
+      taklifQuti.append(tcb, document.createTextNode(" Lentaga taklif qilish — admin tasdiqlagach hammaga ko'rinadi"));
+      sozlama.appendChild(taklifQuti);
+    }
+  }
 
   const tanlovGuruhi = (obyekt, kalit, matnOl) => {
     const g = yarat("div", "tanlov-guruhi");
@@ -530,6 +651,7 @@ function kartaniChiz(param) {
   const portretTanlov = yarat("label", "belgilash");
   const cb = yarat("input"); cb.type = "checkbox"; cb.checked = karta.portret;
   portretTanlov.append(cb, document.createTextNode(" Muallif portretini qo'shish"));
+  cb.addEventListener("change", () => { karta.portret = cb.checked; yangila(); });
   sozlama.appendChild(portretTanlov);
   s.appendChild(sozlama);
 
@@ -540,23 +662,31 @@ function kartaniChiz(param) {
   const xabar = yarat("p", "ulash-xabar"); xabar.setAttribute("role", "status");
   s.append(ulash, yuklab, xabar);
 
+  const tayyormi = () => karta.manba === "baza" || (karta.ozim.matn.trim().length >= 3 && karta.ozim.muallif.trim().length >= 2);
   let navbat = 0;
   async function yangila() {
-    const mening_navbatim = ++navbat;
+    const meningNavbatim = ++navbat;
     ulash.disabled = yuklab.disabled = true; xabar.textContent = "";
     try {
       const blob = await kartaRasminiChiz();
-      if (mening_navbatim !== navbat) return;
+      if (meningNavbatim !== navbat) return;
       karta.blob = blob;
       korinish.src = await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob); });
       korinish.className = "karta-korinish " + karta.olcham;
-      ulash.disabled = yuklab.disabled = false;
+      ulash.disabled = yuklab.disabled = !tayyormi();
+      if (!tayyormi()) xabar.textContent = "Iqtibos matni va muallifni kiriting.";
     } catch (e) { xabar.textContent = "Karta chizilmadi — sahifani sayt manzili orqali oching."; }
   }
-  tanla.addEventListener("change", () => { karta.raqam = parseInt(tanla.value, 10); yangila(); });
-  cb.addEventListener("change", () => { karta.portret = cb.checked; yangila(); });
-  ulash.addEventListener("click", () => { if (karta.blob) faylniUlash(karta.blob, "sitata-karta.png", xabar); });
-  yuklab.addEventListener("click", () => { if (karta.blob) { rasmniYuklabOl(karta.blob, "sitata-karta.png"); xabar.textContent = "Rasm yuklab olindi."; } });
+  ulash.addEventListener("click", () => {
+    if (!karta.blob) return;
+    faylniUlash(karta.blob, "sitata-karta.png", xabar);     // avval ulashamiz (telefon bosishning o'zida ruxsat beradi)
+    if (karta.manba === "ozim") taklifYubor(xabar);
+  });
+  yuklab.addEventListener("click", () => {
+    if (!karta.blob) return;
+    rasmniYuklabOl(karta.blob, "sitata-karta.png"); xabar.textContent = "Rasm yuklab olindi.";
+    if (karta.manba === "ozim") taklifYubor(xabar);
+  });
   yangila();
 }
 
@@ -635,6 +765,80 @@ function profilimniChiz() {
   kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
   qator.append(kirit, tugma);
   s.append(qator, xato);
+}
+
+// ---------- Admin: takliflarni ko'rib chiqish (#admin, menyuda yo'q) ----------
+async function adminniChiz() {
+  const s = $("adminSahifa");
+  s.innerHTML = "";
+  s.appendChild(yarat("h2", "sahifa-sarlavha", "Takliflar"));
+  if (!BAZA_YOQIQ) { s.appendChild(yarat("p", "bosh-holat", "Baza sozlanmagan.")); return; }
+  const m = await mijozOl();
+  const { data: sessiya } = await m.auth.getSession();
+  const foydalanuvchi = sessiya && sessiya.session ? sessiya.session.user : null;
+  let admin = false;
+  if (foydalanuvchi && !foydalanuvchi.is_anonymous) {
+    const { data } = await m.rpc("adminmi");
+    admin = data === true;
+  }
+
+  if (!admin) {
+    s.appendChild(yarat("p", "kichik-matn markaz", foydalanuvchi && !foydalanuvchi.is_anonymous
+      ? "Bu hisob admin emas." : "Admin sifatida kiring. Bu sahifani o'yin o'ynamaydigan brauzerda (yoki yashirin oynada) oching — kirganda shu brauzerdagi o'yinchi profili ishlamay qoladi."));
+    const forma = yarat("div", "admin-forma");
+    const email = yarat("input", "matn-maydon bir-qator"); email.type = "email"; email.placeholder = "Email"; email.autocomplete = "username";
+    const parol = yarat("input", "matn-maydon bir-qator"); parol.type = "password"; parol.placeholder = "Parol"; parol.autocomplete = "current-password";
+    const kir = yarat("button", "asosiy", "Kirish"); kir.type = "button";
+    const xato = yarat("p", "kichik-matn markaz");
+    kir.addEventListener("click", async () => {
+      kir.disabled = true; xato.textContent = "";
+      const { error } = await m.auth.signInWithPassword({ email: email.value.trim(), password: parol.value });
+      if (error) { kir.disabled = false; xato.textContent = "Kirib bo'lmadi: email yoki parol noto'g'ri."; return; }
+      adminniChiz();
+    });
+    forma.append(email, parol, kir, xato);
+    s.appendChild(forma);
+    return;
+  }
+
+  const yuqori = yarat("div", "admin-yuqori");
+  yuqori.appendChild(yarat("span", "kichik-matn", foydalanuvchi.email));
+  const chiq = yarat("button", "filtr", "Chiqish"); chiq.type = "button";
+  chiq.addEventListener("click", async () => { await m.auth.signOut(); adminniChiz(); });
+  yuqori.appendChild(chiq);
+  s.appendChild(yuqori);
+
+  const { data, error } = await m.from("takliflar").select("id,matn,muallif,asar,yuboruvchi_ism,yaratilgan")
+    .eq("holat", "kutilmoqda").order("yaratilgan", { ascending: true }).limit(100);
+  if (error) { s.appendChild(yarat("p", "bosh-holat", "Takliflarni yuklab bo'lmadi.")); return; }
+  s.appendChild(yarat("p", "kichik-matn markaz", data.length ? `${data.length} ta taklif kutmoqda` : "Yangi taklif yo'q."));
+
+  data.forEach((t) => {
+    const k = yarat("article", "iqtibos-karta admin-taklif");
+    const matn = yarat("textarea", "matn-maydon"); matn.rows = 3; matn.value = t.matn;
+    const muallif = yarat("input", "matn-maydon bir-qator"); muallif.value = t.muallif;
+    const asar = yarat("input", "matn-maydon bir-qator"); asar.value = t.asar || ""; asar.placeholder = "Asar (ixtiyoriy)";
+    const meta = yarat("p", "kichik-matn", `Yubordi: ${t.yuboruvchi_ism || "nomsiz"} · ${new Date(t.yaratilgan).toLocaleDateString("uz")}` +
+      (MUALLIFLAR[t.muallif] ? "" : " · muallif ro'yxatda yo'q") + (lentadaBormi(t.matn) ? " · lentada allaqachon bor!" : ""));
+    const tugmalar = yarat("div", "amallar");
+    const holatniYoz = async (holatNomi) => {
+      tugmalar.querySelectorAll("button").forEach((b) => (b.disabled = true));
+      const { error: e } = await m.from("takliflar").update({
+        holat: holatNomi, matn: matn.value.trim(), muallif: muallif.value.trim(), asar: asar.value.trim() || null,
+        korib_chiqilgan: new Date().toISOString(),
+      }).eq("id", t.id);
+      if (e) { meta.textContent = "Saqlanmadi: " + e.message; tugmalar.querySelectorAll("button").forEach((b) => (b.disabled = false)); return; }
+      k.classList.add("korib-chiqildi");
+      k.innerHTML = "";
+      k.appendChild(yarat("p", "kichik-matn markaz", holatNomi === "tasdiqlandi" ? "✓ Tasdiqlandi — lentada ko'rinadi" : "✗ Rad etildi"));
+      jamoaYuklanishi = null;   // lenta keyingi safar qayta yuklansin
+    };
+    const ha = yarat("button", "amal tanlangan", "✓ Tasdiqlash"); ha.type = "button"; ha.addEventListener("click", () => holatniYoz("tasdiqlandi"));
+    const yoq = yarat("button", "amal", "✗ Rad etish"); yoq.type = "button"; yoq.addEventListener("click", () => holatniYoz("rad_etildi"));
+    tugmalar.append(ha, yoq);
+    k.append(matn, muallif, asar, meta, tugmalar);
+    s.appendChild(k);
+  });
 }
 
 // ---------- Ishga tushirish ----------

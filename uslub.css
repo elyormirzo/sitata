@@ -423,3 +423,23 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
   flex: 1; min-width: 0; height: 44px; padding: 0 12px; border-radius: 4px; border: 1px solid var(--chegara);
   background: #fff; color: var(--qora); font: 16px Lora, Georgia, serif;
 }
+
+/* ===== 10. O'ZIM YOZAMAN VA ADMIN ===== */
+.manba-tablar { display: flex; border: 1px solid var(--chegara); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.manba-tab {
+  flex: 1; height: 42px; border: 0; cursor: pointer; background: var(--qogoz); color: var(--kulrang);
+  font: 600 15px Lora, Georgia, serif;
+}
+.manba-tab + .manba-tab { border-left: 1px solid var(--chegara); }
+.manba-tab.faol { background: var(--zaytun); color: #F8F1E1; }
+.matn-maydon {
+  width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--chegara); background: #fff;
+  color: var(--qora); font: 16px/1.5 Lora, Georgia, serif; resize: vertical;
+}
+.matn-maydon.bir-qator { height: 44px; padding: 0 12px; }
+.sozlama-qator .matn-maydon.bir-qator { margin-top: 6px; }
+.sozlama-qator .tanlash + .matn-maydon { margin-top: 6px; }
+.admin-forma { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.admin-yuqori { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.admin-taklif { display: flex; flex-direction: column; gap: 8px; }
+.admin-taklif .kichik-matn { margin: 0; }
