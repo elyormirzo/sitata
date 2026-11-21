@@ -861,12 +861,12 @@ $("ulashish").addEventListener("click", () => {
 });
 
 // ===== 9. PROFIL VA BAHOLAR (Supabase) =====
-// Supabase loyihangiz manzili va "anon public" kaliti (Settings → API). Bu kalit ochiq bo'lishi mumkin:
+// Supabase loyihasi manzili va "publishable" kaliti (Connect yoki Project Settings → API Keys). Bu kalit ochiq bo'lishi mumkin:
 // xavfsizlikni bazadagi qoidalar (supabase/sozlash.sql) ta'minlaydi.
 // Ikkalasi bo'sh bo'lsa, o'yin profilsiz ishlayveradi.
-const SUPABASE_URL = "";
-const SUPABASE_KALIT = "";
-const SUPABASE_SKRIPT = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+const SUPABASE_URL = "https://zqeodxxtyzjmtrrudqpd.supabase.co";
+const SUPABASE_KALIT = "sb_publishable_iSnpWxy0wNcHdyecR_1zqA_Bp2KnM2t";
+const SUPABASE_SKRIPT = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";
 const BAZA_YOQIQ = !!(SUPABASE_URL && SUPABASE_KALIT) || !!window.__supabaseSinov;
 
 let mijoz = null;
