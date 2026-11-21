@@ -1,0 +1,425 @@
+/* ===== 1. RANGLAR VA ASOSIY USLUB ===== */
+:root {
+  --fon: #E9DFCA;          /* kitob javoni / zig'ir mato */
+  --qogoz: #F8F1E1;        /* yangi qog'oz */
+  --qora: #3B2A1A;         /* siyoh */
+  --kulrang: #7A6448;
+  --teri: #8C4A2F;         /* teri muqova */
+  --teri-toq: #6B3E26;
+  --zaytun: #4F5B3A;       /* to'q yashil muqova */
+  --zaytun-och: #E1E4CF;
+  --qizil-och: #F3D9C6;
+  --chegara: #D8C7A3;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh;
+  background-color: var(--fon);
+  background-image:                              /* zig'ir mato teksturasi */
+    repeating-linear-gradient(0deg, rgba(120,90,50,.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(120,90,50,.035) 0 1px, transparent 1px 3px);
+  color: var(--qora);
+  font-family: Inter, system-ui, sans-serif;
+}
+.ilova { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+
+header { text-align: center; margin-bottom: 16px; }
+header h1 { font-family: Lora, Georgia, serif; font-size: 32px; margin: 0; color: var(--qora); }
+header h1::after { content: "❧"; display: block; font-size: 16px; color: #B98A55; margin-top: 2px; }
+header p { margin: 4px 0 0; color: var(--kulrang); font: italic 14px Lora, Georgia, serif; }
+
+/* Iqtibos kartasi: eski kitob sahifasi ko'rinishida */
+.karta {
+  position: relative; color: #3B2A1A;
+  background-color: #F4EAD5;
+  background-image:
+    linear-gradient(90deg, rgba(110,70,30,.22), rgba(110,70,30,0) 22px),   /* kitob umurtqasi soyasi */
+    radial-gradient(ellipse at 50% 40%, rgba(255,250,235,.7), rgba(255,250,235,0) 70%),
+    radial-gradient(ellipse at 100% 100%, rgba(150,100,40,.18), rgba(150,100,40,0) 45%),
+    radial-gradient(ellipse at 0% 0%, rgba(150,100,40,.12), rgba(150,100,40,0) 40%);
+  border: 1px solid #E0CFA8;
+  border-radius: 6px 16px 16px 6px; padding: 22px 22px 18px 30px; margin-bottom: 22px;
+  box-shadow:                                   /* orqadagi varaqlar */
+    3px 3px 0 -1px #EFE2C4, 3px 3px 0 0 #DCC9A0,
+    6px 6px 0 -1px #EADBB9, 6px 6px 0 0 #D5C095,
+    0 14px 28px rgba(80,50,20,.18);
+}
+.karta small {
+  display: block; text-align: center; color: #8C5A2B; font: italic 500 14px Lora, Georgia, serif;
+  letter-spacing: .3px;
+}
+.karta small::before, .karta small::after { content: "—"; margin: 0 8px; color: #C49A6C; }
+.karta blockquote {
+  position: relative; margin: 14px 0 8px; padding-left: 4px; font-family: Lora, Georgia, serif;
+  font-size: 21px; line-height: 1.5; white-space: pre-line; color: #3B2A1A;
+}
+.karta blockquote::first-letter {               /* bosh harf — kitoblardagidek bezakli */
+  float: left; font-size: 52px; line-height: .9; margin: 4px 8px 0 0; color: #A4502A; font-weight: 600;
+}
+.bezak { text-align: center; color: #B98A55; font: 600 44px/1 Lora, Georgia, serif; height: 26px; margin: 2px 0 12px; }
+
+/* Portret: ism harflari soniga teng bo'laklarga bo'lingan */
+.portret {
+  position: relative; width: 100%; max-width: 240px; aspect-ratio: 4 / 5;
+  margin: 0 auto; border-radius: 4px; overflow: hidden; background: #E8DABA;
+  border: 6px solid #FBF5E6; outline: 1px solid #CDB68A;
+  box-shadow: 0 6px 14px rgba(80,50,20,.22);
+}
+.portret img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.portret .bosh-harf {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: 600 72px Lora, Georgia, serif; color: #fff;
+  background: linear-gradient(160deg, #8C4A2F, #4A2A18);
+}
+.bolak {
+  position: absolute; display: flex; align-items: center; justify-content: center;
+  font: 600 15px Lora, Georgia, serif; color: rgba(251,245,230,.55);
+  border: 1px solid rgba(251,245,230,.35);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.bolak.ochiq { opacity: 0; transform: scale(.4) rotate(8deg); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .bolak { transition: opacity .2s; } .bolak.ochiq { transform: none; } }
+
+/* Xatolar chizig'i */
+.xatolar { display: flex; gap: 6px; margin-top: 16px; }
+.xatolar span { flex: 1; height: 6px; border-radius: 3px; background: #E2D3B3; }
+.xatolar span.ishlatildi { background: #B5502A; }
+.xato-matn { margin-top: 6px; font: italic 13px Lora, Georgia, serif; color: #7A6448; text-align: center; }
+
+/* Ism katakchalari */
+.ism { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 4px 0 14px; }
+.soz { display: flex; gap: 4px; }
+.harf-katak {                                  /* bosmaxona harf-qoliplari */
+  width: 26px; height: 36px; border-radius: 3px; background: var(--qogoz);
+  border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
+  display: flex; align-items: center; justify-content: center;
+  font: 600 19px Lora, Georgia, serif; text-transform: uppercase; color: var(--qora);
+}
+.harf-katak.topildi { background: var(--zaytun-och); border-color: #B7BE98; border-bottom-color: var(--zaytun); color: var(--zaytun); }
+.harf-katak.korsatildi { background: var(--qizil-och); border-color: #E2B89C; border-bottom-color: var(--teri); color: var(--teri); }
+.harf-katak.belgi { width: 10px; border: 0; background: none; }
+.harf-katak.bosh { cursor: pointer; }
+.tanlov-bor .harf-katak.bosh { background: #FFFDF6; border-style: dashed; border-color: #C9A887; }
+.harf-katak.ustida { background: #fff !important; outline: 2px solid var(--teri); outline-offset: 1px; }
+.harf-katak.notogri { background: var(--qizil-och); border-color: #E2B89C; border-bottom-color: var(--teri); color: var(--teri); }
+.harf-katak.pop { animation: sakrash .35s ease; }
+@keyframes sakrash { 0% { transform: scale(1); } 50% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+/* Ishoralar */
+.ishoralar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 26px; margin-bottom: 12px; }
+.ishora {                                      /* kitob xatcho'pi */
+  font: italic 500 13px Lora, Georgia, serif; padding: 5px 14px 5px 10px; color: #FBF5E6;
+  background: var(--teri); border-radius: 2px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+}
+
+/* Harflar klaviaturasi */
+.klaviatura { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.klaviatura .tugma { width: calc((100% - 36px) / 7); max-width: 56px; }
+.tugma {                                       /* harf-qoliplar */
+  height: 46px; border-radius: 4px; background: var(--qogoz); color: var(--qora);
+  border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
+  font: 600 18px Lora, Georgia, serif; cursor: pointer; padding: 0;
+  transition: background .15s, transform .1s, border-color .15s;
+}
+.tugma:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 1px; }
+.tugma:disabled { cursor: default; }
+.tugma.togri { background: var(--zaytun); border-color: var(--zaytun); border-bottom-color: #353D26; color: #F8F1E1; }
+.tugma { touch-action: none; user-select: none; -webkit-user-select: none; }
+.tugma.tanlangan { transform: translateY(-4px); border-color: var(--teri); border-bottom-color: var(--teri-toq); box-shadow: 0 6px 12px rgba(80,50,20,.2); }
+.tugma.ishlatildi { display: none; }
+.tugma.sudralmoqda { opacity: .3; }
+.soya-harf {                                   /* sudralayotgan harf */
+  position: fixed; z-index: 50; pointer-events: none; transform: translate(-50%, -60%) scale(1.15);
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+  background: var(--qogoz); color: var(--qora); border: 1px solid var(--teri); border-bottom: 3px solid var(--teri-toq);
+  border-radius: 4px; font: 600 20px Lora, Georgia, serif; box-shadow: 0 10px 20px rgba(80,50,20,.3);
+}
+.izoh-satr { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); margin: 12px 0 0; text-align: center; line-height: 1.5; }
+
+.asosiy {                                /* teri muqovali tugma */
+  height: 52px; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(180deg, var(--teri), var(--teri-toq)); color: #FBF5E6;
+  border: 1px solid #5A3220; box-shadow: inset 0 0 0 3px rgba(251,245,230,.12);
+  font: 600 17px Lora, Georgia, serif; letter-spacing: .3px;
+}
+.natija {                                      /* yakuniy sahifa */
+  margin-top: 4px; padding: 20px 20px 18px; border-radius: 4px; background: var(--qogoz);
+  border: 1px solid var(--chegara); box-shadow: 0 8px 20px rgba(80,50,20,.12);
+  text-align: center; display: flex; flex-direction: column; gap: 12px;
+}
+.natija h2 { margin: 0; font-family: Lora, Georgia, serif; font-size: 24px; color: var(--qora); }
+.natija h2::before, .natija h2::after { content: "❦"; font-size: 16px; color: #B98A55; margin: 0 10px; vertical-align: middle; }
+#natijaMatn { font: italic 16px Lora, Georgia, serif; }
+.natija .izoh { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.natija-rasm {
+  width: 100%; max-width: 300px; margin: 0 auto; display: block; border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(80,50,20,.2);
+}
+.ulash-xabar { min-height: 18px; font: italic 14px Lora, Georgia, serif; color: var(--zaytun); }
+.ulash-matn {
+  width: 100%; resize: none; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--chegara);
+  background: #fff; color: var(--qora); font: 14px/1.5 Inter, sans-serif; text-align: left;
+}
+/* Profil */
+.profil-quti {
+  border-top: 1px dashed var(--chegara); border-bottom: 1px dashed var(--chegara);
+  padding: 12px 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px;
+}
+.profil-quti p { margin: 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); }
+.profil-quti .qator { display: flex; gap: 8px; }
+.profil-quti input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 12px; border-radius: 4px; border: 1px solid var(--chegara);
+  background: #fff; color: var(--qora); font: 16px Lora, Georgia, serif;
+}
+.profil-quti a { color: var(--teri); word-break: break-all; }
+button.kichik {
+  height: 44px; padding: 0 14px; border-radius: 4px; cursor: pointer; white-space: nowrap;
+  background: var(--zaytun); color: #F8F1E1; border: 1px solid #353D26; font: 600 14px Lora, Georgia, serif;
+}
+button.kichik:disabled { opacity: .6; cursor: default; }
+.profil-sahifa {
+  padding: 22px 20px; border-radius: 4px; background: var(--qogoz); border: 1px solid var(--chegara);
+  box-shadow: 0 8px 20px rgba(80,50,20,.12); text-align: center; display: flex; flex-direction: column; gap: 16px;
+}
+.profil-sahifa h2 { margin: 0; font: 600 28px Lora, Georgia, serif; }
+.profil-sahifa .kichik-matn { font: italic 14px Lora, Georgia, serif; color: var(--kulrang); margin: 0; }
+.statlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { padding: 10px 4px; border: 1px solid var(--chegara); border-radius: 4px; background: #FFFDF6; }
+.stat b { display: block; font: 600 24px Lora, Georgia, serif; color: var(--qora); }
+.stat span { font: italic 12px Lora, Georgia, serif; color: var(--kulrang); }
+.oxirgilar { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+.oxirgilar i { width: 16px; height: 16px; border-radius: 2px; background: #4F5B3A; }
+.oxirgilar i.yoq { background: #B5502A; }
+.baho-ortacha { font: 600 20px Lora, Georgia, serif; }
+.yulduzlar { display: flex; justify-content: center; gap: 4px; }
+.yulduzlar button {
+  width: 48px; height: 48px; border: 0; background: none; cursor: pointer; padding: 0;
+  font-size: 36px; line-height: 1; color: #D8C7A3; transition: transform .1s, color .1s;
+}
+.yulduzlar button.tola { color: #C08A2E; }
+.yulduzlar button:active { transform: scale(.9); }
+.yulduzlar button:disabled { cursor: default; }
+a.asosiy { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.manba { margin-top: 24px; text-align: center; font: italic 12px Lora, Georgia, serif; color: #9A8466; }
+.manba a { color: inherit; }
+.yashirin { display: none !important; }
+
+@keyframes silkinish { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.silkin { animation: silkinish .25s ease 2; }
+@media (prefers-reduced-motion: reduce) { .silkin { animation: none; } }
+
+/* ===== 2. YUQORI PANEL VA MENYU ===== */
+.yuqori {
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  margin: -8px 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--chegara);
+}
+.logo { font: 600 24px Lora, Georgia, serif; color: var(--qora); text-decoration: none; }
+.logo span:first-child { color: var(--teri); margin-right: 2px; }
+.logo .logo-uz { color: var(--kulrang); font-size: 16px; }
+.menyu-tugma {
+  display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 6px; cursor: pointer;
+  background: var(--qogoz); border: 1px solid var(--chegara); color: var(--qora); font: 600 14px Lora, Georgia, serif;
+}
+.menyu-belgi, .menyu-belgi::before, .menyu-belgi::after {
+  display: block; width: 16px; height: 2px; background: var(--qora); border-radius: 1px; position: relative;
+}
+.menyu-belgi::before, .menyu-belgi::after { content: ""; position: absolute; left: 0; }
+.menyu-belgi::before { top: -5px; } .menyu-belgi::after { top: 5px; }
+.menyu {
+  position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; width: min(280px, 100%);
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px; padding: 10px 0;
+  box-shadow: 0 14px 30px rgba(80,50,20,.22); display: flex; flex-direction: column;
+}
+.menyu-sarlavha { margin: 0 16px 6px; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.menyu a {
+  padding: 10px 16px; color: var(--qora); text-decoration: none; font: 500 16px Lora, Georgia, serif;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+}
+.menyu a small { font: italic 12px Lora, Georgia, serif; color: var(--kulrang); }
+.menyu a:hover { background: #F1E6CC; }
+.menyu a.faol { color: var(--teri); box-shadow: inset 3px 0 0 var(--teri); }
+.menyu hr { border: 0; border-top: 1px dashed var(--chegara); margin: 6px 16px; width: auto; }
+
+/* ===== 3. UMUMIY SAHIFA ELEMENTLARI ===== */
+.sahifa-sarlavha { font: 600 28px Lora, Georgia, serif; text-align: center; margin: 4px 0 14px; }
+.sahifa-sarlavha::after { content: "❧"; display: block; font-size: 15px; color: #B98A55; margin-top: 2px; }
+.bolim-sarlavha { font: 600 20px Lora, Georgia, serif; margin: 24px 0 10px; }
+.kichik-matn { font: italic 14px Lora, Georgia, serif; color: var(--kulrang); }
+.markaz { text-align: center; }
+.markaz-flex { justify-content: center; }
+.bosh-holat { text-align: center; font: italic 15px Lora, Georgia, serif; color: var(--kulrang); padding: 16px 0; }
+.barchasi { display: block; text-align: center; margin: 14px 0; color: var(--teri); font: 600 15px Lora, Georgia, serif; }
+.orqaga { display: inline-block; margin-bottom: 10px; color: var(--teri); font: 500 15px Lora, Georgia, serif; text-decoration: none; }
+.ikkilamchi {
+  width: 100%; height: 46px; border-radius: 6px; cursor: pointer; margin-top: 8px;
+  background: transparent; color: var(--teri); border: 1px solid #C9A887; font: 600 15px Lora, Georgia, serif;
+}
+.asosiy:disabled, .ikkilamchi:disabled { opacity: .55; cursor: default; }
+.sahifa .asosiy { width: 100%; }
+a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 16px; }
+.matnli { font: 16px/1.6 Lora, Georgia, serif; }
+.matnli h3 { font: 600 19px Lora, Georgia, serif; margin: 22px 0 6px; }
+.matnli ol, .matnli ul { padding-left: 22px; }
+.matnli li { margin-bottom: 6px; }
+.belgi-yashil { background: var(--zaytun-och); color: var(--zaytun); padding: 0 5px; border-radius: 3px; }
+.belgi-qizil { background: var(--qizil-och); color: var(--teri); padding: 0 5px; border-radius: 3px; }
+.pastki { margin-top: 32px; padding-top: 14px; border-top: 1px solid var(--chegara); text-align: center;
+  font: italic 13px Lora, Georgia, serif; color: #9A8466; }
+.pastki a { color: inherit; }
+
+/* Mini portret (lenta, viktorina) */
+.mini-portret {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: inline-flex;
+  align-items: center; justify-content: center; background: var(--teri); border: 2px solid #FBF5E6;
+  box-shadow: 0 1px 4px rgba(80,50,20,.25);
+}
+.mini-portret img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.mini-portret.harfli { color: #FBF5E6; font: 600 14px Lora, Georgia, serif; }
+.mini-portret.katta { width: 100%; height: auto; aspect-ratio: 4 / 5; border-radius: 4px; border-width: 4px; font-size: 32px; }
+.mini-portret.eng-katta { width: 160px; height: 200px; border-radius: 4px; border-width: 6px; font-size: 48px; }
+
+/* ===== 4. BOSH SAHIFA ===== */
+.qahramon { text-align: center; margin: 6px 0 18px; }
+.qahramon h1 { font: 600 30px/1.2 Lora, Georgia, serif; margin: 0 0 8px; }
+.qahramon p { margin: 0; font: italic 15px/1.5 Lora, Georgia, serif; color: var(--kulrang); }
+.oyin-karta {
+  display: block; text-decoration: none; color: var(--qora); margin-bottom: 14px;
+  background-color: #F4EAD5;
+  background-image: linear-gradient(90deg, rgba(110,70,30,.2), rgba(110,70,30,0) 20px),
+    radial-gradient(ellipse at 50% 30%, rgba(255,250,235,.8), rgba(255,250,235,0) 70%);
+  border: 1px solid #E0CFA8; border-radius: 6px 14px 14px 6px; padding: 18px 18px 18px 26px;
+  box-shadow: 3px 3px 0 -1px #EFE2C4, 3px 3px 0 0 #DCC9A0, 0 10px 22px rgba(80,50,20,.15);
+}
+.oyin-karta small { font: italic 13px Lora, Georgia, serif; color: #8C5A2B; }
+.oyin-karta h2 { font: 600 26px Lora, Georgia, serif; margin: 2px 0 8px; }
+.oyin-karta blockquote { margin: 0 0 10px; font: 500 18px/1.45 Lora, Georgia, serif; }
+.oyin-karta .holat { margin: 0 0 12px; font: italic 14px Lora, Georgia, serif; color: var(--zaytun); }
+.tugmacha {
+  display: inline-block; padding: 9px 18px; border-radius: 6px; color: #FBF5E6;
+  background: linear-gradient(180deg, var(--teri), var(--teri-toq)); font: 600 15px Lora, Georgia, serif;
+}
+.bolimlar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bolim-karta {
+  display: flex; flex-direction: column; gap: 3px; padding: 14px; border-radius: 6px; text-decoration: none;
+  background: var(--qogoz); border: 1px solid var(--chegara); color: var(--qora);
+  box-shadow: 0 3px 8px rgba(80,50,20,.08); transition: transform .12s, box-shadow .12s;
+}
+.bolim-karta:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(80,50,20,.14); }
+.bolim-karta b { font: 600 17px Lora, Georgia, serif; }
+.bolim-karta span { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.bolim-karta .bolim-belgi {
+  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--zaytun); color: #F8F1E1; font: 600 18px Lora, Georgia, serif; margin-bottom: 6px;
+}
+
+/* ===== 5. LENTA VA IQTIBOS KARTALARI ===== */
+.qidiruv-maydon {
+  width: 100%; height: 46px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--chegara);
+  background: #fff; color: var(--qora); font: 16px Lora, Georgia, serif;
+}
+.filtrlar { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+.filtr {
+  height: 34px; padding: 0 12px; border-radius: 17px; cursor: pointer; background: var(--qogoz);
+  border: 1px solid var(--chegara); color: var(--qora); font: 500 14px Lora, Georgia, serif;
+}
+.filtr.faol { background: var(--zaytun); border-color: var(--zaytun); color: #F8F1E1; }
+.royxat { display: flex; flex-direction: column; gap: 12px; }
+.iqtibos-karta {
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 4px; padding: 16px 16px 12px;
+  box-shadow: 0 3px 10px rgba(80,50,20,.08); margin-bottom: 12px;
+}
+.royxat .iqtibos-karta { margin-bottom: 0; }
+.iqtibos-karta blockquote {
+  margin: 0 0 12px; font: 500 19px/1.5 Lora, Georgia, serif; white-space: pre-line; position: relative; padding-left: 18px;
+}
+.iqtibos-karta blockquote::before { content: "“"; position: absolute; left: -2px; top: -8px; font-size: 40px; color: #B98A55; }
+.iqtibos-meta { display: flex; align-items: center; gap: 10px; }
+.iqtibos-meta > div { display: flex; flex-direction: column; }
+.iqtibos-meta b { font: 600 15px Lora, Georgia, serif; }
+.iqtibos-meta a { color: var(--teri); font: 500 14px Lora, Georgia, serif; }
+.muallif-havola { font: 600 15px Lora, Georgia, serif !important; color: var(--qora) !important; text-decoration: none; }
+.asar { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.amallar { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--chegara); }
+.amal {
+  flex: 1; height: 34px; border-radius: 4px; cursor: pointer; background: transparent; border: 1px solid var(--chegara);
+  color: var(--kulrang); font: 500 13px Lora, Georgia, serif; text-decoration: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.amal.tanlangan { color: var(--teri); border-color: #C9A887; background: #FBEEE4; }
+.yashirin-iqtibos { text-align: center; font: italic 15px Lora, Georgia, serif; color: var(--kulrang); }
+.yashirin-iqtibos a { color: var(--teri); }
+
+/* ===== 6. MUALLIFLAR ===== */
+.mualliflar-panjara { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.muallif-karta {
+  display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--qora);
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 4px; padding: 8px 8px 12px;
+}
+.muallif-karta b { font: 600 15px Lora, Georgia, serif; margin-top: 6px; }
+.muallif-karta span { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.muallif-karta .son { color: var(--teri); font-size: 12px; }
+.muallif-bosh { text-align: center; }
+.muallif-bosh h2 { font: 600 28px Lora, Georgia, serif; margin: 12px 0 2px; }
+.muallif-bosh .meta { font: italic 15px Lora, Georgia, serif; color: var(--kulrang); margin: 0; }
+.bio { font: 16px/1.6 Lora, Georgia, serif; margin: 16px 0 0; }
+
+/* ===== 7. VIKTORINA ===== */
+.vik-quti { display: flex; flex-direction: column; gap: 8px; font: 16px/1.5 Lora, Georgia, serif; }
+.vik-quti p { margin: 0; }
+.katta-belgi { font: 600 64px Lora, Georgia, serif; color: var(--teri); }
+.katta-son { font: 600 64px/1 Lora, Georgia, serif; color: var(--zaytun); margin-top: 8px !important; }
+.eng-yaxshi { color: var(--zaytun); font-weight: 600; margin: 6px 0 !important; }
+.vik-yuqori { display: flex; justify-content: space-between; font: 600 15px Lora, Georgia, serif; margin-bottom: 8px; }
+.vik-vaqt { height: 6px; border-radius: 3px; background: #E2D3B3; overflow: hidden; margin-bottom: 14px; }
+.vik-vaqt span { display: block; height: 100%; width: 100%; background: var(--zaytun); transition: width .1s linear; }
+.vik-vaqt span.oz { background: #B5502A; }
+.vik-iqtibos blockquote { font-size: 21px; }
+.vik-variantlar { display: flex; flex-direction: column; gap: 8px; }
+.vik-variant {
+  display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-bottom: 3px solid #CDB68A;
+  color: var(--qora); font: 500 16px Lora, Georgia, serif; text-align: left;
+}
+.vik-variant:disabled { cursor: default; opacity: .6; }
+.vik-variant.togri { background: var(--zaytun); color: #F8F1E1; border-color: var(--zaytun); opacity: 1; }
+.vik-variant.xato { background: var(--qizil-och); color: var(--teri); border-color: #E2B89C; opacity: 1; }
+
+/* ===== 8. KARTA YARATISH ===== */
+.karta-sozlama { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.sozlama-qator { display: flex; flex-direction: column; gap: 4px; }
+.sozlama-nom { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.tanlash {
+  width: 100%; height: 44px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--chegara);
+  background: #fff; color: var(--qora); font: 15px Lora, Georgia, serif;
+}
+.tanlov-guruhi { display: flex; flex-wrap: wrap; gap: 6px; }
+.fon-namuna::before {
+  content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px;
+  background: var(--namuna); border: 1px solid rgba(0,0,0,.2); vertical-align: -1px;
+}
+.belgilash { font: 15px Lora, Georgia, serif; display: flex; align-items: center; gap: 6px; }
+.belgilash input { width: 18px; height: 18px; accent-color: var(--zaytun); }
+.karta-korinish {
+  display: block; margin: 0 auto 14px; max-width: 100%; border-radius: 4px; box-shadow: 0 10px 24px rgba(80,50,20,.22);
+}
+.karta-korinish.story { max-height: 560px; }
+.karta-korinish.post { max-height: 470px; }
+
+/* ===== 9. REYTING ===== */
+.reyting-royxat { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.reyting-qator {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 6px;
+  background: var(--qogoz); border: 1px solid var(--chegara);
+}
+.reyting-qator.meniki { border-color: var(--zaytun); box-shadow: inset 4px 0 0 var(--zaytun); }
+.orin { width: 28px; text-align: center; font: 600 17px Lora, Georgia, serif; color: var(--kulrang); }
+.reyting-nom { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.reyting-nom a { color: var(--qora); font: 600 16px Lora, Georgia, serif; text-decoration: none; }
+.reyting-nom small { font: italic 12px Lora, Georgia, serif; color: var(--kulrang); }
+.reyting-ball { font: 600 17px Lora, Georgia, serif; color: var(--zaytun); white-space: nowrap; }
+.profil-forma { display: flex; gap: 8px; }
+.profil-forma input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 12px; border-radius: 4px; border: 1px solid var(--chegara);
+  background: #fff; color: var(--qora); font: 16px Lora, Georgia, serif;
+}
