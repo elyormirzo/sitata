@@ -631,11 +631,47 @@ const KARTA_FONLARI = {
   zaytun:   { nom: "Zaytun",   bg: ["#56633F", "#323A24"], matn: "#F8F1E1", ikkinchi: "#D9DDC5", aksent: "#E9C46A" },
   tun:      { nom: "Tun",      bg: ["#262B3A", "#12141C"], matn: "#F3EBDD", ikkinchi: "#B7BCC7", aksent: "#C9A26B" },
   terakota: { nom: "Terakota", bg: ["#B9673C", "#7E3F27"], matn: "#FFF7EC", ikkinchi: "#F6DCC6", aksent: "#FFE3A3" },
+  shom:     { nom: "Shom",     bg: ["#FF9A8B", "#C8507A"], matn: "#FFFFFF", ikkinchi: "#FFE4EA", aksent: "#FFF3B0", bezak: "doira" },
+  okean:    { nom: "Okean",    bg: ["#2E8BC0", "#0C2D48"], matn: "#F2FAFF", ikkinchi: "#B8DDF2", aksent: "#7FE0E8", bezak: "doira" },
+  neon:     { nom: "Neon",     bg: ["#1A0E3A", "#3B0F5C"], matn: "#F5F0FF", ikkinchi: "#C3B3F0", aksent: "#5CFFB0", bezak: "yulduz" },
+  kosmos:   { nom: "Koinot",   bg: ["#0B1026", "#2B3A67"], matn: "#F3F1FF", ikkinchi: "#AEB6D8", aksent: "#FFD166", bezak: "yulduz" },
+  lavanda:  { nom: "Lavanda",  bg: ["#EEE7FA", "#BCA9E6"], matn: "#2D2246", ikkinchi: "#5B4B85", aksent: "#7A5CC2", bezak: "nuqta" },
+  yalpiz:   { nom: "Yalpiz",   bg: ["#E3F7EC", "#9ED9BE"], matn: "#173B2E", ikkinchi: "#2F6B55", aksent: "#1F8A5B", bezak: "nuqta" },
+  limon:    { nom: "Limon",    bg: ["#FFF7C7", "#FFD25A"], matn: "#3A2A00", ikkinchi: "#6B5300", aksent: "#E05A2B", bezak: "chiziq" },
+  oltin:    { nom: "Qora oltin", bg: ["#222222", "#050505"], matn: "#F5E6C4", ikkinchi: "#BFAE8A", aksent: "#D4AF37", bezak: "chiziq" },
+  oq:       { nom: "Oq",       bg: ["#FFFFFF", "#F0EEEA"], matn: "#151515", ikkinchi: "#666666", aksent: "#E63946" },
 };
+// Fon bezaklari: nuqtalar, yumshoq doiralar, yulduzlar, qiya chiziqlar
+function kartaBezagi(ctx, W, H, f) {
+  if (!f.bezak) return;
+  ctx.save();
+  if (f.bezak === "nuqta") {
+    ctx.fillStyle = f.aksent; ctx.globalAlpha = 0.13;
+    for (let y = 70; y < H; y += 54) for (let x = 70 + ((y / 54) % 2) * 27; x < W; x += 54) { ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill(); }
+  } else if (f.bezak === "doira") {
+    ctx.fillStyle = f.matn;
+    [[W * 0.95, H * 0.08, W * 0.42, 0.10], [W * 0.02, H * 0.6, W * 0.32, 0.07], [W * 0.85, H * 0.97, W * 0.36, 0.09]].forEach(([x, y, r, a]) => {
+      ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    });
+  } else if (f.bezak === "yulduz") {
+    let urug = 7;
+    const tasodif = () => ((urug = (urug * 16807) % 2147483647) / 2147483647);
+    ctx.fillStyle = "#FFFFFF";
+    for (let i = 0; i < 140; i++) {
+      const x = tasodif() * W, y = tasodif() * H, r = tasodif() * 2.6 + 0.6;
+      ctx.globalAlpha = 0.25 + tasodif() * 0.55; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 0.18; ctx.fillStyle = f.aksent; ctx.beginPath(); ctx.arc(W * 0.88, H * 0.1, W * 0.09, 0, Math.PI * 2); ctx.fill();
+  } else if (f.bezak === "chiziq") {
+    ctx.strokeStyle = f.aksent; ctx.globalAlpha = 0.12; ctx.lineWidth = 3;
+    for (let x = -H; x < W; x += 46) { ctx.beginPath(); ctx.moveTo(x, H); ctx.lineTo(x + H, 0); ctx.stroke(); }
+  }
+  ctx.restore();
+}
 const KARTA_SHRIFTLARI = { lora: ['"Lora", Georgia, serif', "Lora"], playfair: ['"Playfair Display", Georgia, serif', "Playfair"], inter: ['"Inter", system-ui, sans-serif', "Inter"] };
 // manba: "baza" — lentadagi iqtibos (kalit bo'yicha), "ozim" — foydalanuvchi o'zi yozgan iqtibos
 const karta = {
-  manba: "baza", kalit: null, olcham: "post", fon: "qogoz", shrift: "lora", portret: true, blob: null,
+  manba: "baza", kalit: null, olcham: "story", fon: "qogoz", shrift: "lora", portret: true, blob: null,
   ozim: { matn: "", muallif: "", asar: "" }, taklif: true, yuborilgan: new Set(),
 };
 const kartaIqtibosi = () => (karta.manba === "ozim"
@@ -654,6 +690,7 @@ async function kartaRasminiChiz() {
   const g = ctx.createLinearGradient(0, 0, W * 0.4, H);
   g.addColorStop(0, f.bg[0]); g.addColorStop(1, f.bg[1]);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  kartaBezagi(ctx, W, H, f);
   ctx.strokeStyle = f.aksent; ctx.globalAlpha = 0.5; ctx.lineWidth = 3;           // ingichka hoshiya
   ctx.strokeRect(40, 40, W - 80, H - 80); ctx.globalAlpha = 1;
 
@@ -707,7 +744,7 @@ async function kartaRasminiChiz() {
   if (izoh) { ctx.fillStyle = f.ikkinchi; ctx.font = `italic 500 30px ${shrift}`; ctx.fillText(izoh, ismX, y + 68); }
 
   ctx.fillStyle = f.ikkinchi; ctx.textAlign = "right"; ctx.font = `600 30px ${shrift}`;
-  ctx.fillText("sitata.uz", W - P, H - 80);
+  ctx.fillText(mening && mening.taxallus ? "sitata.uz/" + mening.taxallus : "sitata.uz", W - P, H - 80);
 
   return new Promise((ok) => c.toBlob(ok, "image/png"));
 }

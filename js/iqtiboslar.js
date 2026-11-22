@@ -288,6 +288,21 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl, q = {}) {
   });
   amallar.appendChild(qayta);
   if (iq.matn) amallar.appendChild(nusxaAmali(() => `“${iq.matn || ""}”\n${manbaMatni(iq, ism)}`));
+  // Story kartasi: matn karta sahifasiga o'tadi (kitobdoshlar iqtibosi — adminga taklif qilinmaydi)
+  if (iq.matn && typeof karta !== "undefined") {
+    const k2 = postAmal(IKON.karta, "", "Story kartasi yasash");
+    k2.addEventListener("click", () => {
+      const tur = iq.manba_turi || "kitob";
+      karta.manba = "ozim"; karta.taklif = false; karta.portret = tur === "kitob" && !!MUALLIFLAR[iq.muallif];
+      karta.ozim = {
+        matn: iq.matn,
+        muallif: tur === "ozim" ? (ism || "") : tur === "kocha" ? "Ko'chadagi yozuv" : (iq.muallif || ism || ""),
+        asar: tur === "kitob" ? (iq.kitob || "") : tur === "kocha" ? (iq.kitob || "") : (iq.kitob || ""),
+      };
+      location.hash = "#karta";
+    });
+    amallar.appendChild(k2);
+  }
   if (ozimniki) {
     const ochir = postAmal(IKON.ochir, "", "O'chirish", "ochir");
     ochir.addEventListener("click", async () => {
