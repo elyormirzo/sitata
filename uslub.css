@@ -981,3 +981,43 @@ a.post-ism:hover { text-decoration: underline; }
 .banner-toplam.faol { border-color: var(--qora); box-shadow: 0 0 0 2px var(--qogoz) inset; }
 .banner-ozim { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rang-tanla { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--chegara); border-radius: 6px; background: #fff; cursor: pointer; }
+
+/* ===== Sinf va guruhlar ===== */
+.guruh-kod-qator { display: flex; gap: 8px; margin-bottom: 4px; }
+.guruh-kod-qator input { flex: 1; min-width: 0; }
+.guruh-karta { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 10px; text-decoration: none; color: inherit; }
+.guruh-karta:hover { border-color: var(--teri); }
+.guruh-karta > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.guruh-karta b { font: 600 16px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.guruh-belgi { flex: none; width: 44px; height: 44px; border-radius: 12px; background: #EFE4CC; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.guruh-belgi.katta { width: 60px; height: 60px; font-size: 30px; border-radius: 16px; }
+.guruh-otish { color: var(--teri); font-size: 18px; }
+.guruh-bosh { display: flex; align-items: center; gap: 14px; margin: 8px 0 12px; }
+.guruh-bosh h2 { margin: 0; font: 600 24px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.guruh-taklif { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 14px; background: var(--qogoz); border: 1px dashed var(--chegara); border-radius: 10px; }
+.guruh-kod { font: 700 20px/1 "Courier New", monospace; letter-spacing: 3px; color: var(--teri); }
+.guruh-taklif .kichik { margin-left: auto; }
+.guruh-tablar { margin: 0 -16px 12px; position: static; }
+.guruh-tablar .lenta-tab { border: 0; background: none; cursor: pointer; }
+.guruh-tana { display: flex; flex-direction: column; gap: 10px; }
+.guruh-tana .filtrlar { margin: 0; }
+.topshiriq-karta { padding: 12px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
+.topshiriq-bosh { display: flex; gap: 10px; align-items: flex-start; }
+.topshiriq-bosh > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.topshiriq-bosh b { font: 600 16px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.topshiriq-bosh span { font: italic 14px Lora, Georgia, serif; color: var(--kulrang); }
+.topshiriq-bosh .muddat { font-size: 13px; color: var(--zaytun); }
+.topshiriq-bosh .muddat.otdi { color: #B3261E; }
+.topshiriq-jarayon { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--chegara); }
+.topshiriq-jarayon .kichik { align-self: flex-start; }
+.topshiriq-azolar summary { cursor: pointer; font: 600 14px Lora, Georgia, serif; color: var(--teri); padding: 4px 0; }
+.topshiriq-azolar[open] { display: flex; flex-direction: column; gap: 6px; }
+.topshiriq-holat { flex: none; font-size: 13px; color: var(--kulrang); font-variant-numeric: tabular-nums; }
+.topshiriq-holat.tugadi { color: var(--zaytun); font-weight: 600; }
+.guruh-pastki { display: flex; gap: 18px; justify-content: center; padding-top: 12px; }
+.matn-tugma.xavfli { color: #B3261E; }
+.odam-nom { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.odam-nom a { color: var(--qora); font: 600 15px Lora, Georgia, serif; text-decoration: none; }
+.odam-nom a:hover { text-decoration: underline; }
+.topshiriq-azolar .odam-qator { padding: 8px 10px; }
+.reyting-nom > b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }

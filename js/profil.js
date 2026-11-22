@@ -22,7 +22,7 @@ const TAXALLUS_SHAKLI = /^[a-z0-9_]{3,20}$/;
 const BAND_TAXALLUSLAR = ["admin", "sitata", "sitatauz", "support", "yordam", "moderator", "null", "undefined", "profil", "profilim", "reyting",
   "bosh", "lenta", "viktorina", "mualliflar", "muallif", "karta", "kitobdoshlar", "javon", "liga", "daraja", "birga", "qoidalar", "haqida",
   "iqtiboslar", "kitoblar", "sozlamalar", "bildirishnomalar", "kirish", "login", "api", "www", "mail", "about", "help", "settings",
-  "js", "rasmlar", "ikonkalar", "supabase", "assets", "static", "index", "manifest", "sw", "favicon", "robots", "sitemap", "cname"];
+  "js", "rasmlar", "ikonkalar", "supabase", "assets", "static", "index", "manifest", "sw", "favicon", "robots", "sitemap", "cname", "guruhlar", "guruh", "qoshil", "sinf"];
 const taxallusniTozala = (t) => String(t || "").trim().toLowerCase().replace(/^@+/, "");
 function taxallusTaklifi(ism) {
   let t = String(ism || "").toLowerCase().replace(/([og])['ʻʼ‘’`]/g, "$1").replace(/[^a-z0-9_]/g, "");

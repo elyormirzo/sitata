@@ -97,6 +97,7 @@ const SARLAVHALAR = {
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
   kitobdoshlar: "Kitobdoshlar — sitata.uz", javon: "Kitob javonim — sitata.uz", liga: "Haftalik liga — sitata.uz", daraja: "Darajam — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
+  guruhlar: "Sinf va guruhlar — sitata.uz", guruh: "Guruh — sitata.uz", qoshil: "Guruhga qo'shilish — sitata.uz",
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
@@ -162,12 +163,12 @@ function sahifaniKor() {
   }
   if (nom !== "profilim" && !SARLAVHALAR[nom]) nom = "lenta";
   const profilTab = nom === "profilim" ? (["daraja", "reyting"].includes(param) ? param : "") : null;
-  const bolim = nom === "profilim" ? (profilTab || "profil") : nom;
+  const bolim = nom === "profilim" ? (profilTab || "profil") : (nom === "guruh" || nom === "qoshil") ? "guruhlar" : nom;
   const korinadigan = nom === "profilim" ? ["profiltab", bolim] : [bolim];
 
   clearInterval(viktorinaTaymeri);
   document.querySelectorAll(".sahifa").forEach((s) => s.classList.toggle("yashirin", !korinadigan.includes(s.dataset.sahifa)));
-  menyu.querySelectorAll("a").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom));
+  menyu.querySelectorAll("a").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom || a.dataset.yol === bolim));
   menyuniYop();
   document.title = SARLAVHALAR[bolim];
   if (profilTab !== null) profilTablariniChiz(profilTab);
@@ -176,7 +177,8 @@ function sahifaniKor() {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: () => lentaniChiz(param), mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: () => (profilTab === "daraja" ? darajaChiz() : profilTab === "reyting" ? reytingniChiz() : profilimniChiz()), profil: () => profilSahifasiniKor(param), admin: adminniChiz,
-    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
+    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param),
+    guruhlar: guruhlarniChiz, guruh: () => guruhniChiz(param), qoshil: () => qoshilishniChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
   window.scrollTo(0, 0);

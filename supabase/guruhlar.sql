@@ -1,0 +1,14 @@
+-- ===== SINF VA GURUHLAR, O'QISH JURNALI =====
+-- Migratsiyalar (Supabase): oqish_jurnali, guruhlar, taxallus_band_guruhlar.
+--
+-- oqish_jurnali(profil_id, kun, sahifalar) — kunlik o'qilgan sahifalar (Toshkent sanasi).
+--   kitob_javoni.sahifa «o'qiyapman» holatida oshganda trigger (oqish_jurnaliga_yoz) yozadi; kuniga ko'pi bilan 600 sahifa.
+--   Hamma o'qiy oladi (javon ham ochiq), hech kim to'g'ridan-to'g'ri yoza olmaydi.
+--
+-- guruhlar(id, nom, tur 'sinf'|'guruh', kod, egasi) — kod faqat a'zolarga (guruhlarim() orqali), ustun darajasida yopiq.
+-- guruh_azolari(guruh_id, profil_id) — a'zolar bir-birini ko'radi (guruh_azosimi); o'zi chiqadi yoki egasi chiqaradi.
+-- guruh_topshiriqlari(guruh_id, kitob, muallif, izoh, muddat) — egasi beradi, a'zolar ko'radi; a'zolarga bildirishnoma.
+--
+-- RPC (security definer): guruh_yarat(nom, tur) — ko'pi bilan 10 ta; guruhga_qoshil(kod) — guruhda ≤300, odamda ≤20 guruh;
+--   guruhlarim(); guruh_koddan(kod); guruh_reytingi(g, 'hafta'|'oy'|'hammasi') — sahifalar, kitoblar, topilgan (faqat a'zolarga);
+--   topshiriq_jarayoni(t) — a'zolar javonidagi shu nomli kitob holati; guruhlar_bellashuvi(davr) — ≥3 a'zoli guruhlar.

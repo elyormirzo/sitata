@@ -9,7 +9,7 @@
   // shu faylni ochadi; biz uni saytning o'zidagi #@taxallus yo'liga yo'naltiramiz.
   // Saytning o'z sahifalari nomi (javon, lenta…) taxallus bo'la olmaydi — ular #bo'limga o'tadi.
   (function () {
-    var BOLIMLAR = ["bosh", "lenta", "viktorina", "mualliflar", "karta", "reyting", "kitobdoshlar", "javon", "liga", "daraja", "birga", "qoidalar", "haqida", "profilim", "admin"];
+    var BOLIMLAR = ["bosh", "lenta", "viktorina", "mualliflar", "karta", "reyting", "kitobdoshlar", "javon", "liga", "daraja", "birga", "qoidalar", "haqida", "profilim", "admin", "guruhlar"];
     var m = location.pathname.match(/^\/(@?)([A-Za-z0-9_]{3,20})\/?$/);
     if (!m) return;
     var nom = m[2].toLowerCase();
