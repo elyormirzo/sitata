@@ -248,7 +248,10 @@ async function oqishlarRoyxati() {
   });
 }
 
-async function yangiOqishChiz(tanlanganId) {
+// #birga/yangi/<kitobdosh_id> — kitobdosh oldindan belgilangan; #birga/yangi/kitob-<javon_id> — javondagi kitob tanlangan
+async function yangiOqishChiz(param) {
+  const javonKitobId = /^kitob-\d+$/.test(param || "") ? Number(param.slice(6)) : null;
+  const tanlanganId = javonKitobId ? null : param;
   const s = $("birgaSahifa");
   s.innerHTML = "";
   s.appendChild(havola("#birga", "orqaga", "← Birga o'qiymiz"));
@@ -301,6 +304,16 @@ async function yangiOqishChiz(tanlanganId) {
    ...oqiladigan.map((f) => [String(f.id), `📄 ${f.kitob} (${(kengaytma(f.fayl_nomi) || "").toUpperCase()})`])]
     .forEach(([v, t]) => { const o = yarat("option", "", t); o.value = v; faylTanla.appendChild(o); });
   faylTanla.disabled = !oqiladigan.length;
+  // Javondan kelgan bo'lsa — kitob va (bo'lsa) faylni oldindan to'ldiramiz
+  if (javonKitobId) {
+    const { data: jk } = await m.from("kitob_javoni").select("id,kitob,muallif").eq("id", javonKitobId).maybeSingle();
+    if (jk) {
+      const royxatda = KITOBLAR.findIndex((x) => x.nom.toLowerCase() === jk.kitob.toLowerCase());
+      if (royxatda >= 0) kitobTanla.value = String(royxatda);
+      else { kitobTanla.value = boshqa; kitobTanla.dispatchEvent(new Event("change")); kitobYoz.value = jk.kitob; muallifYoz.value = jk.muallif || ""; }
+      if (oqiladigan.some((f) => f.id === jk.id)) faylTanla.value = String(jk.id);
+    }
+  }
   faylTanla.addEventListener("change", () => {
     const f = oqiladigan.find((x) => String(x.id) === faylTanla.value);
     if (f && kitobTanla.value === "") { kitobTanla.value = boshqa; kitobTanla.dispatchEvent(new Event("change")); kitobYoz.value = f.kitob; muallifYoz.value = f.muallif || ""; }

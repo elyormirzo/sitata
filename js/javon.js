@@ -216,6 +216,8 @@ function kitobKartasi(m, k) {
     ong.appendChild(sharhTugma);
   }
   ong.appendChild(faylQatori(m, k, javonChiz));
+  ong.appendChild(havola("#birga/yangi/kitob-" + k.id, "matn-tugma birga-havola",
+    k.fayl_yoli && faylTuri(k.fayl_nomi || k.fayl_yoli) !== "yuklab" ? "👥 Kitobdoshlar bilan birga o'qish (fayl bilan)" : "👥 Kitobdoshlar bilan birga o'qish"));
   const ochir = yarat("button", "kitob-ochir", "×"); ochir.type = "button"; ochir.setAttribute("aria-label", "Javondan olib tashlash");
   ochir.addEventListener("click", async () => {
     if (!confirm(`«${k.kitob}»ni javondan olib tashlaysizmi?` + (k.fayl_yoli ? " Biriktirilgan fayl ham o'chiriladi." : ""))) return;

@@ -743,3 +743,4 @@ body.oquvchi-ochiq { overflow: hidden; }
 .ulashilgan-fayl { display: flex; align-items: center; gap: 12px; margin: 12px auto 0; padding: 12px; max-width: 360px; text-align: left;
   background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; }
 .ulashilgan-fayl > div { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.birga-havola { align-self: flex-start; margin-top: 4px; }
