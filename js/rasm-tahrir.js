@@ -88,38 +88,72 @@ function ramkaliRasm(h, maxTomon) {
   const c = document.createElement("canvas");
   const x = c.getContext("2d");
   const imzo = h.sarlavha || "";
-  if (h.ramka === "polaroid") {
-    const p = birlik * 4, past = birlik * 16;
-    c.width = w + p * 2; c.height = hh + p + past;
+  const polaroid = h.ramka === "polaroid";
+  const p = birlik * (polaroid ? 4 : h.ramka === "kitob" ? 6 : 5);
+  // Izoh: kesilmaydi — so'zlar bo'yicha qatorlarga bo'linadi (3 tagacha), sig'masa harf kichrayadi
+  const kenglik = w + p * 2 - p * 2.4;
+  const katta = Math.min(birlik * (polaroid ? 4.2 : 3.6), w * 0.066);
+  const izoh = imzo ? matnniJoyla(x, imzo, kenglik, katta, Math.max(katta * 0.6, w * 0.028), 3) : null;
+  const qatorBal = izoh ? izoh.olcham * 1.3 : 0;
+  const imzoBal = izoh ? izoh.qatorlar.length * qatorBal : 0;
+  const belgi = polaroid ? Math.min(birlik * 2.6, w * 0.04) : 0;
+  const past = polaroid ? Math.max(birlik * 10, imzoBal + belgi * 1.6 + p * 1.6) : imzo ? imzoBal + p * 1.4 : p;
+  c.width = w + p * 2; c.height = hh + p + past;
+  if (polaroid) {
     x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, c.width, c.height);
     x.drawImage(ich, p, p);
-    x.fillStyle = "#3B2A1A"; x.textAlign = "center"; x.textBaseline = "middle";
-    x.font = `italic ${Math.round(birlik * 4.2)}px Lora, Georgia, serif`;
-    x.fillText(qisqart(x, imzo || "sitata.uz", c.width - p * 2), c.width / 2, hh + p + past * 0.42);
-    x.font = `${Math.round(birlik * 2.6)}px Lora, Georgia, serif`; x.fillStyle = "#9A8668";
-    x.fillText("sitata.uz", c.width / 2, hh + p + past * 0.75);
-    return c;
-  }
-  const p = birlik * (h.ramka === "kitob" ? 6 : 5), past = imzo ? birlik * 9 : p;
-  c.width = w + p * 2; c.height = hh + p + past;
-  if (h.ramka === "kitob") {
-    const g = x.createLinearGradient(0, 0, c.width, c.height); g.addColorStop(0, "#7A4529"); g.addColorStop(1, "#4E2B18");
-    x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
-    x.strokeStyle = "#D9B26A"; x.lineWidth = Math.max(2, birlik * 0.5);
-    x.strokeRect(p * 0.45, p * 0.45, c.width - p * 0.9, c.height - p * 0.9);
   } else {
-    x.fillStyle = "#F6EEDC"; x.fillRect(0, 0, c.width, c.height);
-    x.strokeStyle = "#C9B48E"; x.lineWidth = Math.max(1, birlik * 0.25);
-    x.strokeRect(p * 0.5, p * 0.5, c.width - p, c.height - p);
+    if (h.ramka === "kitob") {
+      const g = x.createLinearGradient(0, 0, c.width, c.height); g.addColorStop(0, "#7A4529"); g.addColorStop(1, "#4E2B18");
+      x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+      x.strokeStyle = "#D9B26A"; x.lineWidth = Math.max(2, birlik * 0.5);
+      x.strokeRect(p * 0.45, p * 0.45, c.width - p * 0.9, c.height - p * 0.9);
+    } else {
+      x.fillStyle = "#F6EEDC"; x.fillRect(0, 0, c.width, c.height);
+      x.strokeStyle = "#C9B48E"; x.lineWidth = Math.max(1, birlik * 0.25);
+      x.strokeRect(p * 0.5, p * 0.5, c.width - p, c.height - p);
+    }
+    x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = birlik * 1.5; x.shadowOffsetY = birlik * 0.4;
+    x.drawImage(ich, p, p); x.restore();
   }
-  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = birlik * 1.5; x.shadowOffsetY = birlik * 0.4;
-  x.drawImage(ich, p, p); x.restore();
-  if (imzo) {
-    x.fillStyle = h.ramka === "kitob" ? "#F3E3BF" : "#5A4330"; x.textAlign = "center"; x.textBaseline = "middle";
-    x.font = `italic ${Math.round(birlik * 3.6)}px Lora, Georgia, serif`;
-    x.fillText(qisqart(x, imzo, c.width - p * 2), c.width / 2, hh + p + past * 0.5);
+  x.textAlign = "center"; x.textBaseline = "middle";
+  const blokBal = imzoBal + (polaroid ? belgi * 1.6 : 0);
+  let y = hh + p + (past - blokBal) / 2 + qatorBal / 2;
+  if (izoh) {
+    x.fillStyle = polaroid ? "#3B2A1A" : h.ramka === "kitob" ? "#F3E3BF" : "#5A4330";
+    x.font = `italic ${izoh.olcham}px Lora, Georgia, serif`;
+    izoh.qatorlar.forEach((q) => { x.fillText(q, c.width / 2, y); y += qatorBal; });
+  }
+  if (polaroid) {
+    x.font = `${Math.round(belgi)}px Lora, Georgia, serif`; x.fillStyle = "#9A8668";
+    x.fillText("sitata.uz", c.width / 2, izoh ? y - qatorBal / 2 + belgi * 1.1 : hh + p + past / 2);
   }
   return c;
+}
+
+// Matnni kenglikka so'zlar bo'yicha bo'lish: avval katta harf bilan, sig'masa kichraytirib
+function matnniJoyla(x, matn, kenglik, katta, kichik, maxQator) {
+  const bol = (olcham) => {
+    x.font = `italic ${olcham}px Lora, Georgia, serif`;
+    const qatorlar = [];
+    let q = "";
+    for (const soz of matn.split(/\s+/)) {
+      const sinov = q ? q + " " + soz : soz;
+      if (!q || x.measureText(sinov).width <= kenglik) q = sinov;
+      else { qatorlar.push(q); q = soz; }
+    }
+    if (q) qatorlar.push(q);
+    return qatorlar;
+  };
+  for (let o = katta; o >= kichik; o *= 0.92) {
+    const q = bol(Math.round(o));
+    if (q.length <= maxQator && q.every((t) => x.measureText(t).width <= kenglik)) return { olcham: Math.round(o), qatorlar: q };
+  }
+  // Juda uzun bo'lsa — oxirgi qator qisqartiriladi
+  const olcham = Math.round(kichik), q = bol(olcham).slice(0, maxQator);
+  x.font = `italic ${olcham}px Lora, Georgia, serif`;
+  q[q.length - 1] = qisqart(x, q[q.length - 1], kenglik);
+  return { olcham, qatorlar: q };
 }
 
 function qisqart(x, matn, kenglik) {
