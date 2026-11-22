@@ -6,3 +6,9 @@
 --   kelganlarni ko'radi. Trigger iqtibos_yoqtirish_hisobi — sonni yangilaydi va egasiga bildirishnoma yuboradi (1 kunda 1 marta).
 -- * iqtibos_statistikasi(p) — profil uchun: nechta iqtibos yozgan, jami nechta yoqtirma olgan (faqat sonlar, hammaga ochiq).
 -- To'liq SQL: Supabase → Database → Migrations.
+
+-- «iqtibos_rasmlari» migratsiyasi: sahifa surati bilan iqtibos.
+-- * kitob_iqtiboslari.rasm_yoli ('<uid>/<uuid>.jpg'); rasm bo'lsa matn ixtiyoriy.
+-- * Storage bucket «iqtibos-rasmlar»: maxfiy, faqat JPEG, ≤ 3 MB. Yuklash/o'chirish — o'z papkasiga;
+--   ko'rish — egasi va uning kitobdoshlari (iqtibos_rasmiga_ruxsat(name)).
+-- * Rasm brauzerda tahrirlanadi (js/rasm-tahrir.js): qirqish/burish, marker va ruchka bilan belgilash, filtr va ramka.

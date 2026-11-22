@@ -11,7 +11,7 @@ async function kitobdoshIqtiboslariniChiz(s) {
   s.appendChild(royxat);
 
   const [{ data: iqtiboslar, error }, { data: dostlar }] = await Promise.all([
-    m.from("kitob_iqtiboslari").select("id,profil_id,kitob,muallif,matn,sahifa,yoqtirishlar,vaqt").order("vaqt", { ascending: false }).limit(60),
+    m.from("kitob_iqtiboslari").select("id,profil_id,kitob,muallif,matn,sahifa,yoqtirishlar,vaqt,rasm_yoli").order("vaqt", { ascending: false }).limit(60),
     m.from("kitobdoshlar").select("id").eq("holat", "qabul").limit(1),
   ]);
   royxat.innerHTML = "";
@@ -31,7 +31,14 @@ async function kitobdoshIqtiboslariniChiz(s) {
     m.from("iqtibos_yoqtirishlar").select("iqtibos_id").eq("profil_id", mening.id).in("iqtibos_id", idlar),
   ]);
   const yoqqan = new Set((yoqtirganlarim || []).map((y) => y.iqtibos_id));
-  iqtiboslar.forEach((iq) => royxat.appendChild(kitobdoshIqtibosKartasi(m, iq, profillar[iq.profil_id], yoqqan.has(iq.id))));
+  // Rasmlar maxfiy — ko'rish uchun vaqtinchalik havolalar (RLS: egasi va kitobdoshlari)
+  const rasmYollari = iqtiboslar.filter((i) => i.rasm_yoli).map((i) => i.rasm_yoli);
+  const havolalar = {};
+  if (rasmYollari.length) {
+    const { data } = await m.storage.from("iqtibos-rasmlar").createSignedUrls(rasmYollari, 3600);
+    (data || []).forEach((d) => { if (d.signedUrl) havolalar[d.path] = d.signedUrl; });
+  }
+  iqtiboslar.forEach((iq) => royxat.appendChild(kitobdoshIqtibosKartasi(m, iq, profillar[iq.profil_id], yoqqan.has(iq.id), havolalar[iq.rasm_yoli])));
 }
 
 function iqtibosJoylashFormasi(m, s) {
@@ -42,6 +49,46 @@ function iqtibosJoylashFormasi(m, s) {
   const kitob = yarat("input", "matn-maydon bir-qator yashirin"); kitob.placeholder = "Kitob nomi"; kitob.maxLength = 120;
   const muallif = yarat("input", "matn-maydon bir-qator yashirin"); muallif.placeholder = "Muallifi (ixtiyoriy)"; muallif.maxLength = 60;
   const matn = yarat("textarea", "matn-maydon"); matn.rows = 4; matn.maxLength = 600; matn.placeholder = "Kitobdagi sizga yoqqan jumla…";
+  // Sahifa surati: suratga olish yoki galereyadan → qirqish, belgilash, bezash
+  let rasmBlob = null, asliFayl = null, rasmUrl = null;
+  const rasmQuti = yarat("div", "iqtibos-rasm-quti");
+  const kamera = yarat("input"); kamera.type = "file"; kamera.accept = "image/*"; kamera.setAttribute("capture", "environment"); kamera.className = "yashirin";
+  const galereya = yarat("input"); galereya.type = "file"; galereya.accept = "image/*"; galereya.className = "yashirin";
+  const sarlavhaOl = () => {
+    const k = kitoblar.find((x) => String(x.id) === tanlov.value);
+    const nom = k ? k.kitob : kitob.value.trim(), mu = k ? k.muallif : muallif.value.trim();
+    return nom ? "«" + nom + "»" + (mu ? " — " + mu : "") + (sahifa.value ? ", " + sahifa.value + "-bet" : "") : "";
+  };
+  const tahrirla = async (f) => {
+    if (!f) return;
+    const b = await rasmTahrirchisi(f, { sarlavha: sarlavhaOl() });
+    if (!b) return;
+    asliFayl = f; rasmBlob = b; rasmniKorsat();
+  };
+  const rasmniKorsat = () => {
+    rasmQuti.innerHTML = "";
+    if (rasmUrl) { URL.revokeObjectURL(rasmUrl); rasmUrl = null; }
+    if (rasmBlob) {
+      rasmUrl = URL.createObjectURL(rasmBlob);
+      const img = yarat("img", "iqtibos-rasm-oldin"); img.src = rasmUrl; img.alt = "Iqtibos rasmi";
+      const qayta = yarat("button", "matn-tugma", "✎ qayta tahrirlash"); qayta.type = "button";
+      qayta.addEventListener("click", () => tahrirla(asliFayl));
+      const ol = yarat("button", "matn-tugma", "rasmni olib tashlash"); ol.type = "button";
+      ol.addEventListener("click", () => { rasmBlob = asliFayl = null; rasmniKorsat(); });
+      const t = yarat("div", ""); t.append(qayta, ol);
+      rasmQuti.append(img, t);
+      matn.placeholder = "Izoh yoki iqtibos matni (ixtiyoriy)";
+    } else {
+      const b1 = yarat("button", "amal", "📷 Suratga olish"); b1.type = "button"; b1.addEventListener("click", () => kamera.click());
+      const b2 = yarat("button", "amal", "🖼 Galereyadan"); b2.type = "button"; b2.addEventListener("click", () => galereya.click());
+      const t = yarat("div", "tugmalar"); t.append(b1, b2);
+      rasmQuti.append(yarat("small", "kichik-matn", "Sahifani suratga olib, kerakli qismini qirqing va belgilang:"), t);
+      matn.placeholder = "Kitobdagi sizga yoqqan jumla…";
+    }
+    rasmQuti.append(kamera, galereya);
+  };
+  [kamera, galereya].forEach((i) => i.addEventListener("change", () => { const f = i.files[0]; i.value = ""; tahrirla(f); }));
+  rasmniKorsat();
   const sahifa = yarat("input", "matn-maydon bir-qator"); sahifa.type = "number"; sahifa.min = 0; sahifa.max = 20000; sahifa.inputMode = "numeric"; sahifa.placeholder = "Sahifa (ixtiyoriy)";
   const hisob = yarat("small", "kichik-matn", "0 / 600");
   const tugma = yarat("button", "asosiy", "Joylash"); tugma.type = "button";
@@ -76,32 +123,47 @@ function iqtibosJoylashFormasi(m, s) {
 
   tugma.addEventListener("click", async () => {
     const t = matn.value.trim();
-    if (t.length < 3) { matn.focus(); xabar.textContent = "Iqtibos matnini yozing."; return; }
+    if (!rasmBlob && t.length < 3) { matn.focus(); xabar.textContent = "Iqtibos matnini yozing yoki sahifani suratga oling."; return; }
     const k = kitoblar.find((x) => String(x.id) === tanlov.value);
     const nom = k ? k.kitob : kitob.value.trim();
     if (!nom) { kitob.focus(); xabar.textContent = "Kitob nomini yozing."; return; }
     const sv = sahifa.value === "" ? null : Math.round(Number(sahifa.value));
     tugma.disabled = true; xabar.textContent = "";
+    let rasmYoli = null;
+    if (rasmBlob) {
+      xabar.textContent = "Rasm yuklanmoqda…";
+      rasmYoli = `${mening.id}/${crypto.randomUUID()}.jpg`;
+      const { error: e1 } = await m.storage.from("iqtibos-rasmlar").upload(rasmYoli, rasmBlob, { contentType: "image/jpeg", upsert: false });
+      if (e1) { tugma.disabled = false; xabar.textContent = "Rasm yuklanmadi — internetni tekshirib, qayta urinib ko'ring."; return; }
+    }
     const { error } = await m.from("kitob_iqtiboslari").insert({
       kitob_javoni_id: k ? k.id : null, kitob: nom, muallif: (k ? k.muallif : muallif.value.trim()) || null,
-      matn: t, sahifa: Number.isFinite(sv) && sv >= 0 && sv <= 20000 ? sv : null,
+      matn: t || null, sahifa: Number.isFinite(sv) && sv >= 0 && sv <= 20000 ? sv : null, rasm_yoli: rasmYoli,
     });
     tugma.disabled = false;
+    if (error && rasmYoli) m.storage.from("iqtibos-rasmlar").remove([rasmYoli]).then(() => {});
     if (error) { xabar.textContent = /row-level|policy/i.test(error.message || "") ? "Bugun juda ko'p iqtibos joyladingiz — ertaga davom eting." : "Joylab bo'lmadi — qayta urinib ko'ring."; return; }
     lentaniChiz("kitobdoshlar");
   });
 
-  ichi.append(tanlov, kitob, muallif, matn, hisob, sahifa, tugma, xabar,
+  ichi.append(tanlov, kitob, muallif, rasmQuti, matn, hisob, sahifa, tugma, xabar,
     yarat("p", "kichik-matn", "🔒 Iqtibosingizni faqat kitobdoshlaringiz ko'radi."));
   quti.appendChild(ichi);
   return quti;
 }
 
-function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi) {
+function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
   const k = yarat("article", "iqtibos-karta kitobdosh-iqtibos");
   const bosh = yarat("div", "jarayon-kim");
   bosh.append(profilHavola(p), yarat("small", "", vaqtOldin(iq.vaqt)));
-  k.append(bosh, yarat("blockquote", "", iq.matn));
+  k.appendChild(bosh);
+  if (iq.rasm_yoli) {
+    const img = yarat("img", "iqtibos-rasm"); img.alt = "«" + iq.kitob + "» sahifasidan iqtibos"; img.loading = "lazy";
+    if (rasmUrl) img.src = rasmUrl;
+    img.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
+    k.appendChild(img);
+  }
+  if (iq.matn) k.appendChild(yarat("blockquote", iq.rasm_yoli ? "rasm-izohi" : "", iq.matn));
   const manba = yarat("p", "iqtibos-manba", "— «" + iq.kitob + "»" + (iq.muallif ? ", " + iq.muallif : "") + (iq.sahifa != null ? ` · ${iq.sahifa}-sahifa` : ""));
   k.appendChild(manba);
 
@@ -130,22 +192,36 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi) {
 
   const nusxa = yarat("button", "amal", "Nusxa"); nusxa.type = "button";
   nusxa.addEventListener("click", async () => {
-    const ok = await nusxaOl(`“${iq.matn}”\n— ${iq.muallif ? iq.muallif + ", " : ""}«${iq.kitob}»`);
+    const ok = await nusxaOl(`“${iq.matn || ""}”\n— ${iq.muallif ? iq.muallif + ", " : ""}«${iq.kitob}»`);
     nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
     setTimeout(() => { nusxa.textContent = "Nusxa"; }, 1500);
   });
-  amallar.appendChild(nusxa);
+  if (iq.matn) amallar.appendChild(nusxa);
   if (ozimniki) {
     const ochir = yarat("button", "amal", "O'chirish"); ochir.type = "button";
     ochir.addEventListener("click", async () => {
       if (!confirm("Bu iqtibosni o'chirasizmi?")) return;
       await m.from("kitob_iqtiboslari").delete().eq("id", iq.id);
+      if (iq.rasm_yoli) await m.storage.from("iqtibos-rasmlar").remove([iq.rasm_yoli]);
       k.remove();
     });
     amallar.appendChild(ochir);
   }
   k.appendChild(amallar);
   return k;
+}
+
+// Rasmni to'liq ekranda ko'rish
+function rasmniKattaKor(src, alt) {
+  if (!src) return;
+  const o = yarat("div", "rasm-katta"); o.setAttribute("role", "dialog"); o.setAttribute("aria-label", alt);
+  const img = yarat("img"); img.src = src; img.alt = alt;
+  const yop = yarat("button", "oquvchi-yop", "✕"); yop.type = "button"; yop.setAttribute("aria-label", "Yopish");
+  o.append(img, yop);
+  const ket = () => { o.remove(); document.removeEventListener("keydown", tugma); };
+  const tugma = (e) => { if (e.key === "Escape") ket(); };
+  o.addEventListener("click", ket); document.addEventListener("keydown", tugma);
+  document.body.appendChild(o);
 }
 
 // Profil sahifasi: nechta iqtibos yozgan va ularga nechta yoqtirma kelgan
