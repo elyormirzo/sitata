@@ -651,3 +651,44 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .liga-chegara.tushish { color: #B5402A; border-top: 2px dashed #E2B89C; }
 .reyting-qator.zona-yuqori { background: #F1F6EA; }
 .reyting-qator.zona-quyi { background: #FBF1EC; }
+
+/* ===== 18. KITOB JAVONI ===== */
+.challenge-quti { display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 12px;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 10px; text-align: left; }
+.challenge-quti.kichik { padding: 10px; margin: 8px 0; }
+.halqa { flex: none; line-height: 0; }
+.challenge-matn { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.challenge-matn small { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.challenge-matn b { font: 600 19px Lora, Georgia, serif; }
+.challenge-matn span { font: 14px Lora, Georgia, serif; color: var(--zaytun); }
+.challenge-matn .matn-tugma { align-self: flex-start; font-size: 13px; }
+.challenge-matn .profil-forma input { max-width: 110px; }
+.kitob-qoshish { margin-bottom: 12px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; padding: 0 14px; }
+.kitob-qoshish summary { cursor: pointer; padding: 12px 0; font: 600 16px Lora, Georgia, serif; color: var(--teri); }
+.kitob-qoshish[open] summary { border-bottom: 1px dashed var(--chegara); margin-bottom: 10px; }
+.kitob-qoshish .karta-sozlama { padding-bottom: 12px; }
+.javon-tablar .manba-tab { font-size: 13px; }
+.kitob-karta { position: relative; display: flex; gap: 12px; padding: 12px 36px 12px 12px; background: var(--qogoz);
+  border: 1px solid var(--chegara); border-radius: 8px; }
+.muqova { flex: none; width: 56px; height: 80px; border-radius: 3px 6px 6px 3px; display: flex; align-items: center; justify-content: center;
+  color: #F8F1E1; font: 600 18px Lora, Georgia, serif; box-shadow: 2px 3px 6px rgba(40,25,10,.3), inset -3px 0 0 rgba(255,255,255,.15); }
+.muqova.kichik { width: 32px; height: 46px; font-size: 12px; }
+.kitob-ong { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.kitob-ong .kichik-matn { margin: 0; }
+.kitob-nomi { font: 600 17px Lora, Georgia, serif; }
+.kitob-ong .amal { flex: none; align-self: flex-start; padding: 0 12px; margin-top: 4px; }
+.foiz-matn.kichik { font-size: 15px; min-width: 40px; }
+.kitob-sharh { margin: 2px 0; font: italic 14px/1.5 Lora, Georgia, serif; }
+.kitob-ochir { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border: 0; background: none; color: #B0A288; font-size: 20px; cursor: pointer; }
+.kichik-yulduzlar { display: inline-flex; gap: 2px; }
+.kichik-yulduzlar > * { background: none; border: 0; padding: 0; font-size: 20px; line-height: 1; color: #D8C7A3; cursor: default; }
+.kichik-yulduzlar button { cursor: pointer; }
+.kichik-yulduzlar .tola { color: #C08A2E; }
+.javon-qism { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px dashed var(--chegara); text-align: left; }
+.javon-qism > b { font: 600 17px Lora, Georgia, serif; }
+.javon-sarlavha { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); margin-top: 4px; }
+.javon-qator { display: flex; align-items: center; gap: 10px; }
+.javon-qator > div { display: flex; flex-direction: column; min-width: 0; }
+.javon-qator b { font: 600 15px Lora, Georgia, serif; }
+.javon-qator .kichik-matn { margin: 0; font-size: 13px; }
+.javon-qator .kichik-yulduzlar > * { font-size: 14px; }

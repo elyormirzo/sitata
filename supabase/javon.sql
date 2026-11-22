@@ -1,0 +1,5 @@
+-- «sitata.uz» — kitob javoni va yillik challenge (Supabase'da «kitob_javoni_va_yillik_maqsad» migratsiyasi sifatida qo'llangan).
+-- kitob_javoni: profil_id, kitob, muallif, holat (oqimoqchi | oqiyapman | oqidim), foiz, baho (1–5), sharh, boshlangan, tugatilgan.
+--   Bir profilda bir xil kitob takrorlanmaydi; hamma ko'radi, faqat egasi o'zgartiradi; ko'pi bilan 1000 ta kitob.
+-- yillik_maqsad: profil_id, yil, maqsad (1–365); hamma ko'radi, faqat egasi qo'yadi/o'zgartiradi.
+-- To'liq SQL: Supabase → Database → Migrations.

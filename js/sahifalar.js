@@ -96,7 +96,7 @@ const SARLAVHALAR = {
   bosh: "sitata.uz — iqtiboslar, mualliflar va o'yinlar", "kim-aytgan": "Kim aytgan? — sitata.uz",
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
-  kitobdoshlar: "Kitobdoshlar — sitata.uz", liga: "Haftalik liga — sitata.uz", daraja: "Darajam — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
+  kitobdoshlar: "Kitobdoshlar — sitata.uz", javon: "Kitob javonim — sitata.uz", liga: "Haftalik liga — sitata.uz", daraja: "Darajam — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
@@ -126,7 +126,7 @@ function sahifaniKor() {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: profilimniChiz, profil: () => profilSahifasiniKor(param), admin: adminniChiz,
-    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz, liga: ligaChiz,
+    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
   window.scrollTo(0, 0);
@@ -171,11 +171,11 @@ function boshniChiz() {
     ["#viktorina", "Viktorina", enYaxshi ? `Eng yaxshi natijangiz: ${enYaxshi} ball` : "10 savol, vaqtga qarshi", "?"],
     ["#lenta", "Iqtiboslar lentasi", `${barchaIqtiboslar().length} ta iqtibos`, "“"],
     ["#mualliflar", "Mualliflar", `${Object.keys(MUALLIFLAR).length} ta muallif`, "✒"],
+    ["#javon", "Kitob javonim", "O'qiyapman, o'qidim, yillik maqsad", "📚"],
     ["#karta", "Karta yaratish", "Story, post yoki kvadrat", "▣"],
     ["#birga", "Birga o'qiymiz", "Kitobdoshlar bilan bir kitob", "❦"],
     ["#liga", "Haftalik liga", "Varaqdan Xazinagacha", "🏆"],
     ["#daraja", "Darajam", "Bronzadan Afsonagacha", "◆"],
-    ["#profilim", "Profilim", mening ? mening.ism : "Profil oching", "☺"],
   ];
   const panjara = yarat("div", "bolimlar");
   bolimlar.forEach(([href, nom, izoh, belgi]) => {

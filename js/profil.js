@@ -350,6 +350,7 @@ async function profilSahifasiniKor(kod) {
   }
   sahifa.appendChild(xabar);
 
+  if (typeof javonQismi === "function") sahifa.appendChild(javonQismi(profil, ozimniki));
   if (!ozimniki && typeof kitobdoshTugmasi === "function") sahifa.appendChild(kitobdoshTugmasi(profil));
 
   const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga qaytish" : "O'zingiz ham o'ynab ko'ring");
