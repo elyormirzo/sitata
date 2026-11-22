@@ -97,6 +97,7 @@ const SARLAVHALAR = {
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
   kitobdoshlar: "Kitobdoshlar — sitata.uz", javon: "Kitob javonim — sitata.uz", liga: "Haftalik liga — sitata.uz", daraja: "Darajam — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
+  duellar: "Duellar — sitata.uz", duel: "Duel — sitata.uz",
   guruhlar: "Sinf va guruhlar — sitata.uz", guruh: "Guruh — sitata.uz", qoshil: "Guruhga qo'shilish — sitata.uz",
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
@@ -163,7 +164,7 @@ function sahifaniKor() {
   }
   if (nom !== "profilim" && !SARLAVHALAR[nom]) nom = "lenta";
   const profilTab = nom === "profilim" ? (["daraja", "reyting"].includes(param) ? param : "") : null;
-  const bolim = nom === "profilim" ? (profilTab || "profil") : (nom === "guruh" || nom === "qoshil") ? "guruhlar" : nom;
+  const bolim = nom === "profilim" ? (profilTab || "profil") : (nom === "guruh" || nom === "qoshil") ? "guruhlar" : nom === "duel" ? "duellar" : nom;
   const korinadigan = nom === "profilim" ? ["profiltab", bolim] : [bolim];
 
   clearInterval(viktorinaTaymeri);
@@ -178,6 +179,7 @@ function sahifaniKor() {
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: () => (profilTab === "daraja" ? darajaChiz() : profilTab === "reyting" ? reytingniChiz() : profilimniChiz()), profil: () => profilSahifasiniKor(param), admin: adminniChiz,
     kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param),
+    duellar: () => duellarniChiz(param), duel: () => duelniChiz(param),
     guruhlar: guruhlarniChiz, guruh: () => guruhniChiz(param), qoshil: () => qoshilishniChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
@@ -538,6 +540,7 @@ function viktorinaBoshi() {
   b.addEventListener("click", viktorinaniBoshla);
   quti.appendChild(b);
   s.appendChild(quti);
+  if (BAZA_YOQIQ) s.appendChild(havola("#duellar", "duel-havola", "⚔️ Do'stingiz bilan duel — kim ko'p topadi?"));
   if (typeof adabiyotBolimi === "function") s.appendChild(adabiyotBolimi());
 }
 

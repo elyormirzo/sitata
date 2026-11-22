@@ -18,3 +18,9 @@
 -- ball_voqealari: 'oqish' — oqish_jurnali bo'yicha har 2 sahifaga 1 ball, kuniga ≤30; ball_haftalar: o'qish ham faollik.
 -- oqish_holati(p) — bugun, maqsad, joriy/eng uzun seriya, jami sahifa, kitoblar, iqtiboslar, yoqtirmalar, kitobdoshlar,
 --   guruhlar, topilgan, birga_oqishlar, jadid_kitoblar — nishonlar shu ko'rsatkichlardan saytda hisoblanadi (js/nishonlar.js).
+
+-- ===== Duellar (migratsiyalar: duellar, taxallus_band_duel) =====
+-- duellar(chaqiruvchi, raqib, mavzu, savollar jsonb, chaqiruvchi_ball/togri, raqib_ball/togri, holat 'kutmoqda'|'tugadi'|'rad').
+-- Faqat kitobdoshni chaqirish (kitobdoshmi), bir vaqtda ≤10 ta kutilayotgan chaqiruv; faqat ikki ishtirokchi ko'radi.
+-- duelni_yakunla(id, ball, togri) — raqib natijasi + chaqiruvchiga bildirishnoma; duelni_rad_et(id).
+-- Chaqiruv yaratilganda raqibga bildirishnoma (duel_chaqiruvi_bildir).

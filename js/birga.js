@@ -211,7 +211,8 @@ function kitobdoshTugmasi(profil) {
         .or(`and(kimdan.eq.${mening.id},kimga.eq.${profil.id}),and(kimdan.eq.${profil.id},kimga.eq.${mening.id})`).maybeSingle();
       quti.innerHTML = "";
       if (data && data.holat === "qabul") {
-        quti.append(yarat("p", "kichik-matn", "✓ Kitobdoshingiz"), havola("#birga/yangi/" + profil.id, "ikkilamchi havola-tugma", "Birga o'qishga taklif qilish"));
+        quti.append(yarat("p", "kichik-matn", "✓ Kitobdoshingiz"), havola("#birga/yangi/" + profil.id, "ikkilamchi havola-tugma", "Birga o'qishga taklif qilish"),
+          havola("#duellar/yangi/" + profil.id, "ikkilamchi havola-tugma", "⚔️ Duelga chaqirish"));
       } else if (data && data.kimdan === mening.id) {
         quti.appendChild(yarat("p", "kichik-matn", "Kitobdoshlik taklifi yuborilgan — javob kutilmoqda."));
       } else if (data) {

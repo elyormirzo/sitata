@@ -1067,3 +1067,29 @@ a.post-ism:hover { text-decoration: underline; }
 .variant-harf { flex: none; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
   background: #EFE4CC; color: var(--teri); font: 700 14px Inter, system-ui, sans-serif; }
 .vik-variant.togri .variant-harf, .vik-variant.xato .variant-harf { background: rgba(255,255,255,.3); color: inherit; }
+
+/* ===== Duellar ===== */
+.duel-havola { display: block; margin-top: 14px; padding: 12px 14px; text-align: center; border-radius: 10px; background: var(--zaytun); color: #F8F1E1; text-decoration: none; font: 600 15px Lora, Georgia, serif; }
+.duel-yangi { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.duel-yangi > b { font: 600 17px Lora, Georgia, serif; }
+.duel-stat { text-align: center; font: 600 14px Lora, Georgia, serif; margin: 4px 0 0; }
+.duel-qator { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 10px; text-decoration: none; color: inherit; }
+.duel-qator > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.duel-qator b { font: 600 15px Lora, Georgia, serif; }
+.duel-hisob { flex: none; font: 700 15px Inter, system-ui, sans-serif; color: var(--teri); }
+.duel-hisob.yutdi { color: var(--zaytun); }
+.duel-hisob.yutqazdi { color: #B3261E; }
+.duel-hisob.durang { color: var(--kulrang); }
+.duel-karta { display: flex; align-items: center; justify-content: space-around; gap: 8px; padding: 20px 10px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 14px; }
+.duel-tomon { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.duel-tomon b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.duel-tomon small { color: var(--kulrang); font-size: 12px; }
+.duel-son { font: 700 26px Lora, Georgia, serif; color: var(--qora); }
+.duel-tomon.golib .duel-son { color: var(--zaytun); }
+.duel-toj { position: absolute; top: -18px; font-size: 24px; }
+.duel-vs { flex: none; font: 800 18px Inter, system-ui, sans-serif; color: var(--teri); }
+.duel-holat { text-align: center; font: 600 18px Lora, Georgia, serif; margin: 12px 0; }
+.duel-savollar { margin-top: 14px; }
+.duel-savollar summary { cursor: pointer; font: 600 14px Lora, Georgia, serif; color: var(--teri); }
+.duel-savollar p { margin: 8px 0; font-size: 14px; }
+.duel-savollar b { color: var(--zaytun); }

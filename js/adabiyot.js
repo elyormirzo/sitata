@@ -131,11 +131,12 @@ function adabiyotniBoshla(k) {
 }
 
 function adabiyotSavoli() {
-  const s = $("viktorinaSahifa");
+  const s = $(adab.sahifaId || "viktorinaSahifa");
   const sv = adab.savollar[adab.i];
   s.innerHTML = "";
   const yuqori = yarat("div", "vik-yuqori");
-  yuqori.append(yarat("span", "", `${ADABIYOT_MAVZULARI[adab.k].belgi} Savol ${adab.i + 1} / ${adab.savollar.length}`), yarat("span", "", `${adab.ball} ball`));
+  const belgi = adab.belgi || (ADABIYOT_MAVZULARI[adab.k] || {}).belgi || "❓";
+  yuqori.append(yarat("span", "", `${belgi} Savol ${adab.i + 1} / ${adab.savollar.length}`), yarat("span", "", `${adab.ball} ball`));
   const chiziq = yarat("div", "vik-vaqt"); const tolgan = yarat("span"); chiziq.appendChild(tolgan);
   const k = yarat("article", "iqtibos-karta adabiyot-savol");
   k.appendChild(yarat("p", "", sv.savol));
@@ -155,7 +156,7 @@ function adabiyotSavoli() {
       else if (b.dataset.v === tanlangan) b.classList.add("xato");
     });
     yuqori.lastChild.textContent = `${adab.ball} ball`;
-    setTimeout(() => { adab.i++; if (adab.i < adab.savollar.length) adabiyotSavoli(); else adabiyotYakuni(); }, tanlangan === sv.togri ? 1100 : 1900);
+    setTimeout(() => { adab.i++; if (adab.i < adab.savollar.length) adabiyotSavoli(); else (adab.yakun || adabiyotYakuni)(); }, tanlangan === sv.togri ? 1100 : 1900);
   };
   sv.variantlar.forEach((v, i) => {
     const b = yarat("button", "vik-variant"); b.type = "button"; b.dataset.v = v;
