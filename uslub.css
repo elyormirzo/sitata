@@ -623,3 +623,31 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .kayfiyat-skelet { background: #EFEBE2; border-style: dashed; }
 .kayfiyat-skelet .kitobcha-gap { font-style: italic; color: #6E685E; }
 @media (prefers-reduced-motion: reduce) { .kitobcha-rasm svg { animation: none !important; } }
+
+/* ===== 17. SERIYA MUZLATISH VA LIGALAR ===== */
+.seriya-quti { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; margin-bottom: 6px;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; }
+.seriya-chap { display: flex; flex-direction: column; gap: 2px; }
+.seriya-chap b { font: 600 20px Lora, Georgia, serif; }
+.seriya-chap span { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.muzlatish { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end; max-width: 120px; }
+.muzlatish .muz { font-size: 24px; filter: grayscale(1); opacity: .3; }
+.muzlatish .muz.bor { filter: none; opacity: 1; }
+.muzlatish small { width: 100%; text-align: right; font: italic 12px Lora, Georgia, serif; color: #3F6E99; }
+.kalendar-kun.muzlatilgan-kun { background: #DCEBF7; color: #3F6E99; box-shadow: inset 0 0 0 2px #9DC3E6; }
+.liga-zina { display: flex; align-items: center; justify-content: center; gap: 2px; margin: 4px 0 6px; flex-wrap: wrap; }
+.liga-pog { line-height: 0; }
+.liga-pog.joriy svg { filter: drop-shadow(0 4px 8px rgba(80,50,20,.3)); }
+.liga-bosh { text-align: center; }
+.liga-bosh h3 { margin: 0; font: 600 26px Lora, Georgia, serif; }
+.liga-bosh .kichik-matn { margin: 2px 0 8px; }
+.liga-tarix { margin: 8px 0; padding: 10px 14px; border-radius: 8px; font: 15px Lora, Georgia, serif; text-align: center;
+  background: var(--qogoz); border: 1px solid var(--chegara); }
+.liga-tarix.kotarildi { background: #E7F1DD; border-color: #A9C48E; }
+.liga-tarix.tushdi { background: #FBEDE7; border-color: #E2B89C; }
+.liga-royxat { margin-top: 10px; }
+.liga-chegara { list-style: none; text-align: center; font: 600 12px Inter, sans-serif; letter-spacing: .3px; padding: 2px 0; }
+.liga-chegara.kotarilish { color: var(--zaytun); border-bottom: 2px dashed #A9C48E; }
+.liga-chegara.tushish { color: #B5402A; border-top: 2px dashed #E2B89C; }
+.reyting-qator.zona-yuqori { background: #F1F6EA; }
+.reyting-qator.zona-quyi { background: #FBF1EC; }

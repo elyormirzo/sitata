@@ -83,8 +83,8 @@ async function darajaChiz() {
   const m = await profilniTekshir(s);
   if (!m) return;
   const yuklanmoqda = yarat("p", "bosh-holat", "Yuklanmoqda…"); s.appendChild(yuklanmoqda);
-  const [{ data: haftalar, error }, { data: voqealar }] = await Promise.all([
-    m.rpc("ball_haftalar", { p: mening.id }), m.rpc("ball_voqealari", { p: mening.id }),
+  const [{ data: haftalar, error }, { data: voqealar }, { data: seriyaQator }] = await Promise.all([
+    m.rpc("ball_haftalar", { p: mening.id }), m.rpc("ball_voqealari", { p: mening.id }), m.rpc("kunlik_seriya", { p: mening.id }),
   ]);
   yuklanmoqda.remove();
   if (error) { s.appendChild(yarat("p", "bosh-holat", "Ballarni yuklab bo'lmadi.")); return; }
@@ -158,6 +158,20 @@ async function darajaChiz() {
   statlar.append(stat("🔥", joriySeriya, "Faol rejim"), stat("👑", rekord, "Rekordingiz"));
   s.appendChild(statlar);
 
+  // Kunlik seriya va muzlatishlar
+  const sr = (seriyaQator && seriyaQator[0]) || { joriy: 0, eng_uzun: 0, muzlatish: 1, muzlatilgan: [] };
+  const seriyaQuti = yarat("div", "seriya-quti");
+  const chap = yarat("div", "seriya-chap");
+  chap.append(yarat("b", "", `🔥 ${sr.joriy} kunlik seriya`), yarat("span", "", `Eng uzuni: ${sr.eng_uzun} kun`));
+  const ong = yarat("div", "muzlatish");
+  for (let k = 0; k < 2; k++) ong.appendChild(yarat("span", "muz" + (k < sr.muzlatish ? " bor" : ""), "🧊"));
+  ong.appendChild(yarat("small", "", `Muzlatish: ${sr.muzlatish}/2`));
+  seriyaQuti.append(chap, ong);
+  s.appendChild(seriyaQuti);
+  s.appendChild(yarat("p", "kichik-matn markaz",
+    "Bir kun o'tkazib yuborsangiz, muzlatish seriyangizni o'zi saqlab qoladi. Har 7 kunlik seriya uchun yangi muzlatish beriladi (ko'pi bilan 2 ta)."));
+  darajaHolati.muzlatilgan = new Set(sr.muzlatilgan || []);
+
   s.appendChild(kalendarChiz(haftalar, voqealar || []));
 }
 
@@ -198,6 +212,7 @@ function kalendarChiz(haftalar, voqealar) {
       const katak = yarat("span", "kalendar-kun", String(kun.getUTCDate()));
       if (kun.getUTCMonth() !== oy) katak.classList.add("boshqa-oy");
       if (kunlik[s]) { katak.classList.add("faol-kun"); katak.title = `+${kunlik[s]} ball`; }
+      else if (darajaHolati.muzlatilgan && darajaHolati.muzlatilgan.has(s)) { katak.classList.add("muzlatilgan-kun"); katak.title = "Muzlatish ishlatildi — seriya saqlandi"; }
       if (s === sanaMatni(bugun)) katak.classList.add("bugun");
       jadval.appendChild(katak);
     }
@@ -211,7 +226,7 @@ function kalendarChiz(haftalar, voqealar) {
     hafta.setUTCDate(hafta.getUTCDate() + 7);
   }
   quti.appendChild(jadval);
-  quti.appendChild(yarat("p", "kichik-matn markaz", "Yashil — o'ynagan kunlar. O'ngda — haftalik ball."));
+  quti.appendChild(yarat("p", "kichik-matn markaz", "Yashil — o'ynagan kunlar, havorang — muzlatish ishlatilgan kunlar. O'ngda — haftalik ball."));
   return quti;
 }
 
