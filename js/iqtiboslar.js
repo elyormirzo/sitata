@@ -11,7 +11,7 @@ async function kitobdoshIqtiboslariniChiz(s) {
   s.appendChild(royxat);
 
   const [{ data: iqtiboslar, error }, { data: dostlar }] = await Promise.all([
-    m.from("kitob_iqtiboslari").select("id,profil_id,kitob,muallif,matn,sahifa,yoqtirishlar,vaqt,rasm_yoli").order("vaqt", { ascending: false }).limit(60),
+    m.from("kitob_iqtiboslari").select("id,profil_id,manba_turi,kitob,muallif,matn,sahifa,yoqtirishlar,vaqt,rasm_yoli").order("vaqt", { ascending: false }).limit(60),
     m.from("kitobdoshlar").select("id").eq("holat", "qabul").limit(1),
   ]);
   royxat.innerHTML = "";
@@ -43,8 +43,16 @@ async function kitobdoshIqtiboslariniChiz(s) {
 
 function iqtibosJoylashFormasi(m, s) {
   const quti = yarat("details", "kitob-qoshish iqtibos-joylash");
-  quti.appendChild(yarat("summary", "", "❝ O'qiyotgan kitobimdan iqtibos joylash"));
+  quti.appendChild(yarat("summary", "", "❝ Iqtibos joylash"));
   const ichi = yarat("div", "karta-sozlama");
+  // Manba turi: kitob, ko'chadagi yozuv, o'zi yozgan fikr yoki boshqa (film, qo'shiq, sayt…)
+  let tur = "kitob";
+  const turlar = yarat("div", "filtrlar iqtibos-turlari");
+  const turTugmalari = IQTIBOS_TURLARI.map(([k, nom]) => {
+    const b = yarat("button", "filtr" + (k === tur ? " faol" : ""), nom); b.type = "button";
+    b.addEventListener("click", () => { tur = k; turgaQarab(); });
+    turlar.appendChild(b); return [k, b];
+  });
   const tanlov = yarat("select", "tanlash");
   const kitob = yarat("input", "matn-maydon bir-qator yashirin"); kitob.placeholder = "Kitob nomi"; kitob.maxLength = 120;
   const muallif = yarat("input", "matn-maydon bir-qator yashirin"); muallif.placeholder = "Muallifi (ixtiyoriy)"; muallif.maxLength = 60;
@@ -54,11 +62,18 @@ function iqtibosJoylashFormasi(m, s) {
   const rasmQuti = yarat("div", "iqtibos-rasm-quti");
   const kamera = yarat("input"); kamera.type = "file"; kamera.accept = "image/*"; kamera.setAttribute("capture", "environment"); kamera.className = "yashirin";
   const galereya = yarat("input"); galereya.type = "file"; galereya.accept = "image/*"; galereya.className = "yashirin";
-  const sarlavhaOl = () => {
-    const k = kitoblar.find((x) => String(x.id) === tanlov.value);
-    const nom = k ? k.kitob : kitob.value.trim(), mu = k ? k.muallif : muallif.value.trim();
-    return nom ? "«" + nom + "»" + (mu ? " — " + mu : "") + (sahifa.value ? ", " + sahifa.value + "-bet" : "") : "";
+  // Tanlangan manba bo'yicha qiymatlar
+  const qiymatlar = () => {
+    const k = tur === "kitob" ? kitoblar.find((x) => String(x.id) === tanlov.value) : null;
+    if (tur === "kitob") return { k, nom: k ? k.kitob : kitob.value.trim(), mu: k ? k.muallif : muallif.value.trim(), sah: sahifa.value };
+    if (tur === "ozim") return { nom: "", mu: "", sah: "" };
+    return { nom: kitob.value.trim(), mu: tur === "boshqa" ? muallif.value.trim() : "", sah: "" };
   };
+  function matnYozuvi() {
+    matn.placeholder = rasmBlob ? "Izoh yoki iqtibos matni (ixtiyoriy)"
+      : { kitob: "Kitobdagi sizga yoqqan jumla…", kocha: "Devor, peshtaxta yoki e'londagi yozuv…", ozim: "O'z fikringiz, hikmatli so'zingiz…", boshqa: "Iqtibos matni…" }[tur];
+  }
+  const sarlavhaOl = () => manbaMatni({ manba_turi: tur, kitob: qiymatlar().nom, muallif: qiymatlar().mu, sahifa: qiymatlar().sah || null }, mening.ism, true);
   const tahrirla = async (f) => {
     if (!f) return;
     const b = await rasmTahrirchisi(f, { sarlavha: sarlavhaOl() });
@@ -77,13 +92,13 @@ function iqtibosJoylashFormasi(m, s) {
       ol.addEventListener("click", () => { rasmBlob = asliFayl = null; rasmniKorsat(); });
       const t = yarat("div", ""); t.append(qayta, ol);
       rasmQuti.append(img, t);
-      matn.placeholder = "Izoh yoki iqtibos matni (ixtiyoriy)";
+      matnYozuvi();
     } else {
       const b1 = yarat("button", "amal", "📷 Suratga olish"); b1.type = "button"; b1.addEventListener("click", () => kamera.click());
       const b2 = yarat("button", "amal", "🖼 Galereyadan"); b2.type = "button"; b2.addEventListener("click", () => galereya.click());
       const t = yarat("div", "tugmalar"); t.append(b1, b2);
-      rasmQuti.append(yarat("small", "kichik-matn", "Sahifani suratga olib, kerakli qismini qirqing va belgilang:"), t);
-      matn.placeholder = "Kitobdagi sizga yoqqan jumla…";
+      rasmQuti.append(yarat("small", "kichik-matn", "Kitob sahifasi yoki ko'chadagi yozuvni rasmga tushirib, kerakli qismini qirqing va belgilang:"), t);
+      matnYozuvi();
     }
     rasmQuti.append(kamera, galereya);
   };
@@ -95,9 +110,17 @@ function iqtibosJoylashFormasi(m, s) {
   const xabar = yarat("p", "kichik-matn");
   let kitoblar = [];
 
+  const turgaQarab = () => {
+    turTugmalari.forEach(([k, b]) => b.classList.toggle("faol", k === tur));
+    tanlov.classList.toggle("yashirin", tur !== "kitob");
+    sahifa.classList.toggle("yashirin", tur !== "kitob");
+    kitob.placeholder = { kitob: "Kitob nomi", kocha: "Qayerda ko'rdingiz? (ixtiyoriy, masalan: Chorsu, avtobus bekati)", boshqa: "Manba: film, qo'shiq, sayt, suhbat… (ixtiyoriy)" }[tur] || "";
+    matnYozuvi();
+    tanlovgaQarab();
+  };
   const tanlovgaQarab = () => {
-    const boshqa = tanlov.value === "boshqa";
-    kitob.classList.toggle("yashirin", !boshqa); muallif.classList.toggle("yashirin", !boshqa);
+    const boshqa = tur === "kitob" ? tanlov.value === "boshqa" : tur !== "ozim";
+    kitob.classList.toggle("yashirin", !boshqa); muallif.classList.toggle("yashirin", !(tur === "kitob" ? boshqa : tur === "boshqa"));
     const k = kitoblar.find((x) => String(x.id) === tanlov.value);
     if (k && k.sahifa != null && !sahifa.dataset.qolda) sahifa.value = k.sahifa;
   };
@@ -123,11 +146,10 @@ function iqtibosJoylashFormasi(m, s) {
 
   tugma.addEventListener("click", async () => {
     const t = matn.value.trim();
-    if (!rasmBlob && t.length < 3) { matn.focus(); xabar.textContent = "Iqtibos matnini yozing yoki sahifani suratga oling."; return; }
-    const k = kitoblar.find((x) => String(x.id) === tanlov.value);
-    const nom = k ? k.kitob : kitob.value.trim();
-    if (!nom) { kitob.focus(); xabar.textContent = "Kitob nomini yozing."; return; }
-    const sv = sahifa.value === "" ? null : Math.round(Number(sahifa.value));
+    if (!rasmBlob && t.length < 3) { matn.focus(); xabar.textContent = "Iqtibos matnini yozing yoki rasmga tushiring."; return; }
+    const { k, nom, mu, sah } = qiymatlar();
+    if (tur === "kitob" && !nom) { kitob.focus(); xabar.textContent = "Kitob nomini yozing."; return; }
+    const sv = sah === "" ? null : Math.round(Number(sah));
     tugma.disabled = true; xabar.textContent = "";
     let rasmYoli = null;
     if (rasmBlob) {
@@ -137,7 +159,7 @@ function iqtibosJoylashFormasi(m, s) {
       if (e1) { tugma.disabled = false; xabar.textContent = "Rasm yuklanmadi — internetni tekshirib, qayta urinib ko'ring."; return; }
     }
     const { error } = await m.from("kitob_iqtiboslari").insert({
-      kitob_javoni_id: k ? k.id : null, kitob: nom, muallif: (k ? k.muallif : muallif.value.trim()) || null,
+      manba_turi: tur, kitob_javoni_id: k ? k.id : null, kitob: nom || null, muallif: mu || null,
       matn: t || null, sahifa: Number.isFinite(sv) && sv >= 0 && sv <= 20000 ? sv : null, rasm_yoli: rasmYoli,
     });
     tugma.disabled = false;
@@ -146,7 +168,8 @@ function iqtibosJoylashFormasi(m, s) {
     lentaniChiz("kitobdoshlar");
   });
 
-  ichi.append(tanlov, kitob, muallif, rasmQuti, matn, hisob, sahifa, tugma, xabar,
+  turgaQarab();
+  ichi.append(turlar, tanlov, kitob, muallif, rasmQuti, matn, hisob, sahifa, tugma, xabar,
     yarat("p", "kichik-matn", "🔒 Iqtibosingizni faqat kitobdoshlaringiz ko'radi."));
   quti.appendChild(ichi);
   return quti;
@@ -158,13 +181,13 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
   bosh.append(profilHavola(p), yarat("small", "", vaqtOldin(iq.vaqt)));
   k.appendChild(bosh);
   if (iq.rasm_yoli) {
-    const img = yarat("img", "iqtibos-rasm"); img.alt = "«" + iq.kitob + "» sahifasidan iqtibos"; img.loading = "lazy";
+    const img = yarat("img", "iqtibos-rasm"); img.alt = "Iqtibos rasmi: " + manbaMatni(iq, p && p.ism); img.loading = "lazy";
     if (rasmUrl) img.src = rasmUrl;
     img.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
     k.appendChild(img);
   }
   if (iq.matn) k.appendChild(yarat("blockquote", iq.rasm_yoli ? "rasm-izohi" : "", iq.matn));
-  const manba = yarat("p", "iqtibos-manba", "— «" + iq.kitob + "»" + (iq.muallif ? ", " + iq.muallif : "") + (iq.sahifa != null ? ` · ${iq.sahifa}-sahifa` : ""));
+  const manba = yarat("p", "iqtibos-manba", manbaMatni(iq, p && p.ism));
   k.appendChild(manba);
 
   const amallar = yarat("div", "amallar");
@@ -192,7 +215,7 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
 
   const nusxa = yarat("button", "amal", "Nusxa"); nusxa.type = "button";
   nusxa.addEventListener("click", async () => {
-    const ok = await nusxaOl(`“${iq.matn || ""}”\n— ${iq.muallif ? iq.muallif + ", " : ""}«${iq.kitob}»`);
+    const ok = await nusxaOl(`“${iq.matn || ""}”\n${manbaMatni(iq, p && p.ism)}`);
     nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
     setTimeout(() => { nusxa.textContent = "Nusxa"; }, 1500);
   });
@@ -209,6 +232,21 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
   }
   k.appendChild(amallar);
   return k;
+}
+
+const IQTIBOS_TURLARI = [["kitob", "📖 Kitobdan"], ["kocha", "📍 Ko'chada ko'rdim"], ["ozim", "✍ O'zim yozdim"], ["boshqa", "🎬 Boshqa"]];
+
+// Iqtibos manbasi matni (kartada, nusxada va rasm ramkasida)
+function manbaMatni(iq, ism, rasmUchun) {
+  const tur = iq.manba_turi || "kitob";
+  if (tur === "kitob") {
+    if (!iq.kitob) return "";
+    return (rasmUchun ? "" : "— ") + "«" + iq.kitob + "»" + (iq.muallif ? (rasmUchun ? " — " : ", ") + iq.muallif : "")
+      + (iq.sahifa != null && iq.sahifa !== "" ? (rasmUchun ? `, ${iq.sahifa}-bet` : ` · ${iq.sahifa}-sahifa`) : "");
+  }
+  if (tur === "kocha") return "📍 Ko'chadagi yozuv" + (iq.kitob ? " · " + iq.kitob : "");
+  if (tur === "ozim") return "✍ " + (ism ? ism + "ning" : "O'z") + " fikri";
+  return (iq.kitob || iq.muallif) ? "— " + [iq.muallif, iq.kitob].filter(Boolean).join(", ") : "";
 }
 
 // Rasmni to'liq ekranda ko'rish

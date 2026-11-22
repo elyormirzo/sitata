@@ -12,3 +12,6 @@
 -- * Storage bucket «iqtibos-rasmlar»: maxfiy, faqat JPEG, ≤ 3 MB. Yuklash/o'chirish — o'z papkasiga;
 --   ko'rish — egasi va uning kitobdoshlari (iqtibos_rasmiga_ruxsat(name)).
 -- * Rasm brauzerda tahrirlanadi (js/rasm-tahrir.js): qirqish/burish, marker va ruchka bilan belgilash, filtr va ramka.
+
+-- «iqtibos_manba_turlari» migratsiyasi: kitob_iqtiboslari.manba_turi — 'kitob' | 'kocha' (ko'chadagi yozuv) | 'ozim' (o'z fikri) | 'boshqa'.
+-- kitob ustuni endi ixtiyoriy (faqat 'kitob' turida majburiy); ko'cha/boshqa turida joy yoki manba nomi shu ustunga yoziladi.
