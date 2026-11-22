@@ -771,3 +771,11 @@ body.oquvchi-ochiq { overflow: hidden; }
 .amal.yoqtirish.tanlangan { color: #B3261E; }
 .amal.yoqtirish:disabled { opacity: 1; cursor: default; }
 .iqtibos-statlar { margin-top: 8px; }
+/* Lenta tepasidagi kunlik o'yin qatori */
+.kunlik-qator { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; text-decoration: none; color: inherit;
+  background: linear-gradient(90deg, #6B3E26 0 6px, var(--qogoz) 6px); border: 1px solid var(--chegara); border-radius: 8px; }
+.kunlik-qator > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.kunlik-qator b { font: 600 16px Lora, Georgia, serif; }
+.kunlik-qator span { font-size: 13px; color: var(--kulrang); }
+.kunlik-qator .kunlik-belgi { font: 700 38px/1 Lora, Georgia, serif; color: #B98A55; margin: 6px 0 -10px 4px; }
+.kunlik-qator .kunlik-tugma { flex: none; font-size: 14px; font-weight: 600; color: var(--teri); }

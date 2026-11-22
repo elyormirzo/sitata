@@ -22,7 +22,7 @@
 
   <!-- ===== Yuqori panel va menyu ===== -->
   <nav class="yuqori" aria-label="Asosiy menyu">
-    <a class="logo" href="#bosh"><span aria-hidden="true">“</span>sitata<span class="logo-uz">.uz</span></a>
+    <a class="logo" href="#lenta"><span aria-hidden="true">“</span>sitata<span class="logo-uz">.uz</span></a>
     <div class="yuqori-ong">
     <button type="button" class="qongiroq yashirin" id="qongiroq" aria-label="Bildirishnomalar" aria-expanded="false">
       <span aria-hidden="true">🔔</span><span class="nishon yashirin" id="qongiroqSon"></span>
@@ -34,10 +34,10 @@
     <div class="bildirish-panel yashirin" id="bildirishPanel" role="dialog" aria-label="Bildirishnomalar"></div>
     <div class="menyu yashirin" id="menyu">
       <p class="menyu-sarlavha">Mundarija</p>
-      <a href="#bosh" data-yol="bosh">Bosh sahifa</a>
+      <a href="#lenta" data-yol="lenta">Lenta <small>iqtiboslar</small></a>
       <a href="#kim-aytgan" data-yol="kim-aytgan">Kim aytgan? <small>kunlik o'yin</small></a>
       <a href="#viktorina" data-yol="viktorina">Viktorina</a>
-      <a href="#lenta" data-yol="lenta">Iqtiboslar lentasi</a>
+      <a href="#bosh" data-yol="bosh">Barcha bo'limlar</a>
       <a href="#mualliflar" data-yol="mualliflar">Mualliflar</a>
       <a href="#karta" data-yol="karta">Karta yaratish</a>
       <a href="#javon" data-yol="javon">Kitob javonim</a>
@@ -57,7 +57,7 @@
   </section>
 
   <!-- ===== Bosh sahifa ===== -->
-  <section class="sahifa" data-sahifa="bosh" id="boshSahifa"></section>
+  <section class="sahifa yashirin" data-sahifa="bosh" id="boshSahifa"></section>
 
   <!-- ===== «Kim aytgan?» kunlik o'yini ===== -->
   <section class="sahifa yashirin" data-sahifa="kim-aytgan" id="oyinSahifa">
@@ -98,7 +98,7 @@
 
   <!-- ===== Boshqa bo'limlar (JS bilan to'ldiriladi) ===== -->
   <section class="sahifa yashirin" data-sahifa="viktorina" id="viktorinaSahifa"></section>
-  <section class="sahifa yashirin" data-sahifa="lenta" id="lentaSahifa"></section>
+  <section class="sahifa" data-sahifa="lenta" id="lentaSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="mualliflar" id="mualliflarSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="muallif" id="muallifSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="karta" id="kartaSahifa"></section>

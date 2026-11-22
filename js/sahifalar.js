@@ -1,5 +1,5 @@
 // ===== SAHIFALAR: menyu, bosh sahifa, lenta, mualliflar, viktorina, karta yaratish, reyting, profilim =====
-// Manzillar (#...): #bosh, #kim-aytgan, #viktorina, #lenta, #mualliflar, #muallif/<nom>, #karta, #karta/<raqam>,
+// Manzillar (#...): manzilsiz → #lenta (asosiy sahifa), #bosh (barcha bo'limlar), #kim-aytgan, #viktorina, #lenta, #mualliflar, #muallif/<nom>, #karta, #karta/<raqam>,
 // #reyting, #profilim, #qoidalar, #haqida. Ulashilgan profil havolasi: ?p=KOD.
 
 // ---------- Umumiy yordamchilar ----------
@@ -106,7 +106,8 @@ function joriyYol() {
   if (hash) { const [nom, ...qolgan] = hash.split("/"); return { nom, param: qolgan.join("/") }; }
   if (parametrlar.has("p")) return { nom: "profil", param: parametrlar.get("p") };
   if (SINOV) return { nom: "kim-aytgan" };
-  return { nom: "bosh" };
+  // Asosiy sahifa — lenta (oxirgi tanlangan bo'limi bilan)
+  return { nom: "lenta", param: xotiradanOl("sitataLentaTab", "") };
 }
 
 let viktorinaTaymeri = null;
@@ -130,7 +131,7 @@ function sahifaniKor() {
     param = nom; nom = "profilim";
     history.replaceState(null, "", location.pathname + location.search + "#profilim/" + param);
   }
-  if (nom !== "profilim" && !SARLAVHALAR[nom]) nom = "bosh";
+  if (nom !== "profilim" && !SARLAVHALAR[nom]) nom = "lenta";
   const profilTab = nom === "profilim" ? (["daraja", "reyting"].includes(param) ? param : "") : null;
   const bolim = nom === "profilim" ? (profilTab || "profil") : nom;
   const korinadigan = nom === "profilim" ? ["profiltab", bolim] : [bolim];
@@ -262,7 +263,19 @@ function iqtibosKartasi(iq) {
   return k;
 }
 
-// ---------- Iqtiboslar lentasi ----------
+// ---------- Iqtiboslar lentasi (asosiy sahifa) ----------
+// Lenta tepasidagi ixcham qator: bugungi «Kim aytgan?» o'yini
+function kunlikOyinQatori() {
+  const a = havola("#kim-aytgan", "kunlik-qator");
+  const matn = holat.tugadi
+    ? (holat.yutdi ? `Bugun topdingiz ✓ · ${xatolarSoni()} xato` : "Bugun topilmadi — ertaga yangisi")
+    : (holat.urinishlar.length ? "O'yin tugamagan — davom eting" : "Bugungi iqtibos muallifini toping");
+  const t = yarat("div", "");
+  t.append(yarat("b", "", "Kim aytgan?"), yarat("span", "", matn));
+  a.append(yarat("span", "kunlik-belgi", "“"), t, yarat("span", "kunlik-tugma", holat.tugadi ? "Natija" : "O'ynash →"));
+  return a;
+}
+
 const lentaFiltri = { soz: "", kasb: "", sevimli: false };
 
 function lentaniChiz(param) {
@@ -271,6 +284,8 @@ function lentaniChiz(param) {
   s.appendChild(yarat("h2", "sahifa-sarlavha", "Iqtiboslar lentasi"));
   // Bo'limlar: hamma uchun to'plam va faqat kitobdoshlar ko'radigan iqtiboslar
   const kitobdosh = param === "kitobdoshlar";
+  xotiragaYoz("sitataLentaTab", kitobdosh ? "kitobdoshlar" : "");
+  s.appendChild(kunlikOyinQatori());
   const tablar = yarat("nav", "manba-tablar profil-tablar lenta-tablar"); tablar.setAttribute("aria-label", "Lenta bo'limlari");
   [["#lenta", "📚 Hammasi", !kitobdosh], ["#lenta/kitobdoshlar", "👥 Kitobdoshlar", kitobdosh]].forEach(([h, nom, faol]) => {
     const a = havola(h, "manba-tab" + (faol ? " faol" : ""), nom);
@@ -483,7 +498,7 @@ function viktorinaYakuni() {
     const ok = await nusxaOl(`sitata.uz viktorinasi: ${vik.ball} ball, ${vik.savollar.length} tadan ${vik.togri} ta to'g'ri.\nSiz ham sinab ko'ring: ${SAYT_MANZILI}#viktorina`);
     nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
   });
-  quti.append(qayta, nusxa, havola("#bosh", "barchasi", "Bosh sahifa"));
+  quti.append(qayta, nusxa, havola("#lenta", "barchasi", "Lentaga qaytish"));
   s.appendChild(quti);
 }
 
