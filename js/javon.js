@@ -143,11 +143,18 @@ function kitobQoshishFormasi(m) {
   const fayl = yarat("input"); fayl.type = "file";
   const faylMatn = yarat("span", "", "📎 Kitob fayli (ixtiyoriy) — PDF, EPUB, FB2, TXT, audio va boshqa formatlar, 50 MB gacha");
   faylQuti.append(fayl, faylMatn);
-  fayl.addEventListener("change", () => {
+  // Fayl tanlanganda — nomi va muallifini fayl ichidan aniqlab, bo'sh (yoki avval o'zimiz to'ldirgan) maydonlarga yozamiz
+  let avtoKitob = "", avtoMuallif = "";
+  fayl.addEventListener("change", async () => {
     const f = fayl.files[0];
     if (!f) return;
-    faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}`;
-    if (!kitob.value.trim()) kitob.value = fayldanNom(f.name);
+    faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)} — ma'lumotlar aniqlanmoqda…`;
+    const d = await faylMalumoti(f);
+    if (fayl.files[0] !== f) return;
+    if (!kitob.value.trim() || kitob.value === avtoKitob) { kitob.value = d.kitob; avtoKitob = d.kitob; }
+    if (!muallif.value.trim() || muallif.value === avtoMuallif) { muallif.value = d.muallif; avtoMuallif = d.muallif; }
+    faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}` +
+      (d.manba === "fayl" ? " — nomi va muallifi fayldan olindi ✓" : " — fayl nomidan to'ldirildi, tekshirib ko'ring");
   });
   const holat = yarat("select", "tanlash");
   Object.entries(JAVONLAR).forEach(([k, v]) => { const o = yarat("option", "", v); o.value = k; o.selected = k === javonHolati.tab; holat.appendChild(o); });

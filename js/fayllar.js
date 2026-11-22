@@ -303,3 +303,147 @@ async function pdfniChiz(tana, url, id) {
   sahifalar.forEach((s) => kuzatuvchi.observe(s));
   oqishJoyiniTikla(tana, id);
 }
+
+// ===== FAYLDAN KITOB NOMI VA MUALLIFINI ANIQLASH =====
+// EPUB (OPF), FB2, PDF (xossalar), MOBI/AZW3 (EXTH), DOCX (core.xml), MP3 (ID3v2), qolganlari — fayl nomidan.
+const tozaMatn = (t) => String(t || "").replace(/\s+/g, " ").trim().slice(0, 120);
+
+async function jszipOl() { if (!window.JSZip) await skriptYukla(EPUB_SKRIPTLAR[0]); return window.JSZip; }
+
+function xmlMatni(xml, ...teglar) {
+  for (const t of teglar) {
+    const el = xml.getElementsByTagNameNS("*", t)[0] || xml.getElementsByTagName(t)[0];
+    if (el && el.textContent.trim()) return el.textContent;
+  }
+  return "";
+}
+
+async function epubMalumoti(fayl) {
+  const zip = await (await jszipOl()).loadAsync(fayl);
+  const container = await zip.file("META-INF/container.xml")?.async("string");
+  const opfYol = container && (container.match(/full-path="([^"]+)"/) || [])[1];
+  const opf = opfYol && await zip.file(opfYol)?.async("string");
+  if (!opf) return {};
+  const x = new DOMParser().parseFromString(opf, "application/xml");
+  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator") };
+}
+
+async function docxMalumoti(fayl) {
+  const zip = await (await jszipOl()).loadAsync(fayl);
+  const core = await zip.file("docProps/core.xml")?.async("string");
+  if (!core) return {};
+  const x = new DOMParser().parseFromString(core, "application/xml");
+  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator") };
+}
+
+async function fb2Malumoti(fayl) {
+  const matn = matnniOch(await fayl.slice(0, 200000).arrayBuffer());
+  const x = new DOMParser().parseFromString(matn.replace(/<binary[\s\S]*$/, "</FictionBook>"), "application/xml");
+  const ti = x.getElementsByTagName("title-info")[0] || x;
+  const a = ti.getElementsByTagName("author")[0];
+  const muallif = a ? ["first-name", "middle-name", "last-name"].map((t) => (a.getElementsByTagName(t)[0] || {}).textContent || "").filter(Boolean).join(" ") : "";
+  return { kitob: (ti.getElementsByTagName("book-title")[0] || {}).textContent || "", muallif };
+}
+
+async function pdfMalumoti(fayl) {
+  if (!window.pdfjsLib) await skriptYukla(PDFJS + "pdf.min.js");
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+  const h = await window.pdfjsLib.getDocument({ data: new Uint8Array(await fayl.arrayBuffer()) }).promise;
+  const { info } = await h.getMetadata();
+  h.destroy();
+  return { kitob: info && info.Title, muallif: info && info.Author };
+}
+
+// MOBI/AZW3: PalmDB → 0-yozuv → MOBI sarlavhasi → EXTH (100 — muallif, 503 — nom) yoki to'liq nom
+async function mobiMalumoti(fayl) {
+  const buf = await fayl.slice(0, 300000).arrayBuffer();
+  const v = new DataView(buf);
+  const r0 = v.getUint32(78);
+  if (String.fromCharCode(...new Uint8Array(buf, r0 + 16, 4)) !== "MOBI") return {};
+  const mobiUzun = v.getUint32(r0 + 20), kodlash = v.getUint32(r0 + 28) === 65001 ? "utf-8" : "windows-1252";
+  const dek = new TextDecoder(kodlash);
+  const natija = {};
+  const nomJoy = v.getUint32(r0 + 84), nomUzun = v.getUint32(r0 + 88);
+  if (nomUzun && r0 + nomJoy + nomUzun <= buf.byteLength) natija.kitob = dek.decode(new Uint8Array(buf, r0 + nomJoy, nomUzun));
+  if (v.getUint32(r0 + 128) & 0x40) {
+    let p = r0 + 16 + mobiUzun;
+    if (String.fromCharCode(...new Uint8Array(buf, p, 4)) === "EXTH") {
+      const soni = v.getUint32(p + 8); p += 12;
+      for (let i = 0; i < soni && p + 8 <= buf.byteLength; i++) {
+        const tur = v.getUint32(p), uz = v.getUint32(p + 4);
+        const qiymat = dek.decode(new Uint8Array(buf, p + 8, Math.max(0, uz - 8)));
+        if (tur === 100 && !natija.muallif) natija.muallif = qiymat;
+        if (tur === 503) natija.kitob = qiymat;
+        p += uz;
+      }
+    }
+  }
+  return natija;
+}
+
+// MP3: ID3v2.3/2.4 — TIT2 (nom), TPE1 (ijrochi/muallif)
+async function mp3Malumoti(fayl) {
+  const buf = await fayl.slice(0, 256000).arrayBuffer();
+  const b = new Uint8Array(buf);
+  if (String.fromCharCode(b[0], b[1], b[2]) !== "ID3") return {};
+  const versiya = b[3];
+  const hajm = ((b[6] & 0x7f) << 21) | ((b[7] & 0x7f) << 14) | ((b[8] & 0x7f) << 7) | (b[9] & 0x7f);
+  const natija = {};
+  let p = 10;
+  while (p + 10 < Math.min(hajm + 10, b.length)) {
+    const id = String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
+    if (!/^[A-Z0-9]{4}$/.test(id)) break;
+    const uz = versiya === 4 ? ((b[p + 4] & 0x7f) << 21) | ((b[p + 5] & 0x7f) << 14) | ((b[p + 6] & 0x7f) << 7) | (b[p + 7] & 0x7f)
+      : (b[p + 4] << 24) | (b[p + 5] << 16) | (b[p + 6] << 8) | b[p + 7];
+    if (id === "TIT2" || id === "TPE1") {
+      const enc = b[p + 10], baytlar = b.slice(p + 11, p + 10 + uz);
+      const dek = enc === 1 ? "utf-16" : enc === 2 ? "utf-16be" : enc === 3 ? "utf-8" : "windows-1252";
+      const q = new TextDecoder(dek).decode(baytlar).replace(/\u0000/g, "");
+      if (id === "TIT2") natija.kitob = q; else natija.muallif = q;
+    }
+    p += 10 + uz;
+  }
+  return natija;
+}
+
+// Fayl nomidan: "Muallif - Kitob", "Kitob (Muallif)", "Kitob_by_Muallif"
+function nomdanMalumot(nom) {
+  const t = fayldanNom(nom);
+  const n = String(nom).replace(/\.[^.]+$/, "").replace(/_/g, " ");
+  const juft = n.split(/\s+[-–—]\s+/);
+  if (juft.length === 2) {
+    const [a, b] = juft.map(tozaMatn);
+    const muallifMi = (s) => !!MUALLIFLAR[s] || /^[A-ZА-ЯЎҚҒҲ][\wʻ'’]+\s+[A-ZА-ЯЎҚҒҲ][\wʻ'’]+$/.test(s);
+    return muallifMi(a) && !muallifMi(b) ? { muallif: a, kitob: b } : { kitob: a, muallif: b };
+  }
+  const qavs = n.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  if (qavs) return { kitob: tozaMatn(qavs[1]), muallif: tozaMatn(qavs[2]) };
+  return { kitob: t };
+}
+
+async function faylMalumoti(fayl) {
+  const k = kengaytma(fayl.name);
+  let m = {};
+  try {
+    if (k === "epub") m = await epubMalumoti(fayl);
+    else if (k === "fb2") m = await fb2Malumoti(fayl);
+    else if (k === "pdf") m = await pdfMalumoti(fayl);
+    else if (["mobi", "azw", "azw3", "prc"].includes(k)) m = await mobiMalumoti(fayl);
+    else if (k === "docx") m = await docxMalumoti(fayl);
+    else if (k === "mp3") m = await mp3Malumoti(fayl);
+  } catch (e) { m = {}; }
+  const nomdan = nomdanMalumot(fayl.name);
+  let kitob = tozaMatn(m.kitob), muallif = tozaMatn(m.muallif);
+  // PDF va DOCX xossalarida ko'pincha keraksiz qiymat bo'ladi ("Microsoft Word - ...", "Untitled", foydalanuvchi nomi)
+  if (/^(untitled|document\d*|microsoft word.*|без названия|новый документ.*)$/i.test(kitob) || /\.(docx?|pdf|indd)$/i.test(kitob)) kitob = "";
+  if (/^(user|admin|author|unknown|пользователь|windows user)$/i.test(muallif)) muallif = "";
+  // Muallif bir nechta bo'lsa (";" yoki "&") — birinchisi
+  muallif = muallif.split(/\s*[;&]\s*/)[0];
+  // Ro'yxatdagi kitob bo'lsa — muallifni ro'yxatdan olamiz
+  const royxatda = KITOBLAR.find((x) => x.nom.toLowerCase() === (kitob || nomdan.kitob || "").toLowerCase());
+  return {
+    kitob: kitob || nomdan.kitob || "",
+    muallif: muallif || (royxatda && royxatda.muallif) || nomdan.muallif || "",
+    manba: kitob || muallif ? "fayl" : "nom",
+  };
+}
