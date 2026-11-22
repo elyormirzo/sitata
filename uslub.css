@@ -443,3 +443,63 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .admin-yuqori { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .admin-taklif { display: flex; flex-direction: column; gap: 8px; }
 .admin-taklif .kichik-matn { margin: 0; }
+
+/* ===== 11. KITOBDOSHLAR, BIRGA O'QISH, BILDIRISHNOMALAR ===== */
+.yuqori-ong { display: flex; align-items: center; gap: 8px; }
+.qongiroq {
+  position: relative; width: 40px; height: 40px; border-radius: 6px; cursor: pointer; font-size: 18px;
+  background: var(--qogoz); border: 1px solid var(--chegara); display: flex; align-items: center; justify-content: center;
+}
+.nishon {
+  position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  background: #B5502A; color: #fff; font: 700 11px/20px Inter, sans-serif; text-align: center; border: 2px solid var(--fon);
+}
+.bildirish-panel {
+  position: absolute; z-index: 31; top: calc(100% + 6px); right: 0; width: min(340px, 100%); max-height: 70vh; overflow-y: auto;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px; box-shadow: 0 14px 30px rgba(80,50,20,.22);
+}
+.panel-yuqori { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px dashed var(--chegara);
+  font: 600 16px Lora, Georgia, serif; }
+.bildirish {
+  display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 10px 14px; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid #EFE4CC; color: var(--qora); font: 15px/1.4 Lora, Georgia, serif;
+}
+.bildirish small { font: italic 12px Lora, Georgia, serif; color: var(--kulrang); }
+.bildirish.yangi { background: #FBF0DF; box-shadow: inset 3px 0 0 var(--teri); }
+.bildirish:hover { background: #F1E6CC; }
+.matn-tugma { background: none; border: 0; padding: 0; cursor: pointer; color: var(--teri); font: 500 14px Lora, Georgia, serif; text-decoration: underline; }
+.matn-tugma.xavfli { display: block; margin: 24px auto 0; color: #9A3B1E; }
+.havola-tugma { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.kitobdosh-quti { display: flex; flex-direction: column; gap: 6px; }
+.kitobdosh-quti .kichik-matn { margin: 0; color: var(--zaytun); }
+
+.odam-qator {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px;
+}
+.odam-qator .tugmalar { display: flex; gap: 6px; }
+.odam-qator .amal { flex: none; padding: 0 12px; }
+.profil-nom { color: var(--qora); font: 600 16px Lora, Georgia, serif; text-decoration: none; }
+.profil-nom:hover { color: var(--teri); }
+
+.oqish-karta { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--qora); }
+.oqish-karta .tugmacha { align-self: flex-start; margin-top: 6px; }
+.oqish-kitob { font: 600 19px Lora, Georgia, serif; }
+.foiz-chiziq { height: 8px; border-radius: 4px; background: #E2D3B3; overflow: hidden; margin-top: 4px; }
+.foiz-chiziq span { display: block; height: 100%; background: var(--zaytun); border-radius: 4px; }
+.oqish-bosh { text-align: center; margin-bottom: 8px; }
+.oqish-bosh h2 { font: 600 28px Lora, Georgia, serif; margin: 2px 0 4px; }
+.oqish-bosh .kichik-matn { margin: 2px 0; }
+.oqish-bosh .profil-nom { font-size: 14px; }
+.oqish-xabar { margin: 12px 0 0; padding: 10px 14px; background: var(--qogoz); border-left: 3px solid #B98A55; text-align: left;
+  font: italic 16px/1.5 Lora, Georgia, serif; }
+.mening-holatim { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.mening-holatim b { font: 600 17px Lora, Georgia, serif; }
+.surgich-qator { display: flex; align-items: center; gap: 12px; }
+.surgich { flex: 1; accent-color: var(--zaytun); height: 28px; }
+.foiz-matn { min-width: 48px; text-align: right; font: 600 20px Lora, Georgia, serif; color: var(--zaytun); }
+.ishtirokchi { padding: 12px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px; }
+.ishtirokchi.meniki { border-color: var(--zaytun); }
+.ishtirokchi-yuqori { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ishtirokchi-izoh { margin: 8px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); }
+.dost-tanlov { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #fff; border: 1px solid var(--chegara); border-radius: 6px; }

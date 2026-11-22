@@ -15,9 +15,15 @@
   <!-- ===== Yuqori panel va menyu ===== -->
   <nav class="yuqori" aria-label="Asosiy menyu">
     <a class="logo" href="#bosh"><span aria-hidden="true">“</span>sitata<span class="logo-uz">.uz</span></a>
+    <div class="yuqori-ong">
+    <button type="button" class="qongiroq yashirin" id="qongiroq" aria-label="Bildirishnomalar" aria-expanded="false">
+      <span aria-hidden="true">🔔</span><span class="nishon yashirin" id="qongiroqSon"></span>
+    </button>
     <button type="button" class="menyu-tugma" id="menyuTugma" aria-expanded="false" aria-controls="menyu">
       <span class="menyu-belgi" aria-hidden="true"></span> Menyu
     </button>
+    </div>
+    <div class="bildirish-panel yashirin" id="bildirishPanel" role="dialog" aria-label="Bildirishnomalar"></div>
     <div class="menyu yashirin" id="menyu">
       <p class="menyu-sarlavha">Mundarija</p>
       <a href="#bosh" data-yol="bosh">Bosh sahifa</a>
@@ -26,6 +32,8 @@
       <a href="#lenta" data-yol="lenta">Iqtiboslar lentasi</a>
       <a href="#mualliflar" data-yol="mualliflar">Mualliflar</a>
       <a href="#karta" data-yol="karta">Karta yaratish</a>
+      <a href="#birga" data-yol="birga">Birga o'qiymiz</a>
+      <a href="#kitobdoshlar" data-yol="kitobdoshlar">Kitobdoshlar</a>
       <a href="#reyting" data-yol="reyting">Reyting</a>
       <a href="#profilim" data-yol="profilim">Profilim</a>
       <hr>
@@ -82,6 +90,8 @@
   <section class="sahifa yashirin" data-sahifa="karta" id="kartaSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="reyting" id="reytingSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="admin" id="adminSahifa"></section>
+  <section class="sahifa yashirin" data-sahifa="kitobdoshlar" id="kitobdoshlarSahifa"></section>
+  <section class="sahifa yashirin" data-sahifa="birga" id="birgaSahifa"></section>
   <section class="sahifa yashirin" data-sahifa="profil" aria-live="polite">
     <div class="profil-sahifa" id="profilSahifa"></div>
   </section>
@@ -138,5 +148,7 @@
 <script src="js/oyin.js"></script>
 <script src="js/profil.js"></script>
 <script src="js/sahifalar.js"></script>
+<script src="js/birga.js"></script>
+<script src="js/boshlash.js"></script>
 </body>
 </html>

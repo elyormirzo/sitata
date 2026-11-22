@@ -96,6 +96,7 @@ const SARLAVHALAR = {
   bosh: "sitata.uz — iqtiboslar, mualliflar va o'yinlar", "kim-aytgan": "Kim aytgan? — sitata.uz",
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
+  kitobdoshlar: "Kitobdoshlar — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
@@ -124,6 +125,7 @@ function sahifaniKor() {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: profilimniChiz, profil: () => profilSahifasiniKor(param), admin: adminniChiz,
+    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param),
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
   window.scrollTo(0, 0);
@@ -167,6 +169,8 @@ function boshniChiz() {
     ["#lenta", "Iqtiboslar lentasi", `${barchaIqtiboslar().length} ta iqtibos`, "“"],
     ["#mualliflar", "Mualliflar", `${Object.keys(MUALLIFLAR).length} ta muallif`, "✒"],
     ["#karta", "Karta yaratish", "Story, post yoki kvadrat", "▣"],
+    ["#birga", "Birga o'qiymiz", "Kitobdoshlar bilan bir kitob", "❦"],
+    ["#kitobdoshlar", "Kitobdoshlar", "Do'stlaringiz va takliflar", "☷"],
     ["#reyting", "Reyting", "Eng yaxshi o'yinchilar", "★"],
     ["#profilim", "Profilim", mening ? mening.ism : "Profil oching", "☺"],
   ];
@@ -854,8 +858,3 @@ async function adminniChiz() {
   });
 }
 
-// ---------- Ishga tushirish ----------
-portretniQur();
-chiz();
-natijaniYoz();   // oldingi safar internet bo'lmagan bo'lsa
-sahifaniKor();

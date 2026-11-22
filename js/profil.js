@@ -255,6 +255,8 @@ async function profilSahifasiniKor(kod) {
   }
   sahifa.appendChild(xabar);
 
+  if (!ozimniki && typeof kitobdoshTugmasi === "function") sahifa.appendChild(kitobdoshTugmasi(profil));
+
   const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga qaytish" : "O'zingiz ham o'ynab ko'ring");
   oyna.href = ozimniki ? "#kim-aytgan" : SAYT_MANZILI + "#kim-aytgan";
   oyna.style.height = "52px"; oyna.style.borderRadius = "6px";

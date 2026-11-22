@@ -95,3 +95,23 @@ const IQTIBOSLAR = [
 
 // Muallif sahifasi manzili uchun qisqa nom: "Mirzo Ulug'bek" → "mirzo-ulugbek"
 const muallifSlug = (ism) => ism.toLowerCase().replace(/['ʻʼ‘’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+// «Birga o'qiymiz» uchun kitoblar ro'yxati. Ro'yxatda yo'q kitobni foydalanuvchi o'zi yozishi mumkin.
+const KITOBLAR = [
+  { nom: "O'tgan kunlar", muallif: "Abdulla Qodiriy" },
+  { nom: "Mehrobdan chayon", muallif: "Abdulla Qodiriy" },
+  { nom: "Boburnoma", muallif: "Zahiriddin Bobur" },
+  { nom: "Xamsa", muallif: "Alisher Navoiy" },
+  { nom: "Mahbub ul-qulub", muallif: "Alisher Navoiy" },
+  { nom: "Urush va tinchlik", muallif: "Lev Tolstoy" },
+  { nom: "Anna Karenina", muallif: "Lev Tolstoy" },
+  { nom: "Jinoyat va jazo", muallif: "Fyodor Dostoyevskiy" },
+  { nom: "Aka-uka Karamazovlar", muallif: "Fyodor Dostoyevskiy" },
+  { nom: "Telba", muallif: "Fyodor Dostoyevskiy" },
+  { nom: "Gamlet", muallif: "Uilyam Shekspir" },
+  { nom: "Romeo va Julyetta", muallif: "Uilyam Shekspir" },
+  { nom: "Yevgeniy Onegin", muallif: "Aleksandr Pushkin" },
+  { nom: "Lun yuy (Suhbatlar va mulohazalar)", muallif: "Konfutsiy" },
+  { nom: "Nikomax axloqi", muallif: "Aristotel" },
+  { nom: "Metod haqida mulohaza", muallif: "Rene Dekart" },
+];
