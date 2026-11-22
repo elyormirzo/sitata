@@ -776,12 +776,7 @@ body.oquvchi-ochiq { overflow: hidden; }
 .iqtibos-manba { margin: 6px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); overflow-wrap: anywhere; }
 .amal.yoqtirish.tanlangan { color: #B3261E; }
 .amal.yoqtirish:disabled { opacity: 1; cursor: default; }
-a.stat { text-decoration: none; display: block; }
-a.stat:hover { border-color: var(--teri); }
-.oyin-qismi { border: 1px solid var(--chegara); border-radius: 8px; background: var(--qogoz); padding: 0 12px; text-align: center; }
-.oyin-qismi > summary { cursor: pointer; padding: 12px 0; font: 15px Lora, Georgia, serif; color: var(--qora); list-style-position: inside; }
-.oyin-qismi[open] { padding-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
-.oyin-qismi .asosiy { height: 46px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+
 /* Lenta tepasidagi kunlik o'yin qatori */
 .kunlik-qator { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; text-decoration: none; color: inherit;
   background: linear-gradient(90deg, #6B3E26 0 6px, var(--qogoz) 6px); border: 1px solid var(--chegara); border-radius: 8px; }
@@ -855,3 +850,57 @@ a.stat:hover { border-color: var(--teri); }
 .avatar-kanvas { touch-action: none; cursor: grab; border-radius: 8px; }
 .profil-nom { display: inline-flex; align-items: center; flex-wrap: wrap; }
 .reyting-qator .avatar.jadval { box-shadow: 0 0 0 2px var(--qogoz), 0 0 0 3px var(--chegara); }
+
+/* ===== Profil sahifasi (banner ko'rinishi) ===== */
+.profil-sahifa:has(> .profil-banner) { padding: 0 0 18px; text-align: left; gap: 14px; overflow: hidden; }
+.profil-banner { position: relative; height: 104px; background: linear-gradient(135deg, #4F5B3A 0%, #7A6A3A 55%, #A0552E 100%); }
+.banner-tugma { position: absolute; top: 12px; right: 12px; z-index: 1; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(251,245,230,.2); color: #FBF5E6; font-size: 18px; backdrop-filter: blur(4px); }
+.banner-tugma:hover { background: rgba(251,245,230,.35); }
+.profil-bosh { display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
+.profil-bosh .profil-avatar { position: relative; z-index: 1; align-items: flex-start; margin: -62px 0 0; }
+.profil-bosh .avatar.katta { box-shadow: 0 0 0 5px var(--qogoz), 0 4px 14px rgba(40,25,10,.25); }
+.profil-bosh h2 { font-size: 30px; line-height: 1.15; overflow-wrap: anywhere; }
+.profil-osti { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.profil-osti .taxallus-yozuv { margin: 0; }
+.profil-raqamlar { display: flex; gap: 6px; justify-content: space-between; padding: 4px 0; }
+.raqam { flex: 1; min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.raqam b { font: 600 22px Lora, Georgia, serif; color: var(--qora); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.raqam span { font-size: 13px; color: var(--kulrang); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+a.raqam:hover b { color: var(--teri); }
+.profil-bio { margin: 0; font: 16px/1.45 Lora, Georgia, serif; color: var(--qora); white-space: pre-line; overflow-wrap: anywhere; }
+.profil-tarmoqlar { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.tarmoq { display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; font: 500 15px Lora, Georgia, serif; color: var(--teri); text-decoration: none; background: none; border: 0; cursor: pointer; }
+.tarmoq span { overflow-wrap: anywhere; }
+a.tarmoq:hover span { text-decoration: underline; }
+.tarmoq.qoshish { color: var(--zaytun); }
+.profil-amallar { display: flex; gap: 10px; align-items: flex-end; }
+.profil-amallar > :first-child { flex: 1; min-width: 0; }
+.amal-asosiy, .profil-amallar .kitobdosh-quti > button, .profil-amallar .kitobdosh-quti > a { display: flex; align-items: center; justify-content: center; min-height: 48px; width: 100%;
+  border-radius: 999px; background: #EFE4CC; border: 1px solid var(--chegara); color: var(--qora); font: 600 16px Lora, Georgia, serif; text-decoration: none; cursor: pointer; box-sizing: border-box; }
+.amal-asosiy:hover { background: #E8DABB; }
+.profil-amallar .kitobdosh-quti { justify-content: center; }
+.amal-doira { flex: none; width: 48px; height: 48px; border-radius: 50%; background: #EFE4CC; border: 1px solid var(--chegara); color: var(--qora); font-size: 20px; cursor: pointer; }
+.profil-baho { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.profil-baho .yulduzlar { justify-content: flex-start; gap: 2px; }
+.profil-baho .yulduzlar button { width: 36px; height: 36px; font-size: 28px; }
+.raqam b small { font-size: 15px; }
+.profil-tahrir { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--chegara); border-radius: 10px; background: #FFFDF6; }
+.profil-tahrir > b { font: 600 17px Lora, Georgia, serif; }
+.profil-tahrir textarea { resize: vertical; min-height: 60px; }
+.profil-tahrir small { align-self: flex-end; margin-top: -4px; }
+.tarmoq-maydon { display: flex; align-items: center; gap: 8px; color: var(--teri); }
+.tarmoq-maydon svg { flex: none; width: 20px; }
+.tarmoq-maydon input { flex: 1; min-width: 0; }
+.tahrir-tugmalar { display: flex; align-items: center; gap: 14px; }
+.tahrir-tugmalar .asosiy { flex: 1; height: 46px; border-radius: 6px; }
+.profil-tablar { display: flex; border-bottom: 1px solid var(--chegara); margin-top: 4px; }
+.profil-tablar button { flex: 1; padding: 12px 6px; background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer;
+  font: 600 15px Lora, Georgia, serif; color: var(--kulrang); }
+.profil-tablar button.faol { color: var(--teri); border-bottom-color: var(--teri); }
+.profil-tab-tana { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; text-align: center; }
+.profil-tab-tana .javon-qism { border-top: 0; padding-top: 0; }
+.profil-tab-tana .asosiy { height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.profil-sozlamalar { margin: 0 20px; border-top: 1px dashed var(--chegara); padding-top: 4px; }
+.profil-sozlamalar > summary { cursor: pointer; padding: 10px 0; font: 600 15px Lora, Georgia, serif; color: var(--kulrang); }
+.profil-sozlamalar[open] { display: flex; flex-direction: column; gap: 8px; text-align: center; }

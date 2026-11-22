@@ -242,6 +242,33 @@ function seriyalar(oyinlar) {
   return { joriy, eng };
 }
 
+// Ijtimoiy tarmoqlar: bazada faqat foydalanuvchi nomi saqlanadi, havola shu yerda yasaladi
+const TARMOQLAR = [
+  { k: "instagram", nom: "Instagram", misol: "username", re: /^[A-Za-z0-9._]{1,30}$/, url: (n) => "https://instagram.com/" + encodeURIComponent(n),
+    hostlar: /^(www\.)?instagram\.com$/i,
+    belgi: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>' },
+  { k: "x", nom: "X", misol: "username", re: /^[A-Za-z0-9_]{1,15}$/, url: (n) => "https://x.com/" + encodeURIComponent(n),
+    hostlar: /^(www\.)?(x|twitter)\.com$/i,
+    belgi: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.3L5.3 21H2.2l7.2-8.3L2 3h6.3l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"/></svg>' },
+  { k: "telegram", nom: "Telegram", misol: "username", re: /^[A-Za-z0-9_]{5,32}$/, url: (n) => "https://t.me/" + encodeURIComponent(n),
+    hostlar: /^(www\.)?(t\.me|telegram\.me)$/i,
+    belgi: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M21.4 3.6 2.9 10.8c-1.2.5-1.2 1.2 0 1.6l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.6-1.5zM9 13.6l9.2-5.8c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.3L9 13.6z"/></svg>' },
+];
+// Kiritilganni tozalash: "@nom", "nom" yoki to'liq havola → nom; bo'sh → null; noto'g'ri → false
+function tarmoqNomi(kirish, t) {
+  let v = String(kirish || "").trim();
+  if (!v) return null;
+  if (/^(https?:\/\/)?[a-z0-9.-]+\.[a-z]{2,}\//i.test(v)) {
+    try {
+      const u = new URL(/^https?:/i.test(v) ? v : "https://" + v);
+      if (!t.hostlar.test(u.hostname)) return false;
+      v = u.pathname.split("/").filter(Boolean)[0] || "";
+    } catch (e) { return false; }
+  }
+  v = v.replace(/^@/, "");
+  return t.re.test(v) ? v : false;
+}
+
 // ?p=KOD — boshqa o'yinchining profil sahifasi
 async function profilSahifasiniKor(kod) {
   const sahifa = $("profilSahifa");
@@ -254,8 +281,8 @@ async function profilSahifasiniKor(kod) {
     const m = await mijozOl();
     const izlash = String(kod).toLowerCase();
     const p = izlash.startsWith("@")
-      ? await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
-      : await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("kod", izlash).maybeSingle();
+      ? await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
+      : await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram").eq("kod", izlash).maybeSingle();
     profil = p.data;
     if (!profil) { sahifa.innerHTML = '<p class="kichik-matn">Bunday profil topilmadi.</p>'; return; }
     const [o, b, u] = await Promise.all([
@@ -282,7 +309,17 @@ async function profilSahifasiniKor(kod) {
   sahifa.innerHTML = "";
   const el = (teg, sinf, matn) => { const e = document.createElement(teg); if (sinf) e.className = sinf; if (matn != null) e.textContent = matn; return e; };
 
-  // Profil rasmi (o'zi bossa — o'zgartiradi)
+  // ---- Bosh qism: banner, rasm, ism, daraja ----
+  const banner = el("div", "profil-banner");
+  if (ozimniki) {
+    const tahrir = el("button", "banner-tugma", "✎"); tahrir.type = "button";
+    tahrir.title = "Profilni tahrirlash"; tahrir.setAttribute("aria-label", "Profilni tahrirlash");
+    tahrir.addEventListener("click", () => tahrirOch());
+    banner.appendChild(tahrir);
+  }
+  sahifa.appendChild(banner);
+
+  const bosh = el("div", "profil-bosh");
   if (typeof avatarEl === "function") {
     const rasmQuti = el("div", "profil-avatar");
     const chizRasm = () => {
@@ -290,56 +327,76 @@ async function profilSahifasiniKor(kod) {
       const a = avatarEl(profil, 104, "katta");
       if (ozimniki) {
         const b = el("button", "avatar-tugma"); b.type = "button"; b.setAttribute("aria-label", "Profil rasmini o'zgartirish");
-        b.append(a, el("span", "avatar-qalam", "✎"));
+        b.append(a, el("span", "avatar-qalam", profil.rasm ? "✎" : "+"));
         b.addEventListener("click", () => avatarTanlash(profil, chizRasm));
         rasmQuti.appendChild(b);
-        if (!profil.rasm) rasmQuti.appendChild(el("small", "kichik-matn", "Rasm qo'yish uchun bosing"));
       } else rasmQuti.appendChild(a);
     };
     chizRasm();
-    sahifa.appendChild(rasmQuti);
+    bosh.appendChild(rasmQuti);
   }
-  sahifa.appendChild(el("h2", "", profil.ism));
-  if (profil.taxallus) sahifa.appendChild(el("p", "taxallus-yozuv", "@" + profil.taxallus));
-  if (typeof darajaYorligi === "function") sahifa.appendChild(darajaYorligi(profil.id));
-  if (ozimniki) {
-    if (!mening || mening.taxallus !== profil.taxallus || mening.rasm !== profil.rasm) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus, rasm: profil.rasm || null });
-    sahifa.appendChild(taxallusQutisi(profil));
-  }
+  bosh.appendChild(el("h2", "", profil.ism));
+  const ostiQator = el("div", "profil-osti");
+  if (profil.taxallus) ostiQator.appendChild(el("span", "taxallus-yozuv", "@" + profil.taxallus));
+  if (typeof darajaYorligi === "function") ostiQator.appendChild(darajaYorligi(profil.id));
+  bosh.appendChild(ostiQator);
+  if (ozimniki && (!mening || mening.taxallus !== profil.taxallus || mening.rasm !== profil.rasm)) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus, rasm: profil.rasm || null });
 
-  if (typeof iqtibosStatlari === "function") sahifa.appendChild(iqtibosStatlari(profil.id, ozimniki));
+  // Raqamlar: iqtibos, yoqtirma, kitobdosh, baho
+  const raqamlar = el("div", "profil-raqamlar");
+  const raqam = (son, nom, href) => {
+    const r = el(href ? "a" : "div", "raqam"); if (href) r.href = href;
+    r.append(el("b", "", String(son)), el("span", "", nom)); return r;
+  };
+  const iq = raqam("–", "iqtibos"), yo = raqam("–", "yoqtirma"), kd = raqam("–", "kitobdosh", ozimniki ? "#kitobdoshlar" : null);
+  raqamlar.append(iq, yo, kd, raqam(baholar.length ? "★ " + ortachaBaho.toFixed(1) : "★ –", baholar.length ? baholar.length + " ta baho" : "baho yo'q"));
+  bosh.appendChild(raqamlar);
+  (async () => {
+    try {
+      const m = await mijozOl();
+      const { data } = await m.rpc("profil_statistikasi", { p: profil.id });
+      if (data && data[0]) {
+        iq.firstChild.textContent = data[0].iqtiboslar; yo.firstChild.textContent = data[0].yoqtirmalar; kd.firstChild.textContent = data[0].kitobdoshlar;
+      }
+    } catch (e) { /* jim */ }
+  })();
 
-  // «Kim aytgan?» o'yini natijalari — yig'ilgan holda, pastroqda
-  const oyinQismi = el("details", "oyin-qismi");
-  oyinQismi.appendChild(el("summary", "", jami ? `🎮 «Kim aytgan?» o'yini · ${jami} o'yin, ${foiz}% topgan` : "🎮 «Kim aytgan?» o'yini"));
-  const statlar = el("div", "statlar");
-  [[jami, "o'yin"], [foiz + "%", "topgan"], [ortachaXato, "o'rtacha xato"],
-   [joriy, "joriy seriya"], [eng, "eng uzun seriya"], [yutganlar.length, "topilgan"]].forEach(([son, nom]) => {
-    const s = el("div", "stat"); s.append(el("b", "", String(son)), el("span", "", nom)); statlar.appendChild(s);
+  if (profil.bio) bosh.appendChild(el("p", "profil-bio", profil.bio));
+
+  // Ijtimoiy tarmoqlar
+  const tarmoqlar = el("div", "profil-tarmoqlar");
+  TARMOQLAR.forEach((t) => {
+    const nom = profil[t.k];
+    if (nom) {
+      const a = el("a", "tarmoq"); a.href = t.url(nom); a.target = "_blank"; a.rel = "noopener noreferrer nofollow";
+      a.innerHTML = t.belgi; a.appendChild(el("span", "", t.k === "telegram" || t.k === "x" ? "@" + nom : nom));
+      a.title = t.nom; tarmoqlar.appendChild(a);
+    } else if (ozimniki) {
+      const b = el("button", "tarmoq qoshish"); b.type = "button";
+      b.append("+ ", t.nom); b.addEventListener("click", () => tahrirOch(t.k)); tarmoqlar.appendChild(b);
+    }
   });
-  oyinQismi.appendChild(statlar);
-  if (jami) {
-    oyinQismi.appendChild(el("p", "kichik-matn", "Oxirgi o'yinlar"));
-    const oxirgilar = el("div", "oxirgilar");
-    oyinlar.slice(0, 14).reverse().forEach((o) => {
-      const i = el("i", o.yutdi ? "" : "yoq");
-      i.title = o.yutdi ? `topgan, ${o.xatolar} xato` : "topa olmagan";
-      oxirgilar.appendChild(i);
-    });
-    oyinQismi.appendChild(oxirgilar);
-  }
-  const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga o'tish" : "O'zingiz ham o'ynab ko'ring");
-  oyna.href = ozimniki ? "#kim-aytgan" : SAYT_MANZILI + "#kim-aytgan";
-  oyinQismi.appendChild(oyna);
+  if (tarmoqlar.childNodes.length) bosh.appendChild(tarmoqlar);
 
-  sahifa.appendChild(el("div", "baho-ortacha",
-    baholar.length ? `★ ${ortachaBaho.toFixed(1)}  ·  ${baholar.length} ta baho` : "Hali baho berilmagan"));
+  // Amallar: kitobdosh + ulashish
+  const amallar = el("div", "profil-amallar");
+  if (ozimniki) amallar.appendChild(havola("#kitobdoshlar", "amal-asosiy", "👥 Kitobdosh qo'shish"));
+  else if (typeof kitobdoshTugmasi === "function") amallar.appendChild(kitobdoshTugmasi(profil));
+  const ulash = el("button", "amal-doira", "↗"); ulash.type = "button";
+  ulash.title = "Profilni ulashish"; ulash.setAttribute("aria-label", "Profilni ulashish");
+  ulash.addEventListener("click", async () => {
+    const url = profilManzili(profil);
+    try { if (navigator.share) { await navigator.share({ title: profil.ism + " — sitata.uz", url }); return; } } catch (e) { return; }
+    try { await navigator.clipboard.writeText(url); ulash.textContent = "✓"; setTimeout(() => (ulash.textContent = "↗"), 1500); } catch (e) { prompt("Havolani nusxalang:", url); }
+  });
+  amallar.appendChild(ulash);
+  bosh.appendChild(amallar);
 
+  // Boshqa odamning profiliga baho berish
   const xabar = el("p", "kichik-matn");
-  if (ozimniki) {
-    xabar.textContent = "Bu sizning profilingiz — havolani ulashing, do'stlaringiz baho bersin.";
-  } else {
-    xabar.textContent = meningBaham ? "Bahoingizni o'zgartirishingiz mumkin:" : "Baho bering:";
+  if (!ozimniki) {
+    const bahoQator = el("div", "profil-baho");
+    bahoQator.appendChild(el("span", "kichik-matn", meningBaham ? "Bahoingiz:" : "Baho bering:"));
     const yulduzlar = el("div", "yulduzlar");
     const chizYulduz = (n) => [...yulduzlar.children].forEach((b, i) => b.classList.toggle("tola", i < n));
     for (let n = 1; n <= 5; n++) {
@@ -367,18 +424,98 @@ async function profilSahifasiniKor(kod) {
       yulduzlar.appendChild(b);
     }
     chizYulduz(meningBaham);
-    sahifa.appendChild(yulduzlar);
+    bahoQator.appendChild(yulduzlar);
+    bosh.append(bahoQator, xabar);
   }
-  sahifa.appendChild(xabar);
 
-  if (typeof javonQismi === "function") sahifa.appendChild(javonQismi(profil, ozimniki));
-  if (!ozimniki && typeof kitobdoshTugmasi === "function") sahifa.appendChild(kitobdoshTugmasi(profil));
+  // Tahrirlash oynasi (bio va tarmoqlar)
+  const tahrirQuti = el("div", "profil-tahrir yashirin");
+  bosh.appendChild(tahrirQuti);
+  function tahrirOch(fokus) {
+    tahrirQuti.innerHTML = ""; tahrirQuti.classList.remove("yashirin");
+    tahrirQuti.appendChild(el("b", "", "Profilni tahrirlash"));
+    const bio = el("textarea", "matn-maydon"); bio.maxLength = 160; bio.rows = 2; bio.placeholder = "O'zingiz haqingizda qisqacha (sevimli kitob, janr…)";
+    bio.value = profil.bio || "";
+    const hisob = el("small", "kichik-matn");
+    const sana = () => (hisob.textContent = `${bio.value.length} / 160`); sana(); bio.addEventListener("input", sana);
+    tahrirQuti.append(bio, hisob);
+    const maydonlar = {};
+    TARMOQLAR.forEach((t) => {
+      const q = el("label", "tarmoq-maydon");
+      q.innerHTML = t.belgi;
+      const i = el("input", "matn-maydon bir-qator"); i.placeholder = t.nom + " — " + t.misol; i.value = profil[t.k] || "";
+      i.autocapitalize = "off"; i.spellcheck = false; i.setAttribute("aria-label", t.nom);
+      q.appendChild(i); tahrirQuti.appendChild(q); maydonlar[t.k] = i;
+    });
+    const tx = el("p", "kichik-matn");
+    const saqla = el("button", "asosiy", "Saqlash"); saqla.type = "button";
+    const bekor = el("button", "matn-tugma", "Bekor qilish"); bekor.type = "button";
+    bekor.addEventListener("click", () => tahrirQuti.classList.add("yashirin"));
+    saqla.addEventListener("click", async () => {
+      const q = { bio: bio.value.trim().slice(0, 160) || null };
+      for (const t of TARMOQLAR) {
+        const v = tarmoqNomi(maydonlar[t.k].value, t);
+        if (v === false) { tx.textContent = `${t.nom} nomi noto'g'ri — faqat foydalanuvchi nomini yoki havolani kiriting.`; maydonlar[t.k].focus(); return; }
+        q[t.k] = v;
+      }
+      saqla.disabled = true; tx.textContent = "Saqlanmoqda…";
+      try {
+        const m = await mijozOl();
+        const { error } = await m.from("profillar").update(q).eq("id", profil.id);
+        if (error) throw error;
+        profilSahifasiniKor(kod);
+      } catch (e) { saqla.disabled = false; tx.textContent = "Saqlanmadi — qayta urinib ko'ring."; }
+    });
+    const tugmalar = el("div", "tahrir-tugmalar"); tugmalar.append(saqla, bekor);
+    tahrirQuti.append(tx, tugmalar);
+    (fokus ? maydonlar[fokus] : bio).focus();
+    tahrirQuti.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  sahifa.appendChild(bosh);
 
-  sahifa.appendChild(oyinQismi);
-  // Sozlamalar (hisob, eslatmalar) — eng pastda
+  // ---- Bo'limlar: Javon | O'yin ----
+  const tablar = el("div", "profil-tablar");
+  const tana = el("div", "profil-tab-tana");
+  const tabTugma = (nom, chiz) => {
+    const b = el("button", "", nom); b.type = "button";
+    b.addEventListener("click", () => { [...tablar.children].forEach((x) => x.classList.toggle("faol", x === b)); tana.innerHTML = ""; chiz(); });
+    tablar.appendChild(b); return b;
+  };
+  const javonTab = tabTugma("📚 Javon", () => {
+    if (typeof javonQismi === "function") tana.appendChild(javonQismi(profil, ozimniki));
+  });
+  tabTugma("🎮 «Kim aytgan?»", () => {
+    const statlar = el("div", "statlar");
+    [[jami, "o'yin"], [foiz + "%", "topgan"], [ortachaXato, "o'rtacha xato"],
+     [joriy, "joriy seriya"], [eng, "eng uzun seriya"], [yutganlar.length, "topilgan"]].forEach(([son, nom]) => {
+      const s = el("div", "stat"); s.append(el("b", "", String(son)), el("span", "", nom)); statlar.appendChild(s);
+    });
+    tana.appendChild(statlar);
+    if (jami) {
+      tana.appendChild(el("p", "kichik-matn", "Oxirgi o'yinlar"));
+      const oxirgilar = el("div", "oxirgilar");
+      oyinlar.slice(0, 14).reverse().forEach((o) => {
+        const i = el("i", o.yutdi ? "" : "yoq");
+        i.title = o.yutdi ? `topgan, ${o.xatolar} xato` : "topa olmagan";
+        oxirgilar.appendChild(i);
+      });
+      tana.appendChild(oxirgilar);
+    }
+    const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga o'tish" : "O'zingiz ham o'ynab ko'ring");
+    oyna.href = ozimniki ? "#kim-aytgan" : SAYT_MANZILI + "#kim-aytgan";
+    tana.appendChild(oyna);
+  });
+  sahifa.append(tablar, tana);
+  javonTab.click();
+
+  // ---- Sozlamalar (faqat o'zi) ----
   if (ozimniki) {
-    sahifa.appendChild(hisobQutisi());
-    if (typeof eslatmaQutisi === "function") sahifa.appendChild(eslatmaQutisi());
+    const soz = el("details", "profil-sozlamalar");
+    soz.appendChild(el("summary", "", "⚙ Sozlamalar"));
+    soz.appendChild(taxallusQutisi(profil));
+    soz.appendChild(hisobQutisi());
+    if (typeof eslatmaQutisi === "function") soz.appendChild(eslatmaQutisi());
+    sahifa.appendChild(soz);
   }
 }
 
