@@ -29,3 +29,11 @@
 -- yillik_xulosa(yil) → jsonb: tugatilgan kitoblar, sahifalar, o'qilgan kunlar, eng uzun seriya, eng ko'p o'qilgan oy,
 --   sevimli muallif, iqtiboslar va yoqtirmalar, eng ko'p yoqtirilgan iqtibos, topilgan, duel g'alabalari, yangi kitobdoshlar.
 --   Faqat chaqiruvchining o'zi uchun (auth.uid()).
+
+-- ===== Guruhda tayyorgarlik (migratsiya: guruh_tayyorgarlik) =====
+-- guruh_savollari(guruh_id, savol, javob, variantlar jsonb, mavzu, tartib) — egasi qo'shadi (≤3000), a'zolar ko'radi.
+-- savol_natijalari(profil_id, savol_id, guruh_id, quti 0–5, togri, xato, oxirgi) — har kim faqat o'zinikini ko'radi/yozadi.
+-- guruh_tayyorgarligi(g) — a'zolar bo'yicha ko'rilgan/o'zlashtirilgan (quti ≥ 2) soni (a'zolarga);
+-- qiyin_savollar(g) — eng ko'p xato qilinayotgan 15 savol (faqat egasiga).
+-- guruh_materiallari + «guruh-fayllar» xotirasi (maxfiy, 50 MB): o'qish — a'zolar, yuklash/o'chirish — egasi (guruh_fayliga_ruxsat).
+-- guruhga_qoshil: guruh hajmi 1000 kishigacha.

@@ -17,6 +17,7 @@ function faylTuri(nom) {
   if (k === "epub") return "epub";
   if (k === "fb2") return "fb2";
   if (k === "txt" || k === "md") return "txt";
+  if (k === "docx") return "docx";
   if (AUDIO_TURLAR.includes(k)) return "audio";
   return "yuklab";
 }
@@ -187,8 +188,8 @@ async function oquvchiniOch(m, k, opts = {}) {
   document.addEventListener("keydown", oquvchiTugmalari);
 
   const [{ data: korish }, { data: yuklash }] = await Promise.all([
-    m.storage.from("kitoblar").createSignedUrl(k.fayl_yoli, himoya ? 300 : 3600),
-    himoya ? Promise.resolve({ data: null }) : m.storage.from("kitoblar").createSignedUrl(k.fayl_yoli, 3600, { download: k.fayl_nomi || true }),
+    m.storage.from(opts.bucket || "kitoblar").createSignedUrl(k.fayl_yoli, himoya ? 300 : 3600),
+    himoya ? Promise.resolve({ data: null }) : m.storage.from(opts.bucket || "kitoblar").createSignedUrl(k.fayl_yoli, 3600, { download: k.fayl_nomi || true }),
   ]);
   if (!korish) { tana.innerHTML = ""; tana.appendChild(yarat("p", "bosh-holat", "Faylni ochib bo'lmadi.")); return; }
   yuklab.href = yuklash ? yuklash.signedUrl : korish.signedUrl;
@@ -211,6 +212,10 @@ async function oquvchiniOch(m, k, opts = {}) {
       const buf = await (await fetch(korish.signedUrl)).arrayBuffer();
       const matn = matnniOch(buf);
       tana.appendChild(tur === "fb2" ? fb2niChiz(matn) : txtniChiz(matn));
+      oqishJoyiniTikla(tana, k.id, () => joyYoz(tana.scrollTop / Math.max(1, tana.scrollHeight - tana.clientHeight)));
+    } else if (tur === "docx") {
+      const buf = await (await fetch(korish.signedUrl)).arrayBuffer();
+      tana.appendChild(txtniChiz((await docxMatni(buf)).replace(/\n/g, "\n\n")));
       oqishJoyiniTikla(tana, k.id, () => joyYoz(tana.scrollTop / Math.max(1, tana.scrollHeight - tana.clientHeight)));
     } else if (tur === "epub") {
       await epubniChiz(tana, korish.signedUrl, k.id, himoya, joyYoz);
@@ -400,6 +405,28 @@ async function epubMalumoti(fayl) {
     if (h) belgilar += h.replace(/<head[\s\S]*?<\/head>/i, "").replace(/<[^>]+>/g, "").replace(/&[a-z#0-9]+;/gi, " ").replace(/\s+/g, " ").length;
   }
   return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator"), sahifalar: belgilardanSahifa(belgilar) };
+}
+
+// DOCX matni: har bir xatboshi — alohida qator. Word'ning avtomatik raqamlashi ham matnga qo'shiladi:
+// 1-daraja — «1.», «2.»…, 2-daraja — «A)», «B)»… (test savollari va variantlarini ajratish uchun)
+async function docxMatni(manba) {
+  const zip = await (await jszipOl()).loadAsync(manba);
+  const xml = await zip.file("word/document.xml")?.async("string");
+  if (!xml) return "";
+  const raqam = {}; let harf = 0;
+  const qatorlar = [];
+  for (const p of xml.split(/<\/w:p>/)) {
+    let t = (p.match(/<w:t(?:\s[^>]*)?>[^<]*/g) || []).map((x) => x.replace(/^<w:t(?:\s[^>]*)?>/, "")).join("");
+    t = t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+    const num = p.match(/<w:numPr>[\s\S]*?<w:ilvl w:val="(\d+)"\/>[\s\S]*?<w:numId w:val="(\d+)"\/>/);
+    if (num && t.trim()) {
+      const daraja = Number(num[1]), id = num[2];
+      if (daraja === 0) { raqam[id] = (raqam[id] || 0) + 1; harf = 0; t = raqam[id] + ". " + t; }
+      else { t = "ABCDEFGH"[harf++ % 8] + ") " + t; }
+    }
+    qatorlar.push(t);
+  }
+  return qatorlar.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 async function docxMalumoti(fayl) {

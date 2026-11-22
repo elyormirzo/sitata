@@ -1132,3 +1132,53 @@ a.post-ism:hover { text-decoration: underline; }
 .xulosa-orqa { left: 0; width: 32%; }
 .xulosa-oldin { right: 0; width: 68%; }
 .xulosa-orqa:disabled, .xulosa-oldin:disabled { cursor: default; }
+
+/* ===== Guruhda tayyorgarlik (mashq) ===== */
+.material-qator { display: flex; align-items: center; gap: 8px; }
+.material-och { flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left;
+  padding: 10px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 10px; cursor: pointer; font: inherit; color: inherit; }
+.material-och > span { grid-row: span 2; font-size: 24px; }
+.material-och b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.material-och small { font-size: 12px; color: var(--kulrang); }
+.material-yukla-quti { display: flex; flex-direction: column; gap: 4px; }
+.material-yukla { align-self: flex-start; cursor: pointer; }
+.mashq-xulosa { display: flex; flex-direction: column; gap: 6px; padding: 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 12px; }
+.mashq-xulosa > b { font: 600 18px Lora, Georgia, serif; }
+.mashq-rejimlar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.mashq-rejim { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 14px 12px; text-align: left; cursor: pointer;
+  background: #FFFDF6; border: 1px solid var(--chegara); border-radius: 12px; font: inherit; color: inherit; }
+.mashq-rejim:not(:disabled):hover { border-color: var(--teri); }
+.mashq-rejim:disabled { opacity: .5; cursor: default; }
+.mashq-rejim > span { font-size: 26px; line-height: 1.1; }
+.mashq-rejim b { font: 600 15px Lora, Georgia, serif; }
+.mashq-rejim small { font-size: 12px; color: var(--kulrang); line-height: 1.3; }
+.seriya-bar.kichik { height: 5px; margin-top: 4px; }
+.qiyin-savollar { padding: 10px 14px; background: #FFF6EE; border: 1px solid #E8C9B0; border-radius: 10px; }
+.qiyin-savollar summary { cursor: pointer; font: 600 14px Lora, Georgia, serif; color: #A0452A; }
+.qiyin-savollar p { margin: 8px 0; font-size: 14px; line-height: 1.4; }
+.qiyin-savollar b { color: var(--zaytun); }
+.qiyin-foiz { display: inline-block; padding: 1px 7px; border-radius: 999px; background: #F6D5C4; color: #8A2E12; font: 700 11px Inter, system-ui, sans-serif; }
+.savol-oldin { display: flex; flex-direction: column; gap: 8px; }
+.savol-oldin-karta { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; background: #FFFDF6; border: 1px solid var(--chegara); border-radius: 8px; }
+.savol-oldin-karta.javobsiz { border-style: dashed; }
+.savol-oldin-karta > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.savol-oldin-karta b { font: 600 14px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.savol-oldin-karta small { font-size: 11px; color: var(--zaytun); }
+.savol-oldin-karta ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.savol-oldin-karta li.togri { color: var(--zaytun); font-weight: 700; }
+.savol-oldin-karta p { margin: 0; font-size: 13px; color: var(--kulrang); overflow-wrap: anywhere; }
+.savol-oldin-karta p.javobsiz { color: #B3261E; }
+.kartochka-yuqori { justify-content: center; }
+.kartochka { display: flex; flex-direction: column; gap: 10px; min-height: 220px; justify-content: center; padding: 22px 18px; text-align: center;
+  background: #FFFDF6; border: 1px solid var(--chegara); border-radius: 16px; box-shadow: 0 6px 18px rgba(80,50,20,.1); }
+.kartochka-mavzu { color: var(--zaytun); font-weight: 600; }
+.kartochka-savol { margin: 0; font: 600 20px/1.45 Lora, Georgia, serif; white-space: pre-line; overflow-wrap: anywhere; }
+.kartochka-variantlar { list-style: none; margin: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.kartochka-javob { padding-top: 12px; border-top: 1px dashed var(--chegara); }
+.kartochka-javob small { color: var(--kulrang); }
+.kartochka-javob p { margin: 4px 0 0; font: 500 17px/1.5 Lora, Georgia, serif; color: var(--zaytun); white-space: pre-line; overflow-wrap: anywhere; }
+.kartochka-tugmalar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kartochka-tugmalar .asosiy { grid-column: span 2; }
+.kartochka-ha, .kartochka-yoq { height: 52px; border-radius: 10px; cursor: pointer; font: 600 16px Lora, Georgia, serif; border: 1px solid; }
+.kartochka-ha { background: #E7F1DE; border-color: #A9C79A; color: #2F5A1E; }
+.kartochka-yoq { background: #FBE6E0; border-color: #E2B0A2; color: #8A2E12; }

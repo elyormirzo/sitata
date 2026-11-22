@@ -167,13 +167,14 @@ async function guruhniChiz(param) {
   // Tablar
   const tablar = yarat("nav", "lenta-tablar guruh-tablar");
   const tana = yarat("div", "guruh-tana");
-  const tablarRoyxati = [["reyting", "Reyting"], ["topshiriq", "Topshiriqlar"], ["azolar", "A'zolar"]];
+  const tablarRoyxati = [["mashq", "Mashq"], ["reyting", "Reyting"], ["topshiriq", "Topshiriqlar"], ["azolar", "A'zolar"]];
   const tabniOch = (k) => {
     guruhHolati.tab = k;
     tablar.querySelectorAll(".lenta-tab").forEach((a) => a.classList.toggle("faol", a.dataset.k === k));
     tana.innerHTML = "";
     if (k === "reyting") guruhReytingi(m, g, tana);
     else if (k === "topshiriq") guruhTopshiriqlari(m, g, tana, egasi);
+    else if (k === "mashq") guruhMashqi(m, g, tana, egasi);
     else guruhAzolari(m, g, tana, egasi);
   };
   tablarRoyxati.forEach(([k, nom]) => {
@@ -183,6 +184,12 @@ async function guruhniChiz(param) {
     tablar.appendChild(b);
   });
   s.append(tablar, tana);
+  // Savollari bor guruh (attestatsiya, imtihon) — «Mashq» bo'limidan ochiladi
+  if (guruhHolati.guruh !== g.id) {
+    guruhHolati.guruh = g.id;
+    const { data: soni } = await m.rpc("guruh_savollari_soni", { g: g.id });
+    guruhHolati.tab = soni > 0 ? "mashq" : "reyting";
+  }
   tabniOch(guruhHolati.tab);
 }
 

@@ -143,13 +143,15 @@ function adabiyotSavoli() {
   s.append(yuqori, chiziq, k);
 
   const variantlar = yarat("div", "vik-variantlar adabiyot-variantlar");
-  let berildi = false, qolgan = ADABIYOT_SONIYA;
+  const SONIYA = adab.soniya || ADABIYOT_SONIYA;
+  let berildi = false, qolgan = SONIYA;
   const boshlangan = Date.now();
   const javob = (tanlangan) => {
     if (berildi) return;
     berildi = true;
     clearInterval(viktorinaTaymeri);
     if (tanlangan === sv.togri) { adab.togri++; adab.ball += 10 + Math.max(0, Math.ceil(qolgan / 2)); }
+    if (adab.javobda) adab.javobda(sv, tanlangan === sv.togri);
     [...variantlar.children].forEach((b) => {
       b.disabled = true;
       if (b.dataset.v === sv.togri) b.classList.add("togri");
@@ -167,8 +169,8 @@ function adabiyotSavoli() {
   s.appendChild(variantlar);
   clearInterval(viktorinaTaymeri);
   viktorinaTaymeri = setInterval(() => {
-    qolgan = ADABIYOT_SONIYA - (Date.now() - boshlangan) / 1000;
-    tolgan.style.width = Math.max(0, (qolgan / ADABIYOT_SONIYA) * 100) + "%";
+    qolgan = SONIYA - (Date.now() - boshlangan) / 1000;
+    tolgan.style.width = Math.max(0, (qolgan / SONIYA) * 100) + "%";
     tolgan.classList.toggle("oz", qolgan < 6);
     if (qolgan <= 0) javob(null);
   }, 100);
