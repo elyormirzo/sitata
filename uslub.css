@@ -973,3 +973,11 @@ a.post-ism:hover { text-decoration: underline; }
 .post-amal.qayta:hover, .post-amal.qayta.tanlangan { color: var(--zaytun); }
 .post-amal.qayta:hover { background: rgba(79,91,58,.1); }
 .post-amal.qayta:disabled:hover { background: none; color: var(--kulrang); }
+/* Banner rangini tanlash */
+.banner-tanlov { display: flex; flex-direction: column; gap: 8px; }
+.banner-namuna { height: 44px; border-radius: 8px; }
+.banner-toplamlar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.banner-toplam { aspect-ratio: 1; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1); }
+.banner-toplam.faol { border-color: var(--qora); box-shadow: 0 0 0 2px var(--qogoz) inset; }
+.banner-ozim { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rang-tanla { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--chegara); border-radius: 6px; background: #fff; cursor: pointer; }

@@ -243,6 +243,23 @@ function seriyalar(oyinlar) {
   return { joriy, eng };
 }
 
+// Profil banneri: 2 yoki 3 rangli gradient (bazada "#aabbcc,#ddeeff[,#112233]")
+const BANNER_TOPLAMLARI = [
+  "#4f5b3a,#7a6a3a,#a0552e", "#1f3b5c,#3f6e8c,#9cc3d5", "#5b2a4a,#a0455e,#e8a07a", "#0f4c3a,#2e8b57,#c8d96f",
+  "#2b2d42,#5c4d7d,#c29ed8", "#7a1f1f,#c0392b,#f1c40f", "#3a2e1f,#8b6b3e,#e3c98d", "#14213d,#fca311",
+  "#264653,#e9c46a", "#6d597a,#eaac8b", "#003049,#d62828", "#1b4332,#95d5b2",
+];
+const BANNER_RE = /^#[0-9a-f]{6}(,#[0-9a-f]{6}){1,2}$/;
+function bannerRanginiQoy(el, ranglar) {
+  const r = BANNER_RE.test(ranglar || "") ? ranglar : BANNER_TOPLAMLARI[0];
+  el.style.background = `linear-gradient(135deg, ${r.split(",").join(", ")})`;
+}
+// Ikki rang o'rtasidagi rang (3-rang qo'shilganda)
+function aralashRang(a, b) {
+  const h = (x, i) => parseInt(x.slice(1 + i * 2, 3 + i * 2), 16);
+  return "#" + [0, 1, 2].map((i) => Math.round((h(a, i) + h(b, i)) / 2).toString(16).padStart(2, "0")).join("");
+}
+
 // Ijtimoiy tarmoqlar: bazada faqat foydalanuvchi nomi saqlanadi, havola shu yerda yasaladi
 const TARMOQLAR = [
   { k: "instagram", nom: "Instagram", misol: "username", re: /^[A-Za-z0-9._]{1,30}$/, url: (n) => "https://instagram.com/" + encodeURIComponent(n),
@@ -282,8 +299,8 @@ async function profilSahifasiniKor(kod) {
     const m = await mijozOl();
     const izlash = String(kod).toLowerCase();
     const p = izlash.startsWith("@")
-      ? await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
-      : await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram").eq("kod", izlash).maybeSingle();
+      ? await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram,banner").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
+      : await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram,banner").eq("kod", izlash).maybeSingle();
     profil = p.data;
     if (!profil) { sahifa.innerHTML = '<p class="kichik-matn">Bunday profil topilmadi.</p>'; return; }
     const [o, u] = await Promise.all([
@@ -309,6 +326,7 @@ async function profilSahifasiniKor(kod) {
 
   // ---- Bosh qism: banner, rasm, ism, daraja ----
   const banner = el("div", "profil-banner");
+  bannerRanginiQoy(banner, profil.banner);
   if (ozimniki) {
     const tahrir = el("button", "banner-tugma", "✎"); tahrir.type = "button";
     tahrir.title = "Profilni tahrirlash"; tahrir.setAttribute("aria-label", "Profilni tahrirlash");
@@ -401,6 +419,41 @@ async function profilSahifasiniKor(kod) {
     const hisob = el("small", "kichik-matn");
     const sana = () => (hisob.textContent = `${bio.value.length} / 160`); sana(); bio.addEventListener("input", sana);
     tahrirQuti.append(bio, hisob);
+    // Banner ranglari: tayyor to'plamlar yoki 2–3 ta o'z rangingiz
+    let ranglar = (profil.banner || BANNER_TOPLAMLARI[0]).split(",");
+    const rangQism = el("div", "banner-tanlov");
+    rangQism.appendChild(el("span", "kichik-matn", "Banner rangi"));
+    const namuna = el("div", "banner-namuna");
+    const toplamlar = el("div", "banner-toplamlar");
+    const ozim = el("div", "banner-ozim");
+    const yangilaRang = () => {
+      bannerRanginiQoy(namuna, ranglar.join(",")); bannerRanginiQoy(banner, ranglar.join(","));
+      [...toplamlar.children].forEach((b) => b.classList.toggle("faol", b.dataset.r === ranglar.join(",")));
+      ozimChiz();
+    };
+    BANNER_TOPLAMLARI.forEach((t) => {
+      const b = el("button", "banner-toplam"); b.type = "button"; b.dataset.r = t; b.setAttribute("aria-label", "Rang to'plami");
+      bannerRanginiQoy(b, t);
+      b.addEventListener("click", () => { ranglar = t.split(","); yangilaRang(); });
+      toplamlar.appendChild(b);
+    });
+    function ozimChiz() {
+      ozim.innerHTML = "";
+      ranglar.forEach((r, i) => {
+        const inp = el("input", "rang-tanla"); inp.type = "color"; inp.value = r; inp.setAttribute("aria-label", (i + 1) + "-rang");
+        inp.addEventListener("input", () => { ranglar[i] = inp.value.toLowerCase(); bannerRanginiQoy(namuna, ranglar.join(",")); bannerRanginiQoy(banner, ranglar.join(",")); [...toplamlar.children].forEach((b) => b.classList.remove("faol")); });
+        ozim.appendChild(inp);
+      });
+      const almash = el("button", "matn-tugma", ranglar.length === 2 ? "3 ta rang qilish" : "2 ta rang qilish"); almash.type = "button";
+      almash.addEventListener("click", () => {
+        ranglar = ranglar.length === 2 ? [ranglar[0], aralashRang(ranglar[0], ranglar[1]), ranglar[1]] : [ranglar[0], ranglar[2]];
+        yangilaRang();
+      });
+      ozim.appendChild(almash);
+    }
+    rangQism.append(namuna, toplamlar, ozim);
+    tahrirQuti.appendChild(rangQism);
+    yangilaRang();
     const maydonlar = {};
     TARMOQLAR.forEach((t) => {
       const q = el("label", "tarmoq-maydon");
@@ -412,9 +465,9 @@ async function profilSahifasiniKor(kod) {
     const tx = el("p", "kichik-matn");
     const saqla = el("button", "asosiy", "Saqlash"); saqla.type = "button";
     const bekor = el("button", "matn-tugma", "Bekor qilish"); bekor.type = "button";
-    bekor.addEventListener("click", () => tahrirQuti.classList.add("yashirin"));
+    bekor.addEventListener("click", () => { tahrirQuti.classList.add("yashirin"); bannerRanginiQoy(banner, profil.banner); });
     saqla.addEventListener("click", async () => {
-      const q = { bio: bio.value.trim().slice(0, 160) || null };
+      const q = { bio: bio.value.trim().slice(0, 160) || null, banner: ranglar.join(",") === BANNER_TOPLAMLARI[0] ? null : ranglar.join(",") };
       for (const t of TARMOQLAR) {
         const v = tarmoqNomi(maydonlar[t.k].value, t);
         if (v === false) { tx.textContent = `${t.nom} nomi noto'g'ri — faqat foydalanuvchi nomini yoki havolani kiriting.`; maydonlar[t.k].focus(); return; }

@@ -11,3 +11,9 @@ alter table public.profillar
   add column if not exists telegram text check (telegram is null or telegram ~ '^[A-Za-z0-9_]{5,32}$');
 grant select (bio, instagram, x, telegram) on public.profillar to anon, authenticated;
 grant insert (bio, instagram, x, telegram), update (bio, instagram, x, telegram) on public.profillar to authenticated;
+
+-- Profil banneri: 2 yoki 3 rangli gradient (migratsiya: profil_banner_rangi)
+alter table public.profillar
+  add column if not exists banner text check (banner is null or banner ~ '^#[0-9a-f]{6}(,#[0-9a-f]{6}){1,2}$');
+grant select (banner) on public.profillar to anon, authenticated;
+grant insert (banner), update (banner) on public.profillar to authenticated;
