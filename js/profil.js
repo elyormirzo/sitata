@@ -581,7 +581,9 @@ async function googleBilanBogla(xabar, keyin = "#profilim") {
   const m = await mijozOl();
   googleKelganYol(keyin);
   const { error } = await m.auth.linkIdentity({ provider: "google", options: { redirectTo: SAYT_MANZILI } });
-  if (error) xabar.textContent = "Bog'lab bo'lmadi: " + error.message;
+  if (error) xabar.textContent = /manual linking/i.test(error.message || "")
+    ? "Google bilan bog'lash hozircha yoqilmagan — birozdan keyin qayta urinib ko'ring."
+    : "Bog'lab bo'lmadi: " + error.message;
 }
 
 // Google hisobi orqali kirish (boshqa qurilmada yoki brauzer tozalangandan keyin)
