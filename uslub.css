@@ -755,7 +755,13 @@ body.oquvchi-ochiq { overflow: hidden; }
 .kitob-ong > .matn-tugma { align-self: flex-start; text-align: left; }
 /* Sahifa ko'rsatkichi */
 .oquvchi-holat { flex: none; font-size: 13px; color: var(--kulrang); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.sahifa-tugma { font-size: 14px; }
+.progress-kirit { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-style: normal; font-variant-numeric: tabular-nums; }
+.progress-son { width: 3.3em; padding: 3px 2px; font: inherit; font-size: 14px; color: var(--qora); text-align: center;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px; -moz-appearance: textfield; }
+.progress-son::-webkit-inner-spin-button, .progress-son::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.progress-son:focus { outline: 2px solid var(--teri); outline-offset: 1px; }
+.progress-ayir { margin: 0 3px; color: var(--kulrang); }
+.progress-guruh { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 /* Kitobdoshlar nima o'qiyapti */
 .jarayon-qator { display: flex; gap: 12px; align-items: flex-start; padding: 12px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; }
 .jarayon-ong { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }

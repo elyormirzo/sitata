@@ -257,38 +257,51 @@ function kitobKartasi(m, k) {
     const q = yarat("div", "surgich-qator");
     const sur = yarat("input", "surgich"); sur.type = "range"; sur.min = 0;
     if (S) { sur.max = S; sur.step = 1; sur.value = k.sahifa != null ? Math.min(k.sahifa, S) : Math.round((k.foiz / 100) * S); }
-    else { sur.max = 100; sur.step = 5; sur.value = k.foiz; }
+    else { sur.max = 100; sur.step = 1; sur.value = k.foiz; }
     sur.setAttribute("aria-label", S ? "Qaysi sahifadasiz" : "Necha foiz o'qildi");
     const fm = yarat("span", "foiz-matn kichik");
-    const sahifaTugma = yarat("button", "matn-tugma sahifa-tugma"); sahifaTugma.type = "button";
+    // Qo'lda kiritish: sahifa raqami va foiz — biri o'zgarsa, ikkinchisi ham yangilanadi
+    const raqam = (max, belgi) => {
+      const i = yarat("input", "progress-son"); i.type = "number"; i.min = 0; i.max = max; i.step = 1;
+      i.inputMode = "numeric"; i.setAttribute("aria-label", belgi); return i;
+    };
+    const kirit = yarat("div", "progress-kirit kichik-matn");
+    const foizI = raqam(100, "Necha foiz o'qildi");
+    const sahifaI = S ? raqam(S, "Qaysi sahifadasiz") : null;
+    const jamiI = S ? null : raqam(20000, "Kitobda necha sahifa bor");
+    const guruh = (...b) => { const g = yarat("span", "progress-guruh"); g.append(...b); return g; };
+    const foizG = guruh(foizI, " %");
+    if (S) kirit.append(guruh("📖 ", sahifaI, ` / ${S} sahifa`), yarat("span", "progress-ayir", "·"), foizG);
+    else { jamiI.min = 1; jamiI.placeholder = "?"; kirit.append(foizG, yarat("span", "progress-ayir", "·"), guruh("Jami sahifa: ", jamiI)); }
     const qiymat = () => { const v = Number(sur.value); return S ? { sahifa: v, foiz: Math.min(100, Math.round((v / S) * 100)) } : { foiz: v }; };
-    const korsat = () => {
+    const korsat = (tashqari) => {
       const x = qiymat(); fm.textContent = x.foiz + "%";
-      sahifaTugma.textContent = S ? `📖 ${x.sahifa} / ${S} sahifa ✎` : "📖 sahifalar sonini kiritish";
+      if (tashqari !== foizI) foizI.value = x.foiz;
+      if (S && tashqari !== sahifaI) sahifaI.value = x.sahifa;
     };
     korsat();
     let kech = null;
     const saqla = () => { clearTimeout(kech); kech = setTimeout(() => { const x = qiymat(); Object.assign(k, x); m.from("kitob_javoni").update(x).eq("id", k.id).then(() => {}); }, 600); };
+    const tugatish = () => { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, tugatilgan: bugun, ...(S ? { sahifa: S } : {}) }); };
     sur.addEventListener("input", () => { korsat(); saqla(); });
-    sahifaTugma.addEventListener("click", () => {
-      if (S) {
-        const j = prompt(`Hozir qaysi sahifadasiz? (0 – ${S})`, sur.value);
-        if (j === null) return;
-        const n = Math.round(Number(j));
-        if (!Number.isFinite(n) || n < 0) return;
-        if (n >= S) { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, sahifa: S, tugatilgan: bugun }); return; }
-        sur.value = n; korsat(); saqla();
-      } else {
-        const j = prompt("Kitobda necha sahifa bor?");
-        const n = Math.round(Number(j));
-        if (!j || !(n >= 1 && n <= 20000)) return;
-        yangila({ sahifalar: n, sahifa: Math.round((k.foiz / 100) * n) });
-      }
+    const sonOl = (i, max) => { const n = Math.round(Number(i.value)); return i.value === "" || !Number.isFinite(n) ? null : Math.max(0, Math.min(max, n)); };
+    if (S) sahifaI.addEventListener("input", () => { const n = sonOl(sahifaI, S); if (n === null) return; sur.value = n; korsat(sahifaI); saqla(); });
+    foizI.addEventListener("input", () => {
+      const f = sonOl(foizI, 100); if (f === null) return;
+      sur.value = S ? Math.round((f / 100) * S) : f; korsat(foizI); saqla();
     });
-    q.append(sur, fm);
+    // 100% yoki oxirgi sahifa kiritilsa — tugatishni taklif qilamiz
+    const oxirmi = () => { if (qiymat().foiz >= 100 && confirm("Kitobni tugatdingizmi?")) tugatish(); };
+    [foizI, sahifaI].filter(Boolean).forEach((i) => i.addEventListener("change", () => { korsat(); oxirmi(); }));
+    if (jamiI) jamiI.addEventListener("change", () => {
+      const n = Math.round(Number(jamiI.value));
+      if (!(n >= 1 && n <= 20000)) { jamiI.value = ""; return; }
+      yangila({ sahifalar: n, sahifa: Math.round((Number(sur.value) / 100) * n) });
+    });
+    q.append(sur);
     const tugat = yarat("button", "amal tanlangan", "✓ Tugatdim"); tugat.type = "button";
-    tugat.addEventListener("click", () => { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, tugatilgan: bugun, ...(S ? { sahifa: S } : {}) }); });
-    ong.append(q, sahifaTugma, tugat);
+    tugat.addEventListener("click", tugatish);
+    ong.append(q, kirit, tugat);
   } else if (k.holat === "oqimoqchi") {
     const bosh = yarat("button", "amal tanlangan", "O'qishni boshlash"); bosh.type = "button";
     bosh.addEventListener("click", () => { javonHolati.tab = "oqiyapman"; yangila({ holat: "oqiyapman", boshlangan: bugun }); });
