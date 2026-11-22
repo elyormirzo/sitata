@@ -124,7 +124,7 @@ async function darajaChiz() {
     <li>Kitobdoshlar bilan birga o'qilgan kitobni tugatish: +150</li>
     <li>Iqtibos taklifingiz tasdiqlansa: +30</li>
     <li>Yangi kitobdosh: +10</li>
-    <li>Bir hafta umuman o'ynamasangiz: −100 (ball 0 dan pastga tushmaydi)</li></ul>`;
+    <li>Bir hafta umuman o'ynamasangiz: −50 (ball 0 dan pastga tushmaydi)</li></ul>`;
   info.addEventListener("click", () => qoidalar.classList.toggle("yashirin"));
   s.appendChild(qoidalar);
 

@@ -60,7 +60,7 @@ language sql stable security definer set search_path = '' as $$
 $$;
 
 -- 4. Haftalik hisob: har hafta (dushanbadan) to'plangan ball, faollik va jami (0 dan pastga tushmaydi).
--- Profil ochilgan haftadan keyingi, tugagan haftada bitta ham o'yin bo'lmasa — −100.
+-- Profil ochilgan haftadan keyingi, tugagan haftada bitta ham o'yin bo'lmasa — −50.
 create or replace function public.ball_haftalar(p uuid)
 returns table (hafta date, ball int, faol boolean, jami int)
 language plpgsql stable security definer set search_path = '' as $$
@@ -75,7 +75,7 @@ begin
     select coalesce(sum(e.ball), 0)::int as b, coalesce(bool_or(e.turi in ('oyin', 'viktorina')), false) as f
       into v from public.ball_voqealari(p) e where e.sana >= h and e.sana < h + 7;
     hafta := h; faol := v.f; ball := v.b;
-    if not v.f and h > boshi and h < joriy then ball := ball - 100; end if;
+    if not v.f and h > boshi and h < joriy then ball := ball - 50; end if;
     yigindi := greatest(0, yigindi + ball);
     jami := yigindi;
     return next;
