@@ -30,14 +30,16 @@ async function profilniTekshir(s) {
 async function profillarniOl(m, idlar) {
   const royxat = [...new Set(idlar)].filter(Boolean);
   if (!royxat.length) return {};
-  const { data } = await m.from("profillar").select("id,kod,ism,taxallus").in("id", royxat);
+  const { data } = await m.from("profillar").select("id,kod,ism,taxallus,rasm").in("id", royxat);
   const natija = {};
   (data || []).forEach((p) => { natija[p.id] = p; });
   return natija;
 }
 
 function profilHavola(p) {
-  const a = havola(profilIchkiHavola(p), "profil-nom", p ? p.ism : "Noma'lum");
+  const a = havola(profilIchkiHavola(p), "profil-nom", "");
+  if (typeof avatarEl === "function") a.appendChild(avatarEl(p, 26, "kichik"));
+  a.appendChild(document.createTextNode(p ? p.ism : "Noma'lum"));
   if (p && p.taxallus) a.appendChild(yarat("small", "profil-taxallus", " @" + p.taxallus));
   return a;
 }

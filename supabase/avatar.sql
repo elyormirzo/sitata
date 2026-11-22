@@ -1,0 +1,4 @@
+-- «sitata.uz» — profil rasmi («profil_rasmi» migratsiyasi).
+-- * profillar.rasm: 'q:<kalit>' — tayyor qahramon (js/avatar.js: muallif portretlari, asar va kino qahramonlari)
+--   yoki '<uid>/<uuid>.jpg' — o'z surati. Trigger profil_rasmi_tekshir: surat faqat o'z papkasidan bo'ladi.
+-- * Storage bucket «avatarlar»: ochiq (profil hammaga ko'rinadi), faqat JPEG, ≤ 1 MB; yuklash/o'chirish — o'z papkasiga.

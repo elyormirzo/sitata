@@ -134,7 +134,7 @@ function tasodifiyKod() {
 async function profilYarat(ism, taxallus) {
   const m = await mijozOl();
   const uid = await kirish();
-  const bor = await m.from("profillar").select("id,kod,ism,taxallus").eq("id", uid).maybeSingle();
+  const bor = await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("id", uid).maybeSingle();
   if (bor.data) {
     const yangi = { ism, taxallus: taxallus || bor.data.taxallus };
     const { error } = await m.from("profillar").update(yangi).eq("id", uid);
@@ -254,8 +254,8 @@ async function profilSahifasiniKor(kod) {
     const m = await mijozOl();
     const izlash = String(kod).toLowerCase();
     const p = izlash.startsWith("@")
-      ? await m.from("profillar").select("id,kod,ism,taxallus").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
-      : await m.from("profillar").select("id,kod,ism,taxallus").eq("kod", izlash).maybeSingle();
+      ? await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
+      : await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("kod", izlash).maybeSingle();
     profil = p.data;
     if (!profil) { sahifa.innerHTML = '<p class="kichik-matn">Bunday profil topilmadi.</p>'; return; }
     const [o, b, u] = await Promise.all([
@@ -282,12 +282,29 @@ async function profilSahifasiniKor(kod) {
   sahifa.innerHTML = "";
   const el = (teg, sinf, matn) => { const e = document.createElement(teg); if (sinf) e.className = sinf; if (matn != null) e.textContent = matn; return e; };
 
+  // Profil rasmi (o'zi bossa — o'zgartiradi)
+  if (typeof avatarEl === "function") {
+    const rasmQuti = el("div", "profil-avatar");
+    const chizRasm = () => {
+      rasmQuti.innerHTML = "";
+      const a = avatarEl(profil, 104, "katta");
+      if (ozimniki) {
+        const b = el("button", "avatar-tugma"); b.type = "button"; b.setAttribute("aria-label", "Profil rasmini o'zgartirish");
+        b.append(a, el("span", "avatar-qalam", "✎"));
+        b.addEventListener("click", () => avatarTanlash(profil, chizRasm));
+        rasmQuti.appendChild(b);
+        if (!profil.rasm) rasmQuti.appendChild(el("small", "kichik-matn", "Rasm qo'yish uchun bosing"));
+      } else rasmQuti.appendChild(a);
+    };
+    chizRasm();
+    sahifa.appendChild(rasmQuti);
+  }
   sahifa.appendChild(el("p", "kichik-matn", "«Kim aytgan?» o'yinchisi"));
   sahifa.appendChild(el("h2", "", profil.ism));
   if (profil.taxallus) sahifa.appendChild(el("p", "taxallus-yozuv", "@" + profil.taxallus));
   if (typeof darajaYorligi === "function") sahifa.appendChild(darajaYorligi(profil.id));
   if (ozimniki) {
-    if (!mening || mening.taxallus !== profil.taxallus) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus });
+    if (!mening || mening.taxallus !== profil.taxallus || mening.rasm !== profil.rasm) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus, rasm: profil.rasm || null });
     sahifa.appendChild(taxallusQutisi(profil));
   }
 
@@ -396,7 +413,7 @@ async function googleBilanKir(xabar) {
 async function profilniSinxronla(uid) {
   if (mening && mening.id === uid) return;
   const m = await mijozOl();
-  const { data } = await m.from("profillar").select("id,kod,ism,taxallus").eq("id", uid).maybeSingle();
+  const { data } = await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("id", uid).maybeSingle();
   if (data) profilniEsla(data);
   else { mening = null; try { localStorage.removeItem("kimAytganProfil"); } catch (e) {} }
 }

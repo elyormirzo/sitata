@@ -816,3 +816,30 @@ body.oquvchi-ochiq { overflow: hidden; }
 .tahrir-tugma.rang { width: 34px; height: 34px; min-height: 0; padding: 0; border: 3px solid transparent; }
 .tahrir-tugma.rang.faol { border-color: #FFFFFF; box-shadow: 0 0 0 2px #F2D06B; }
 .tahrir-izoh { margin: 0; font-size: 13px; color: #CDBB98; }
+/* Profil rasmi */
+.avatar { display: inline-flex; flex: none; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; background: #D8C9A8; vertical-align: middle; }
+.avatar img, .avatar svg { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+.avatar.harfli { background: var(--teri); color: #FBF5E6; font-family: Lora, Georgia, serif; font-weight: 600; }
+.avatar.kichik { margin-right: 6px; }
+.avatar.katta { box-shadow: 0 0 0 4px var(--qogoz), 0 0 0 5px var(--chegara), 0 4px 14px rgba(40,25,10,.25); }
+.profil-avatar { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 10px; }
+.avatar-tugma { position: relative; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
+.avatar-tugma:focus-visible { outline: 3px solid var(--teri); outline-offset: 4px; }
+.avatar-qalam { position: absolute; right: 0; bottom: 2px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--teri); color: #FBF5E6; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.avatar-oyna { position: fixed; inset: 0; z-index: 60; background: rgba(30,20,10,.55); display: flex; align-items: flex-end; justify-content: center; }
+.avatar-quti { width: 100%; max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; background: var(--qogoz); border-radius: 16px 16px 0 0; padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 24px rgba(0,0,0,.25); }
+@media (min-width: 600px) { .avatar-oyna { align-items: center; } .avatar-quti { border-radius: 16px; } }
+.avatar-bosh { display: flex; justify-content: space-between; align-items: center; }
+.avatar-bosh b { font: 600 18px Lora, Georgia, serif; }
+.avatar-tana { overflow-y: auto; min-height: 200px; }
+.avatar-panjara { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; padding: 4px 2px 8px; }
+.avatar-katak { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border: 1px solid var(--chegara); border-radius: 10px; background: #FBF5E6; cursor: pointer; text-align: center; font: inherit; color: inherit; }
+.avatar-katak .avatar { width: 64px; height: 64px; }
+.avatar-katak b { font: 600 13px Lora, Georgia, serif; line-height: 1.2; }
+.avatar-katak small { font-size: 11px; color: var(--kulrang); line-height: 1.2; }
+.avatar-katak.tanlangan { border-color: var(--zaytun); box-shadow: 0 0 0 2px var(--zaytun); }
+.avatar-telefon { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; }
+.avatar-telefon .asosiy, .avatar-telefon .ikkilamchi { width: 100%; max-width: 320px; }
+.avatar-kanvas { touch-action: none; cursor: grab; border-radius: 8px; }
+.profil-nom { display: inline-flex; align-items: center; flex-wrap: wrap; }
