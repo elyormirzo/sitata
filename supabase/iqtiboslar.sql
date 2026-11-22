@@ -15,3 +15,16 @@
 
 -- «iqtibos_manba_turlari» migratsiyasi: kitob_iqtiboslari.manba_turi — 'kitob' | 'kocha' (ko'chadagi yozuv) | 'ozim' (o'z fikri) | 'boshqa'.
 -- kitob ustuni endi ixtiyoriy (faqat 'kitob' turida majburiy); ko'cha/boshqa turida joy yoki manba nomi shu ustunga yoziladi.
+
+-- Profil ko'rsatkichlari: iqtiboslar, ularga yoqtirmalar, kitobdoshlar soni
+create or replace function public.profil_statistikasi(p uuid)
+returns table(iqtiboslar integer, yoqtirmalar integer, kitobdoshlar integer)
+language sql stable security definer set search_path to ''
+as $$
+  select
+    (select count(*)::int from public.kitob_iqtiboslari where profil_id = p),
+    (select coalesce(sum(yoqtirishlar), 0)::int from public.kitob_iqtiboslari where profil_id = p),
+    (select count(*)::int from public.kitobdoshlar where holat = 'qabul' and (kimdan = p or kimga = p));
+$$;
+revoke all on function public.profil_statistikasi(uuid) from public, anon;
+grant execute on function public.profil_statistikasi(uuid) to authenticated;

@@ -776,7 +776,12 @@ body.oquvchi-ochiq { overflow: hidden; }
 .iqtibos-manba { margin: 6px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); overflow-wrap: anywhere; }
 .amal.yoqtirish.tanlangan { color: #B3261E; }
 .amal.yoqtirish:disabled { opacity: 1; cursor: default; }
-.iqtibos-statlar { margin-top: 8px; }
+a.stat { text-decoration: none; display: block; }
+a.stat:hover { border-color: var(--teri); }
+.oyin-qismi { border: 1px solid var(--chegara); border-radius: 8px; background: var(--qogoz); padding: 0 12px; text-align: center; }
+.oyin-qismi > summary { cursor: pointer; padding: 12px 0; font: 15px Lora, Georgia, serif; color: var(--qora); list-style-position: inside; }
+.oyin-qismi[open] { padding-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
+.oyin-qismi .asosiy { height: 46px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
 /* Lenta tepasidagi kunlik o'yin qatori */
 .kunlik-qator { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; text-decoration: none; color: inherit;
   background: linear-gradient(90deg, #6B3E26 0 6px, var(--qogoz) 6px); border: 1px solid var(--chegara); border-radius: 8px; }

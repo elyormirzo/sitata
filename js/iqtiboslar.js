@@ -263,17 +263,19 @@ function rasmniKattaKor(src, alt) {
 }
 
 // Profil sahifasi: nechta iqtibos yozgan va ularga nechta yoqtirma kelgan
-function iqtibosStatlari(profilId) {
-  const q = yarat("div", "statlar iqtibos-statlar yashirin");
+function iqtibosStatlari(profilId, ozimniki) {
+  // Profildagi asosiy ko'rsatkichlar: iqtiboslar, ularga yoqtirmalar, kitobdoshlar soni
+  const q = yarat("div", "statlar profil-statlar yashirin");
   if (!BAZA_YOQIQ) return q;
   (async () => {
     try {
       const m = await mijozOl();
-      const { data, error } = await m.rpc("iqtibos_statistikasi", { p: profilId });
+      const { data, error } = await m.rpc("profil_statistikasi", { p: profilId });
       if (error || !data || !data[0]) return;
-      const { soni, yoqtirmalar } = data[0];
-      [[soni, "❝ iqtibos yozgan"], [yoqtirmalar, "♥ yoqtirma olgan"]].forEach(([n, nom]) => {
-        const s = yarat("div", "stat"); s.append(yarat("b", "", String(n)), yarat("span", "", nom)); q.appendChild(s);
+      const { iqtiboslar, yoqtirmalar, kitobdoshlar } = data[0];
+      [[iqtiboslar, "❝ iqtibos"], [yoqtirmalar, "♥ yoqtirma"], [kitobdoshlar, "👥 kitobdosh", ozimniki && "#kitobdoshlar"]].forEach(([n, nom, href]) => {
+        const s = yarat(href ? "a" : "div", "stat"); if (href) s.href = href;
+        s.append(yarat("b", "", String(n)), yarat("span", "", nom)); q.appendChild(s);
       });
       q.classList.remove("yashirin");
     } catch (e) { /* jim */ }

@@ -299,7 +299,6 @@ async function profilSahifasiniKor(kod) {
     chizRasm();
     sahifa.appendChild(rasmQuti);
   }
-  sahifa.appendChild(el("p", "kichik-matn", "«Kim aytgan?» o'yinchisi"));
   sahifa.appendChild(el("h2", "", profil.ism));
   if (profil.taxallus) sahifa.appendChild(el("p", "taxallus-yozuv", "@" + profil.taxallus));
   if (typeof darajaYorligi === "function") sahifa.appendChild(darajaYorligi(profil.id));
@@ -308,24 +307,30 @@ async function profilSahifasiniKor(kod) {
     sahifa.appendChild(taxallusQutisi(profil));
   }
 
+  if (typeof iqtibosStatlari === "function") sahifa.appendChild(iqtibosStatlari(profil.id, ozimniki));
+
+  // «Kim aytgan?» o'yini natijalari — yig'ilgan holda, pastroqda
+  const oyinQismi = el("details", "oyin-qismi");
+  oyinQismi.appendChild(el("summary", "", jami ? `🎮 «Kim aytgan?» o'yini · ${jami} o'yin, ${foiz}% topgan` : "🎮 «Kim aytgan?» o'yini"));
   const statlar = el("div", "statlar");
   [[jami, "o'yin"], [foiz + "%", "topgan"], [ortachaXato, "o'rtacha xato"],
    [joriy, "joriy seriya"], [eng, "eng uzun seriya"], [yutganlar.length, "topilgan"]].forEach(([son, nom]) => {
     const s = el("div", "stat"); s.append(el("b", "", String(son)), el("span", "", nom)); statlar.appendChild(s);
   });
-  sahifa.appendChild(statlar);
-  if (typeof iqtibosStatlari === "function") sahifa.appendChild(iqtibosStatlari(profil.id));
-
+  oyinQismi.appendChild(statlar);
   if (jami) {
-    sahifa.appendChild(el("p", "kichik-matn", "Oxirgi o'yinlar"));
+    oyinQismi.appendChild(el("p", "kichik-matn", "Oxirgi o'yinlar"));
     const oxirgilar = el("div", "oxirgilar");
     oyinlar.slice(0, 14).reverse().forEach((o) => {
       const i = el("i", o.yutdi ? "" : "yoq");
       i.title = o.yutdi ? `topgan, ${o.xatolar} xato` : "topa olmagan";
       oxirgilar.appendChild(i);
     });
-    sahifa.appendChild(oxirgilar);
+    oyinQismi.appendChild(oxirgilar);
   }
+  const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga o'tish" : "O'zingiz ham o'ynab ko'ring");
+  oyna.href = ozimniki ? "#kim-aytgan" : SAYT_MANZILI + "#kim-aytgan";
+  oyinQismi.appendChild(oyna);
 
   sahifa.appendChild(el("div", "baho-ortacha",
     baholar.length ? `★ ${ortachaBaho.toFixed(1)}  ·  ${baholar.length} ta baho` : "Hali baho berilmagan"));
@@ -333,8 +338,6 @@ async function profilSahifasiniKor(kod) {
   const xabar = el("p", "kichik-matn");
   if (ozimniki) {
     xabar.textContent = "Bu sizning profilingiz — havolani ulashing, do'stlaringiz baho bersin.";
-    sahifa.appendChild(hisobQutisi());
-    if (typeof eslatmaQutisi === "function") sahifa.appendChild(eslatmaQutisi());
   } else {
     xabar.textContent = meningBaham ? "Bahoingizni o'zgartirishingiz mumkin:" : "Baho bering:";
     const yulduzlar = el("div", "yulduzlar");
@@ -371,10 +374,12 @@ async function profilSahifasiniKor(kod) {
   if (typeof javonQismi === "function") sahifa.appendChild(javonQismi(profil, ozimniki));
   if (!ozimniki && typeof kitobdoshTugmasi === "function") sahifa.appendChild(kitobdoshTugmasi(profil));
 
-  const oyna = el("a", "asosiy", ozimniki ? "Bugungi o'yinga qaytish" : "O'zingiz ham o'ynab ko'ring");
-  oyna.href = ozimniki ? "#kim-aytgan" : SAYT_MANZILI + "#kim-aytgan";
-  oyna.style.height = "52px"; oyna.style.borderRadius = "6px";
-  sahifa.appendChild(oyna);
+  sahifa.appendChild(oyinQismi);
+  // Sozlamalar (hisob, eslatmalar) — eng pastda
+  if (ozimniki) {
+    sahifa.appendChild(hisobQutisi());
+    if (typeof eslatmaQutisi === "function") sahifa.appendChild(eslatmaQutisi());
+  }
 }
 
 
