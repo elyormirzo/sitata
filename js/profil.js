@@ -24,10 +24,28 @@ const BAND_TAXALLUSLAR = ["admin", "sitata", "sitatauz", "support", "yordam", "m
   "iqtiboslar", "kitoblar", "sozlamalar", "bildirishnomalar", "kirish", "login", "api", "www", "mail", "about", "help", "settings",
   "js", "rasmlar", "ikonkalar", "supabase", "assets", "static", "index", "manifest", "sw", "favicon", "robots", "sitemap", "cname", "guruhlar", "guruh", "qoshil", "sinf", "duel", "duellar", "xulosa"];
 const taxallusniTozala = (t) => String(t || "").trim().toLowerCase().replace(/^@+/, "");
-function taxallusTaklifi(ism) {
-  let t = String(ism || "").toLowerCase().replace(/([og])['ʻʼ‘’`]/g, "$1").replace(/[^a-z0-9_]/g, "");
+// Kirill → lotin (taxallus uchun): «Дилноза Каримова» → «dilnoza karimova»
+const KIRILL_LOTIN = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "j", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n",
+  о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "x", ц: "ts", ч: "ch", ш: "sh", щ: "sh", ъ: "", ы: "i", ь: "", э: "e", ю: "yu",
+  я: "ya", ў: "o", қ: "q", ғ: "g", ҳ: "h", ә: "a", ө: "o", ү: "u", ң: "n", і: "i" };
+// Ismdan taxallus: so'zlar «_» bilan — «Dilnoza Karimova» → «dilnoza_karimova» (20 belgigacha)
+function taxallusTaklifi(ism, max = 20) {
+  const sozlar = String(ism || "").toLowerCase().replace(/[а-яёўқғҳәөүңі]/g, (h) => KIRILL_LOTIN[h] ?? "")
+    .replace(/([og])['ʻʼ‘’`]/g, "$1").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  let t = "";
+  for (const s of sozlar) { const yangi = t ? t + "_" + s : s; if (yangi.length > max) break; t = yangi; }
+  if (!t && sozlar.length) t = sozlar[0].slice(0, max);
   if (t.length < 3) t = (t + "kitobxon").slice(0, 8);
-  return t.slice(0, 20);
+  return t;
+}
+// Bo'sh taxallusni topish: band bo'lsa oxiriga raqam qo'shiladi (topilmasa — null)
+async function boshTaxallus(ism) {
+  const asos = taxallusTaklifi(ism, 16);   // raqam qo'shishga joy qoladi
+  for (const t of [asos, asos + Math.floor(10 + Math.random() * 90), asos + Math.floor(100 + Math.random() * 900)]) {
+    if (taxallusXatosi(t)) continue;
+    try { if (!(await taxallusEgasi(t))) return t; } catch (e) { return null; }
+  }
+  return null;
 }
 function taxallusXatosi(t) {
   if (!t) return "Taxallus yozing.";
@@ -588,12 +606,7 @@ async function googledanProfilOch(user) {
   const md = user.user_metadata || {};
   const toliq = String(md.full_name || md.name || "").trim();
   const ism = (String(md.given_name || "").trim() || toliq.split(/\s+/)[0] || "Kitobxon").slice(0, 30);
-  let taxallus = null;
-  const asos = taxallusTaklifi(toliq || ism).slice(0, 16);
-  for (const t of [asos, asos + Math.floor(10 + Math.random() * 90), asos + Math.floor(100 + Math.random() * 900)]) {
-    if (taxallusXatosi(t)) continue;
-    try { if (!(await taxallusEgasi(t))) { taxallus = t; break; } } catch (e) { break; }
-  }
+  const taxallus = await boshTaxallus(toliq || ism);
   try { await profilYarat(ism, taxallus); }
   catch (e) { try { await profilYarat(ism, null); } catch (e2) { kirishXatosi = "Profil ochilmadi — qayta urinib ko'ring."; } }
 }

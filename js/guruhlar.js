@@ -152,7 +152,7 @@ async function qoshilishniChiz(kod) {
     if (i.length < 2) { x.textContent = "Ismingizni yozing."; ism.focus(); return; }
     ismTugma.disabled = true; ismTugma.textContent = "Qo'shilmoqda…";
     try {
-      await profilYarat(i, null);
+      try { await profilYarat(i, await boshTaxallus(i)); } catch (e) { if (e.message !== "band") throw e; await profilYarat(i, null); }
       if (!(await qoshil())) { ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
     } catch (e) { x.textContent = "Profil ochilmadi — qayta urinib ko'ring."; ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
   });
