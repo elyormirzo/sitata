@@ -38,9 +38,9 @@ async function faylniBiriktir(m, kitob, fayl) {
     contentType: fayl.type || "application/octet-stream", upsert: false, cacheControl: "3600",
   });
   if (error) throw new Error(/row-level|policy|403/i.test(error.message || "") ? "chegara" : "yuklanmadi");
-  const { error: e2 } = await m.from("kitob_javoni").update({
-    fayl_yoli: yol, fayl_nomi: fayl.name.slice(0, 200), fayl_hajmi: fayl.size, fayl_turi: (fayl.type || "").slice(0, 100) || null,
-  }).eq("id", kitob.id);
+  const q = { fayl_yoli: yol, fayl_nomi: fayl.name.slice(0, 200), fayl_hajmi: fayl.size, fayl_turi: (fayl.type || "").slice(0, 100) || null };
+  if (!kitob.muqova) { const mq = await faylMuqovasi(fayl); if (mq) q.muqova = mq; }
+  const { error: e2 } = await m.from("kitob_javoni").update(q).eq("id", kitob.id);
   if (e2) { await m.storage.from("kitoblar").remove([yol]); throw new Error("yuklanmadi"); }
   if (kitob.fayl_yoli) await m.storage.from("kitoblar").remove([kitob.fayl_yoli]);
 }
@@ -71,6 +71,18 @@ function faylQatori(m, k, yangila) {
       await faylniOlibTashla(m, k); yangila();
     });
     q.append(och, ol);
+    if (!k.muqova && /^(epub|fb2|pdf|mobi|azw3?|prc|docx|mp3)$/.test(kengaytma(k.fayl_nomi || k.fayl_yoli))) {
+      const mt = yarat("button", "matn-tugma", "🖼 muqovani fayldan olish"); mt.type = "button";
+      mt.addEventListener("click", async () => {
+        mt.disabled = true; xabar.textContent = "Muqova qidirilmoqda…";
+        const { data: blob } = await m.storage.from("kitoblar").download(k.fayl_yoli);
+        const mq = blob && await faylMuqovasi(new File([blob], k.fayl_nomi || k.fayl_yoli));
+        if (!mq) { mt.disabled = false; xabar.textContent = "Faylda muqova topilmadi."; return; }
+        await m.from("kitob_javoni").update({ muqova: mq }).eq("id", k.id);
+        yangila();
+      });
+      q.appendChild(mt);
+    }
   } else {
     const kirit = yarat("input"); kirit.type = "file"; kirit.className = "yashirin";
     const tanla = yarat("button", "matn-tugma", "📎 Kitob faylini biriktirish"); tanla.type = "button";
@@ -155,7 +167,7 @@ async function oquvchiniOch(m, k, opts = {}) {
       a.addEventListener("loadedmetadata", () => { const t = xotiradanOl(kalit, 0); if (t) a.currentTime = t; });
       a.addEventListener("timeupdate", () => { if (Math.round(a.currentTime) % 5 === 0) xotiragaYoz(kalit, a.currentTime); });
       const q = yarat("div", "oquvchi-audio-quti");
-      q.append(muqovaEl(k.kitob), yarat("b", "", k.kitob), yarat("span", "kichik-matn", k.muallif || ""), a);
+      q.append(muqovaEl(k.kitob, false, k.muqova), yarat("b", "", k.kitob), yarat("span", "kichik-matn", k.muallif || ""), a);
       tana.appendChild(q);
     } else if (tur === "txt" || tur === "fb2") {
       const buf = await (await fetch(korish.signedUrl)).arrayBuffer();
@@ -446,4 +458,164 @@ async function faylMalumoti(fayl) {
     muallif: muallif || (royxatda && royxatda.muallif) || nomdan.muallif || "",
     manba: kitob || muallif ? "fayl" : "nom",
   };
+}
+
+// ===== FAYLDAN MUQOVANI OLISH =====
+// EPUB (cover-image), FB2 (coverpage), PDF (1-sahifa), MOBI/AZW3 (EXTH 201), DOCX (thumbnail), MP3 (APIC).
+// Natija: kichik JPEG (data:image/jpeg;base64,…, ~240px) — bazada kitob_javoni.muqova ustunida saqlanadi.
+async function rasmniKichrayt(manba) {
+  let rasm;
+  if (manba instanceof HTMLCanvasElement) rasm = manba;
+  else {
+    const url = URL.createObjectURL(manba);
+    try {
+      rasm = await new Promise((ok, xato) => { const i = new Image(); i.onload = () => ok(i); i.onerror = xato; i.src = url; });
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 0); }
+  }
+  const w0 = rasm.naturalWidth || rasm.width, h0 = rasm.naturalHeight || rasm.height;
+  if (w0 < 40 || h0 < 40) return null;
+  const k = Math.min(1, 240 / w0, 360 / h0);
+  const c = document.createElement("canvas");
+  c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(rasm, 0, 0, c.width, c.height);
+  for (const s of [0.8, 0.6, 0.4]) { const d = c.toDataURL("image/jpeg", s); if (d.length <= 80000) return d; }
+  return null;
+}
+
+function rasmTuri(b) {
+  if (b[0] === 0xff && b[1] === 0xd8) return "image/jpeg";
+  if (b[0] === 0x89 && b[1] === 0x50) return "image/png";
+  if (b[0] === 0x47 && b[1] === 0x49) return "image/gif";
+  if (b[0] === 0x52 && b[8] === 0x57) return "image/webp";
+  return "";
+}
+
+async function epubMuqovasi(fayl) {
+  const zip = await (await jszipOl()).loadAsync(fayl);
+  const container = await zip.file("META-INF/container.xml")?.async("string");
+  const opfYol = container && (container.match(/full-path="([^"]+)"/) || [])[1];
+  const opf = opfYol && await zip.file(opfYol)?.async("string");
+  if (!opf) return null;
+  const x = new DOMParser().parseFromString(opf, "application/xml");
+  const itemlar = [...x.getElementsByTagNameNS("*", "item")];
+  const rasmMi = (i) => /^image\//.test(i.getAttribute("media-type") || "");
+  const meta = [...x.getElementsByTagNameNS("*", "meta")].find((m) => m.getAttribute("name") === "cover");
+  const metaId = meta && meta.getAttribute("content");
+  const item = itemlar.find((i) => /(^|\s)cover-image(\s|$)/.test(i.getAttribute("properties") || ""))
+    || itemlar.find((i) => metaId && i.getAttribute("id") === metaId && rasmMi(i))
+    || itemlar.find((i) => rasmMi(i) && /cover|muqova|obloj|обложк/i.test((i.getAttribute("id") || "") + (i.getAttribute("href") || "")));
+  if (!item) return null;
+  const papka = opfYol.includes("/") ? opfYol.replace(/[^/]+$/, "") : "";
+  const yol = new URL(item.getAttribute("href"), "http://x/" + papka).pathname.slice(1);
+  const f = zip.file(decodeURIComponent(yol)) || zip.file(yol);
+  return f ? new Blob([await f.async("uint8array")], { type: item.getAttribute("media-type") }) : null;
+}
+
+async function fb2Muqovasi(fayl) {
+  const matn = matnniOch(await fayl.arrayBuffer());
+  const cp = matn.match(/<coverpage>[\s\S]*?href="#([^"]+)"/);
+  if (!cp) return null;
+  const id = cp[1].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const bin = matn.match(new RegExp(`<binary[^>]*id="${id}"[^>]*>([\\s\\S]*?)</binary>`));
+  if (!bin) return null;
+  const b = Uint8Array.from(atob(bin[1].replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+  return new Blob([b], { type: rasmTuri(b) || "image/jpeg" });
+}
+
+async function pdfMuqovasi(fayl) {
+  if (!window.pdfjsLib) await skriptYukla(PDFJS + "pdf.min.js");
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+  const h = await window.pdfjsLib.getDocument({ data: new Uint8Array(await fayl.arrayBuffer()) }).promise;
+  try {
+    const s = await h.getPage(1);
+    const v0 = s.getViewport({ scale: 1 });
+    const vp = s.getViewport({ scale: Math.min(2, 480 / v0.width) });
+    const c = document.createElement("canvas");
+    c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    await s.render({ canvasContext: x, viewport: vp }).promise;
+    return c;
+  } finally { h.destroy(); }
+}
+
+async function mobiMuqovasi(fayl) {
+  const buf = await fayl.arrayBuffer();
+  const v = new DataView(buf);
+  const yozuvSoni = v.getUint16(76);
+  const yozuv = (i) => i < yozuvSoni ? [v.getUint32(78 + i * 8), i + 1 < yozuvSoni ? v.getUint32(78 + (i + 1) * 8) : buf.byteLength] : null;
+  const r0 = v.getUint32(78);
+  if (String.fromCharCode(...new Uint8Array(buf, r0 + 16, 4)) !== "MOBI") return null;
+  const mobiUzun = v.getUint32(r0 + 20), birinchiRasm = v.getUint32(r0 + 108);
+  let joy = null;
+  if (v.getUint32(r0 + 128) & 0x40) {
+    let p = r0 + 16 + mobiUzun;
+    if (String.fromCharCode(...new Uint8Array(buf, p, 4)) === "EXTH") {
+      const soni = v.getUint32(p + 8); p += 12;
+      for (let i = 0; i < soni && p + 8 <= buf.byteLength; i++) {
+        const tur = v.getUint32(p), uz = v.getUint32(p + 4);
+        if (tur === 201 && joy === null) joy = v.getUint32(p + 8);
+        if (tur === 202 && joy === null) joy = v.getUint32(p + 8);   // eskiz
+        p += uz;
+      }
+    }
+  }
+  const nomzodlar = joy !== null ? [birinchiRasm + joy] : [];
+  for (let i = birinchiRasm; i < Math.min(yozuvSoni, birinchiRasm + 5); i++) nomzodlar.push(i);
+  for (const i of nomzodlar) {
+    const r = yozuv(i); if (!r) continue;
+    const b = new Uint8Array(buf, r[0], r[1] - r[0]);
+    const t = rasmTuri(b);
+    if (t) return new Blob([b], { type: t });
+  }
+  return null;
+}
+
+async function docxMuqovasi(fayl) {
+  const zip = await (await jszipOl()).loadAsync(fayl);
+  const f = zip.file(/^docProps\/thumbnail\.(jpe?g|png)$/i)[0];
+  return f ? new Blob([await f.async("uint8array")]) : null;
+}
+
+async function mp3Muqovasi(fayl) {
+  const bosh = new Uint8Array(await fayl.slice(0, 10).arrayBuffer());
+  if (String.fromCharCode(bosh[0], bosh[1], bosh[2]) !== "ID3") return null;
+  const versiya = bosh[3];
+  const hajm = ((bosh[6] & 0x7f) << 21) | ((bosh[7] & 0x7f) << 14) | ((bosh[8] & 0x7f) << 7) | (bosh[9] & 0x7f);
+  const b = new Uint8Array(await fayl.slice(0, Math.min(hajm + 10, 20 * 1024 * 1024)).arrayBuffer());
+  let p = 10;
+  while (p + 10 < b.length) {
+    const id = String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
+    if (!/^[A-Z0-9]{4}$/.test(id)) break;
+    const uz = versiya === 4 ? ((b[p + 4] & 0x7f) << 21) | ((b[p + 5] & 0x7f) << 14) | ((b[p + 6] & 0x7f) << 7) | (b[p + 7] & 0x7f)
+      : ((b[p + 4] << 24) | (b[p + 5] << 16) | (b[p + 6] << 8) | b[p + 7]) >>> 0;
+    if (id === "APIC") {
+      const d = b.subarray(p + 10, p + 10 + uz);
+      const enc = d[0];
+      let q = 1; while (q < d.length && d[q] !== 0) q++;      // MIME turi
+      q += 2;                                                  // 0 + rasm turi
+      if (enc === 1 || enc === 2) { while (q + 1 < d.length && !(d[q] === 0 && d[q + 1] === 0)) q += 2; q += 2; }
+      else { while (q < d.length && d[q] !== 0) q++; q++; }
+      const r = d.subarray(q);
+      if (rasmTuri(r)) return new Blob([r], { type: rasmTuri(r) });
+    }
+    p += 10 + uz;
+  }
+  return null;
+}
+
+async function faylMuqovasi(fayl) {
+  const k = kengaytma(fayl.name);
+  try {
+    let manba = null;
+    if (k === "epub") manba = await epubMuqovasi(fayl);
+    else if (k === "fb2") manba = await fb2Muqovasi(fayl);
+    else if (k === "pdf") manba = await pdfMuqovasi(fayl);
+    else if (["mobi", "azw", "azw3", "prc"].includes(k)) manba = await mobiMuqovasi(fayl);
+    else if (k === "docx") manba = await docxMuqovasi(fayl);
+    else if (k === "mp3") manba = await mp3Muqovasi(fayl);
+    else if (/^(jpe?g|png|webp|gif)$/.test(k)) manba = fayl;
+    return manba ? await rasmniKichrayt(manba) : null;
+  } catch (e) { return null; }
 }

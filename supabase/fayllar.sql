@@ -13,3 +13,7 @@
 --   set local request.jwt.claims = '{"sub":"<foydalanuvchi_id>","role":"authenticated"}';
 --   select count(*) from storage.objects where bucket_id = 'kitoblar' and name like '<egasi_id>/%';
 -- rollback;
+
+-- Muqova («kitob_muqovasi» migratsiyasi): kitob_javoni.muqova — fayldan olingan kichik JPEG (data:image/jpeg;base64,…, ≤ 80 000 belgi).
+-- alter table public.kitob_javoni add column if not exists muqova text
+--   check (muqova is null or (length(muqova) <= 80000 and muqova like 'data:image/jpeg;base64,%'));

@@ -8,13 +8,18 @@ const toshkentSana = () => new Date(Date.now() + 5 * 3600 * 1000).toISOString().
 const joriyYil = () => Number(toshkentSana().slice(0, 4));
 
 // Kitob muqovasi: nomidan rang, ustida bosh harflar
-function muqovaEl(kitob, kichik) {
+function muqovaEl(kitob, kichik, rasm) {
   let h = 0; for (const c of kitob) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const ranglar = [["#8C4A2F", "#6B3E26"], ["#4F5B3A", "#353D26"], ["#3F5F7A", "#2A4357"], ["#7B2E2E", "#5A1F1F"], ["#6B5A2E", "#4A3E1F"], ["#5E3A6B", "#40274A"]];
   const [a, b] = ranglar[h % ranglar.length];
   const m = yarat("span", "muqova" + (kichik ? " kichik" : ""));
   m.style.background = `linear-gradient(90deg, ${b} 0 10%, ${a} 10% 100%)`;
   m.textContent = kitob.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
+  if (rasm && /^data:image\/jpeg;base64,/.test(rasm)) {
+    m.classList.add("rasmli"); m.textContent = "";
+    m.style.backgroundImage = `url("${rasm}")`;
+    m.setAttribute("role", "img"); m.setAttribute("aria-label", kitob + " muqovasi");
+  }
   return m;
 }
 
@@ -55,7 +60,7 @@ function rejaMatni(soni, maqsad) {
 async function javonMalumoti(m, profilId) {
   const yil = joriyYil();
   const [{ data: kitoblar }, { data: maqsad }] = await Promise.all([
-    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan,fayl_yoli,fayl_nomi,fayl_hajmi,fayl_turi").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
+    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan,fayl_yoli,fayl_nomi,fayl_hajmi,fayl_turi,muqova").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
     m.from("yillik_maqsad").select("maqsad").eq("profil_id", profilId).eq("yil", yil).maybeSingle(),
   ]);
   const royxat = kitoblar || [];
@@ -143,14 +148,28 @@ function kitobQoshishFormasi(m) {
   const fayl = yarat("input"); fayl.type = "file";
   const faylMatn = yarat("span", "", "📎 Kitob fayli (ixtiyoriy) — PDF, EPUB, FB2, TXT, audio va boshqa formatlar, 50 MB gacha");
   faylQuti.append(fayl, faylMatn);
+  // Muqova ko'rinishi: fayldan olingan rasm, xohlasa olib tashlaydi
+  let muqova = null;
+  const muqQuti = yarat("div", "muqova-korinish yashirin");
+  const muqOl = yarat("button", "matn-tugma", "muqovani olib tashlash"); muqOl.type = "button";
+  const muqChiz = () => {
+    muqQuti.innerHTML = "";
+    muqQuti.classList.toggle("yashirin", !muqova);
+    if (!muqova) return;
+    const t = yarat("div", ""); t.append(yarat("small", "", "Muqova fayldan olindi ✓"), muqOl);
+    muqQuti.append(muqovaEl(kitob.value || "Kitob", false, muqova), t);
+  };
+  muqOl.addEventListener("click", () => { muqova = null; muqChiz(); });
   // Fayl tanlanganda — nomi va muallifini fayl ichidan aniqlab, bo'sh (yoki avval o'zimiz to'ldirgan) maydonlarga yozamiz
   let avtoKitob = "", avtoMuallif = "";
   fayl.addEventListener("change", async () => {
     const f = fayl.files[0];
     if (!f) return;
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)} — ma'lumotlar aniqlanmoqda…`;
-    const d = await faylMalumoti(f);
+    muqova = null; muqChiz();
+    const [d, mq] = await Promise.all([faylMalumoti(f), faylMuqovasi(f)]);
     if (fayl.files[0] !== f) return;
+    muqova = mq; muqChiz();
     if (!kitob.value.trim() || kitob.value === avtoKitob) { kitob.value = d.kitob; avtoKitob = d.kitob; }
     if (!muallif.value.trim() || muallif.value === avtoMuallif) { muallif.value = d.muallif; avtoMuallif = d.muallif; }
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}` +
@@ -168,20 +187,20 @@ function kitobQoshishFormasi(m) {
     tugma.disabled = true;
     const bugun = toshkentSana(), h = holat.value;
     const { data: yangi, error } = await m.from("kitob_javoni").insert({
-      profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h,
+      profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h, muqova: f ? muqova : null,
       foiz: h === "oqidim" ? 100 : 0, boshlangan: h !== "oqimoqchi" ? bugun : null, tugatilgan: h === "oqidim" ? bugun : null,
     }).select("id").single();
     if (error) { tugma.disabled = false; xabar.textContent = error.code === "23505" ? "Bu kitob javoningizda allaqachon bor." : "Qo'shib bo'lmadi."; return; }
     if (f) {
       xabar.textContent = "Fayl yuklanmoqda…";
-      try { await faylniBiriktir(m, { id: yangi.id }, f); }
+      try { await faylniBiriktir(m, { id: yangi.id, muqova: muqova || "yoq" }, f); }
       catch (e) { tugma.disabled = false; xabar.textContent = "Kitob qo'shildi, lekin: " + faylXatosi(e); javonHolati.tab = h; setTimeout(javonChiz, 2500); return; }
     }
     tugma.disabled = false;
     javonHolati.tab = h;
     javonChiz();
   });
-  ichi.append(kitob, royxat, muallif, faylQuti, holat, tugma, xabar,
+  ichi.append(kitob, royxat, muallif, faylQuti, muqQuti, holat, tugma, xabar,
     yarat("p", "kichik-matn", "Fayllar faqat sizga ko'rinadi. Mualliflik huquqi bilan himoyalangan kitoblarni boshqalarga tarqatmang."));
   quti.appendChild(ichi);
   return quti;
@@ -189,7 +208,7 @@ function kitobQoshishFormasi(m) {
 
 function kitobKartasi(m, k) {
   const karta = yarat("article", "kitob-karta");
-  karta.appendChild(muqovaEl(k.kitob));
+  karta.appendChild(muqovaEl(k.kitob, false, k.muqova));
   const ong = yarat("div", "kitob-ong");
   ong.append(yarat("b", "kitob-nomi", k.kitob), yarat("span", "kichik-matn", k.muallif || ""));
   const yangila = async (q) => { await m.from("kitob_javoni").update(q).eq("id", k.id); javonChiz(); };
@@ -260,7 +279,7 @@ function javonQismi(profil, ozimniki) {
       if (oqiyapti.length) {
         quti.appendChild(yarat("small", "javon-sarlavha", "Hozir o'qiyapti"));
         oqiyapti.forEach((k) => {
-          const q = yarat("div", "javon-qator"); q.appendChild(muqovaEl(k.kitob, true));
+          const q = yarat("div", "javon-qator"); q.appendChild(muqovaEl(k.kitob, true, k.muqova));
           const t = yarat("div", ""); t.append(yarat("b", "", k.kitob), yarat("span", "kichik-matn", (k.muallif ? k.muallif + " · " : "") + k.foiz + "%"));
           q.appendChild(t); quti.appendChild(q);
         });
@@ -269,7 +288,7 @@ function javonQismi(profil, ozimniki) {
       if (oqigan.length) {
         quti.appendChild(yarat("small", "javon-sarlavha", `O'qigan kitoblari (${d.kitoblar.filter((k) => k.holat === "oqidim").length})`));
         oqigan.forEach((k) => {
-          const q = yarat("div", "javon-qator"); q.appendChild(muqovaEl(k.kitob, true));
+          const q = yarat("div", "javon-qator"); q.appendChild(muqovaEl(k.kitob, true, k.muqova));
           const t = yarat("div", ""); t.append(yarat("b", "", k.kitob));
           if (k.baho) t.appendChild(yulduzlarEl(k.baho));
           if (k.sharh) t.appendChild(yarat("span", "kichik-matn", "«" + k.sharh.slice(0, 90) + (k.sharh.length > 90 ? "…" : "") + "»"));

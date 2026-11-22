@@ -385,10 +385,10 @@ async function oqishChiz(id) {
 
   // Ulashilgan kitob fayli: egasi — odatdagidek; qabul qilgan kitobdosh — faqat o'qish rejimida
   if (o.fayl_kitob_id) {
-    const { data: fk } = await m.from("kitob_javoni").select("id,kitob,muallif,fayl_yoli,fayl_nomi,profil_id").eq("id", o.fayl_kitob_id).maybeSingle();
+    const { data: fk } = await m.from("kitob_javoni").select("id,kitob,muallif,fayl_yoli,fayl_nomi,profil_id,muqova").eq("id", o.fayl_kitob_id).maybeSingle();
     if (fk && fk.fayl_yoli) {
       const fq = yarat("div", "ulashilgan-fayl");
-      fq.append(muqovaEl(fk.kitob), yarat("div", ""));
+      fq.append(muqovaEl(fk.kitob, false, fk.muqova), yarat("div", ""));
       const ich = fq.lastChild;
       ich.append(yarat("b", "", "📖 Kitob fayli ulashilgan"), yarat("span", "kichik-matn", `${(kengaytma(fk.fayl_nomi) || "").toUpperCase()} · faqat saytda o'qiladi`));
       const ozi = fk.profil_id === mening.id;
