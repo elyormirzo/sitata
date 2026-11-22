@@ -692,3 +692,8 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .javon-qator b { font: 600 15px Lora, Georgia, serif; }
 .javon-qator .kichik-matn { margin: 0; font-size: 13px; }
 .javon-qator .kichik-yulduzlar > * { font-size: 14px; }
+
+/* ===== 19. PROFIL TABLARI ===== */
+.profil-tablar { margin-bottom: 14px; }
+.profil-tablar .manba-tab { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+#darajaSahifa > .sahifa-sarlavha, #reytingSahifa > .sahifa-sarlavha { display: none; }

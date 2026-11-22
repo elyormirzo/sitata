@@ -111,21 +111,41 @@ function joriyYol() {
 
 let viktorinaTaymeri = null;
 
+// Daraja va Reyting — profil ichidagi tablar: #profilim/daraja, #profilim/reyting (eski #daraja, #reyting ham ishlaydi)
+const PROFIL_TABLARI = [["", "Profil"], ["daraja", "Daraja"], ["reyting", "Reyting"]];
+
+function profilTablariniChiz(tab) {
+  const t = $("profilTablar");
+  t.innerHTML = "";
+  PROFIL_TABLARI.forEach(([k, nom]) => {
+    const a = havola("#profilim" + (k ? "/" + k : ""), "manba-tab" + (k === tab ? " faol" : ""), nom);
+    if (k === tab) a.setAttribute("aria-current", "page");
+    t.appendChild(a);
+  });
+}
+
 function sahifaniKor() {
   let { nom, param } = joriyYol();
+  if (nom === "daraja" || nom === "reyting") {          // eski manzillar → profil tablari
+    param = nom; nom = "profilim";
+    history.replaceState(null, "", location.pathname + location.search + "#profilim/" + param);
+  }
   if (nom !== "profilim" && !SARLAVHALAR[nom]) nom = "bosh";
-  const bolim = nom === "profilim" ? "profil" : nom;
+  const profilTab = nom === "profilim" ? (["daraja", "reyting"].includes(param) ? param : "") : null;
+  const bolim = nom === "profilim" ? (profilTab || "profil") : nom;
+  const korinadigan = nom === "profilim" ? ["profiltab", bolim] : [bolim];
 
   clearInterval(viktorinaTaymeri);
-  document.querySelectorAll(".sahifa").forEach((s) => s.classList.toggle("yashirin", s.dataset.sahifa !== bolim));
+  document.querySelectorAll(".sahifa").forEach((s) => s.classList.toggle("yashirin", !korinadigan.includes(s.dataset.sahifa)));
   menyu.querySelectorAll("a").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom));
   menyuniYop();
   document.title = SARLAVHALAR[bolim];
+  if (profilTab !== null) profilTablariniChiz(profilTab);
 
   const chizuvchilar = {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
-    profilim: profilimniChiz, profil: () => profilSahifasiniKor(param), admin: adminniChiz,
+    profilim: () => (profilTab === "daraja" ? darajaChiz() : profilTab === "reyting" ? reytingniChiz() : profilimniChiz()), profil: () => profilSahifasiniKor(param), admin: adminniChiz,
     kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
@@ -175,7 +195,7 @@ function boshniChiz() {
     ["#karta", "Karta yaratish", "Story, post yoki kvadrat", "▣"],
     ["#birga", "Birga o'qiymiz", "Kitobdoshlar bilan bir kitob", "❦"],
     ["#liga", "Haftalik liga", "Varaqdan Xazinagacha", "🏆"],
-    ["#daraja", "Darajam", "Bronzadan Afsonagacha", "◆"],
+    ["#profilim", "Profilim", mening ? "Daraja, reyting, javon" : "Profil oching", "☺"],
   ];
   const panjara = yarat("div", "bolimlar");
   bolimlar.forEach(([href, nom, izoh, belgi]) => {

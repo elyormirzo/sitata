@@ -182,7 +182,7 @@ function profilQutiniChiz() {
     if (!SINOV && holat.tugadi) {
       const b = document.createElement("p");
       const ball = holat.yutdi ? Math.max(25, 50 - 5 * xatolarSoni()) : 10;
-      b.innerHTML = `Bugungi o'yin: <b>+${ball} ball</b> — <a href="#daraja">darajangizni ko'ring</a>`;
+      b.innerHTML = `Bugungi o'yin: <b>+${ball} ball</b> — <a href="#profilim/daraja">darajangizni ko'ring</a>`;
       quti.appendChild(b);
     }
     if (SINOV) {

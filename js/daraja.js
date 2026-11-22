@@ -60,7 +60,7 @@ function nishonEl(i, olcham, qulf) { const s = yarat("span", "nishon-svg"); s.in
 // Profil sahifasi uchun: «Kumush · 520 ball» yorlig'i
 function darajaYorligi(profilId) {
   const quti = yarat("a", "daraja-yorliq");
-  quti.href = mening && mening.id === profilId ? "#daraja" : "#reyting";
+  quti.href = mening && mening.id === profilId ? "#profilim/daraja" : "#profilim/reyting";
   if (!BAZA_YOQIQ) return quti;
   (async () => {
     try {
