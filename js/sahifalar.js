@@ -100,10 +100,15 @@ const SARLAVHALAR = {
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
+// Chiroyli profil manzili: sitata.uz/mirzo (yo'l qismida) — sayt ichida #@mirzo bilan teng
+const yoldagiTaxallus = () => (location.pathname.match(/^\/@?([A-Za-z0-9_]{3,20})\/?$/) || [])[1];
+
 function joriyYol() {
   const hash = decodeURIComponent(location.hash.slice(1));
   if (hash.startsWith("@")) return { nom: "profil", param: hash };
   if (hash) { const [nom, ...qolgan] = hash.split("/"); return { nom, param: qolgan.join("/") }; }
+  const tx = yoldagiTaxallus();
+  if (tx && tx.toLowerCase() !== "index") return { nom: "profil", param: "@" + tx.toLowerCase() };
   if (parametrlar.has("p")) return { nom: "profil", param: parametrlar.get("p") };
   if (SINOV) return { nom: "kim-aytgan" };
   // Asosiy sahifa — lenta
@@ -137,9 +142,20 @@ function yuqoriAvatarniYangila() {
   a.title = mening ? mening.ism + " — profilim" : "Profil ochish";
 }
 
+// Manzil qatorini to'g'rilash: profil — sitata.uz/mirzo, qolgan bo'limlar — sitata.uz/#bo'lim
+function manzilniTogrila(nom, param) {
+  const profilYoli = nom === "profil" && /^@[a-z0-9_]{3,20}$/.test(param) ? "/" + param.slice(1) : null;
+  const kerak = profilYoli ? profilYoli + location.search : "/" + location.search + location.hash;
+  if (location.pathname + location.search + location.hash !== kerak) history.replaceState(history.state, "", kerak);
+}
+let oxirgiManzil = "";
+function yolOzgardi() { if (location.href === oxirgiManzil) return; sahifaniKor(); }
+
 function sahifaniKor() {
   yuqoriAvatarniYangila();
   let { nom, param } = joriyYol();
+  manzilniTogrila(nom, param);
+  oxirgiManzil = location.href;
   if (nom === "daraja" || nom === "reyting") {          // eski manzillar → profil tablari
     param = nom; nom = "profilim";
     history.replaceState(null, "", location.pathname + location.search + "#profilim/" + param);
@@ -174,7 +190,8 @@ function sahifaniKor() {
     });
   }
 }
-window.addEventListener("hashchange", sahifaniKor);
+window.addEventListener("hashchange", yolOzgardi);
+window.addEventListener("popstate", yolOzgardi);   // sitata.uz/mirzo ↔ sitata.uz/dilnoza (hash o'zgarmaydi)
 
 // ---------- Bosh sahifa ----------
 function boshniChiz() {

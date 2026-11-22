@@ -1,6 +1,6 @@
 // sitata.uz xizmat ishchisi (service worker): oflayn ishlash va push-eslatmalar.
 // Sayt fayllari o'zgarganda VERSIYA ni oshiring — eski kesh tozalanadi.
-const VERSIYA = "sitata-v36";
+const VERSIYA = "sitata-v37";
 const ASOSIY = [
   "./", "index.html", "uslub.css", "manifest.webmanifest",
   "js/malumotlar.js", "js/oyin.js", "js/profil.js", "js/sahifalar.js", "js/birga.js", "js/daraja.js", "js/kitobcha.js", "js/liga.js", "js/javon.js", "js/fayllar.js", "js/rasm-tahrir.js", "js/avatar.js", "js/iqtiboslar.js", "js/pwa.js", "js/boshlash.js",
@@ -27,6 +27,12 @@ self.addEventListener("fetch", (e) => {
   const ozimiz = url.origin === self.location.origin;
   const tashqiKesh = /fonts\.(googleapis|gstatic)\.com|cdn\.jsdelivr\.net/.test(url.host);
   if (!ozimiz && !tashqiKesh) return;
+  // Profil manzili sitata.uz/mirzo — serverda bunday fayl yo'q; saytning o'zini (index.html) beramiz, u manzilni o'qiydi
+  if (ozimiz && req.mode === "navigate" && /^\/@?[A-Za-z0-9_]{3,20}$/.test(url.pathname) && !/^\/(index|sw)$/i.test(url.pathname)) {
+    e.respondWith(fetch(new URL("./", self.registration.scope)).then((j) => (j.ok ? saqla(new Request("index.html"), j) : j))
+      .catch(() => caches.match("index.html")));
+    return;
+  }
 
   if (ozimiz && /\/(rasmlar|ikonkalar)\//.test(url.pathname)) {
     e.respondWith(caches.match(req).then((bor) => bor || fetch(req).then((j) => saqla(req, j))));
