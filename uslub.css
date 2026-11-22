@@ -753,3 +753,6 @@ body.oquvchi-ochiq { overflow: hidden; }
 .muqova-qalam { position: absolute; right: -6px; bottom: -6px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: var(--qogoz); border: 1px solid var(--chegara); color: var(--teri); font-size: 12px; box-shadow: 0 1px 3px rgba(40,25,10,.25); }
 .kitob-ong > .matn-tugma { align-self: flex-start; text-align: left; }
+/* Sahifa ko'rsatkichi */
+.oquvchi-holat { flex: none; font-size: 13px; color: var(--kulrang); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sahifa-tugma { font-size: 14px; }

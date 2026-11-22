@@ -40,6 +40,7 @@ async function faylniBiriktir(m, kitob, fayl) {
   if (error) throw new Error(/row-level|policy|403/i.test(error.message || "") ? "chegara" : "yuklanmadi");
   const q = { fayl_yoli: yol, fayl_nomi: fayl.name.slice(0, 200), fayl_hajmi: fayl.size, fayl_turi: (fayl.type || "").slice(0, 100) || null };
   if (!kitob.muqova) { const mq = await faylMuqovasi(fayl); if (mq) q.muqova = mq; }
+  if (!kitob.sahifalar) { const d = await faylMalumoti(fayl); if (d.sahifalar) q.sahifalar = d.sahifalar; }
   const { error: e2 } = await m.from("kitob_javoni").update(q).eq("id", kitob.id);
   if (e2) { await m.storage.from("kitoblar").remove([yol]); throw new Error("yuklanmadi"); }
   if (kitob.fayl_yoli) await m.storage.from("kitoblar").remove([kitob.fayl_yoli]);
@@ -64,7 +65,7 @@ function faylQatori(m, k, yangila) {
     const tur = faylTuri(k.fayl_nomi || k.fayl_yoli);
     q.appendChild(yarat("span", "fayl-belgi", `📄 ${(kengaytma(k.fayl_nomi || k.fayl_yoli) || "fayl").toUpperCase()} · ${hajmMatni(k.fayl_hajmi)}`));
     const och = yarat("button", "amal tanlangan", tur === "audio" ? "▶ Tinglash" : tur === "yuklab" ? "⬇ Yuklab olish" : "📖 O'qish"); och.type = "button";
-    och.addEventListener("click", () => oquvchiniOch(m, k));
+    och.addEventListener("click", () => oquvchiniOch(m, k, { joy: oqishJoyiniYozgich(m, k), yopilganda: yangila }));
     const ol = yarat("button", "matn-tugma", "faylni olib tashlash"); ol.type = "button";
     ol.addEventListener("click", async () => {
       if (!confirm("Faylni o'chirasizmi? Kitob javonda qoladi.")) return;
@@ -99,8 +100,29 @@ function faylQatori(m, k, yangila) {
   return q;
 }
 
+// O'qiyotganda qayergacha kelgani bazaga yoziladi (egasi javondan ochganda; «o'qidim»dagi kitobga tegilmaydi)
+function oqishJoyiniYozgich(m, k) {
+  let kech = null, oxirgi = null;
+  return (sahifa, foiz, jami) => {
+    if (k.holat === "oqidim" || foiz == null) return;
+    if (oxirgi && oxirgi.foiz === foiz && oxirgi.sahifa === sahifa) return;
+    if (!oxirgi && foiz === (k.foiz || 0) && (sahifa == null || sahifa === k.sahifa)) return;   // ochilganda — o'zgarish yo'q
+    oxirgi = { foiz, sahifa };
+    clearTimeout(kech);
+    kech = setTimeout(() => {
+      const q = { foiz };
+      if (sahifa != null) q.sahifa = sahifa;
+      if (jami && !k.sahifalar) { q.sahifalar = jami; k.sahifalar = jami; }
+      if (k.holat === "oqimoqchi" && foiz > 0) { q.holat = "oqiyapman"; q.boshlangan = toshkentSana(); k.holat = "oqiyapman"; javonHolati.tab = "oqiyapman"; }
+      k.foiz = foiz; if (sahifa != null) k.sahifa = sahifa;
+      m.from("kitob_javoni").update(q).eq("id", k.id).then(() => {});
+    }, 1200);
+  };
+}
+
 // ---------- O'quvchi oynasi ----------
 let epubKitob = null;
+let oquvchiYopilganda = null;
 
 function oquvchiniYop() {
   const o = $("oquvchi");
@@ -109,6 +131,8 @@ function oquvchiniYop() {
   document.body.classList.remove("oquvchi-ochiq");
   document.removeEventListener("keydown", oquvchiTugmalari);
   document.removeEventListener("keydown", himoyaTugmalari);
+  const f = oquvchiYopilganda; oquvchiYopilganda = null;
+  if (f) setTimeout(f, 1400);   // oxirgi joy bazaga yozilib ulgurishi uchun
 }
 function oquvchiTugmalari(e) {
   if (e.key === "Escape") oquvchiniYop();
@@ -126,6 +150,7 @@ function himoyaTugmalari(e) {
 
 async function oquvchiniOch(m, k, opts = {}) {
   oquvchiniYop();
+  oquvchiYopilganda = opts.yopilganda || null;
   const himoya = !!opts.himoya;
   const tur = faylTuri(k.fayl_nomi || k.fayl_yoli);
   const o = yarat("div", "oquvchi" + (himoya ? " himoyali" : "")); o.id = "oquvchi";
@@ -134,7 +159,18 @@ async function oquvchiniOch(m, k, opts = {}) {
   const yop = yarat("button", "oquvchi-yop", "✕"); yop.type = "button"; yop.setAttribute("aria-label", "Yopish");
   yop.addEventListener("click", oquvchiniYop);
   const yuklab = yarat("a", "matn-tugma", "⬇ Yuklab olish"); yuklab.target = "_blank"; yuklab.rel = "noopener";
-  bosh.append(yarat("b", "", k.kitob), ...(himoya ? [yarat("span", "himoya-belgi", "🔒 faqat o'qish")] : [yuklab]), yop);
+  // Qayerdaligi: «25 / 170 sahifa · 15%»
+  const holatMatn = yarat("span", "oquvchi-holat");
+  let jamiSahifa = k.sahifalar || null;
+  const joyYoz = (ulush, aniqSahifa) => {
+    ulush = Math.max(0, Math.min(1, ulush || 0));
+    const sahifa = aniqSahifa != null ? aniqSahifa : jamiSahifa ? Math.round(ulush * jamiSahifa) : null;
+    const foiz = jamiSahifa && sahifa != null ? Math.min(100, Math.round((sahifa / jamiSahifa) * 100)) : Math.round(ulush * 100);
+    holatMatn.textContent = (jamiSahifa && sahifa != null ? `${sahifa} / ${jamiSahifa} sahifa · ` : "") + foiz + "%";
+    if (opts.joy) opts.joy(jamiSahifa ? sahifa : null, foiz, jamiSahifa);
+  };
+  const jaminiBelgila = (n) => { if (!jamiSahifa) jamiSahifa = n; };
+  bosh.append(yarat("b", "", k.kitob), holatMatn, ...(himoya ? [yarat("span", "himoya-belgi", "🔒 faqat o'qish")] : [yuklab]), yop);
   const tana = yarat("div", "oquvchi-tana");
   tana.appendChild(yarat("p", "bosh-holat", "Yuklanmoqda…"));
   o.append(bosh, tana);
@@ -159,13 +195,15 @@ async function oquvchiniOch(m, k, opts = {}) {
   tana.innerHTML = "";
   try {
     if (tur === "pdf") {
-      await pdfniChiz(tana, korish.signedUrl, k.id);
+      await pdfniChiz(tana, korish.signedUrl, k.id, joyYoz, jaminiBelgila);
     } else if (tur === "audio") {
       const a = yarat("audio", "oquvchi-audio"); a.controls = true; a.src = korish.signedUrl; a.preload = "metadata";
       a.setAttribute("controlsList", "nodownload noplaybackrate"); a.addEventListener("contextmenu", oquvchiBloki);
       const kalit = "sitataAudio:" + k.id;
       a.addEventListener("loadedmetadata", () => { const t = xotiradanOl(kalit, 0); if (t) a.currentTime = t; });
-      a.addEventListener("timeupdate", () => { if (Math.round(a.currentTime) % 5 === 0) xotiragaYoz(kalit, a.currentTime); });
+      a.addEventListener("timeupdate", () => {
+        if (Math.round(a.currentTime) % 5 === 0) { xotiragaYoz(kalit, a.currentTime); if (a.duration) joyYoz(a.currentTime / a.duration); }
+      });
       const q = yarat("div", "oquvchi-audio-quti");
       q.append(muqovaEl(k.kitob, false, k.muqova), yarat("b", "", k.kitob), yarat("span", "kichik-matn", k.muallif || ""), a);
       tana.appendChild(q);
@@ -173,9 +211,9 @@ async function oquvchiniOch(m, k, opts = {}) {
       const buf = await (await fetch(korish.signedUrl)).arrayBuffer();
       const matn = matnniOch(buf);
       tana.appendChild(tur === "fb2" ? fb2niChiz(matn) : txtniChiz(matn));
-      oqishJoyiniTikla(tana, k.id);
+      oqishJoyiniTikla(tana, k.id, () => joyYoz(tana.scrollTop / Math.max(1, tana.scrollHeight - tana.clientHeight)));
     } else if (tur === "epub") {
-      await epubniChiz(tana, korish.signedUrl, k.id, himoya);
+      await epubniChiz(tana, korish.signedUrl, k.id, himoya, joyYoz);
     } else {
       const q = yarat("div", "vik-quti markaz");
       q.append(yarat("p", "katta-belgi", "📄"),
@@ -236,14 +274,14 @@ function fb2niChiz(matn) {
 }
 
 // Matnli kitoblarda qayergacha o'qilganini eslab qolish
-function oqishJoyiniTikla(tana, id) {
+function oqishJoyiniTikla(tana, id, xabarchi) {
   const kalit = "sitataOqish:" + id;
-  requestAnimationFrame(() => { tana.scrollTop = xotiradanOl(kalit, 0); });
+  requestAnimationFrame(() => { tana.scrollTop = xotiradanOl(kalit, 0); if (xabarchi) xabarchi(); });
   let kech = null;
-  tana.addEventListener("scroll", () => { clearTimeout(kech); kech = setTimeout(() => xotiragaYoz(kalit, tana.scrollTop), 300); });
+  tana.addEventListener("scroll", () => { clearTimeout(kech); kech = setTimeout(() => { xotiragaYoz(kalit, tana.scrollTop); if (xabarchi) xabarchi(); }, 300); });
 }
 
-async function epubniChiz(tana, url, id, himoya) {
+async function epubniChiz(tana, url, id, himoya, joyYoz) {
   for (const src of EPUB_SKRIPTLAR) {
     if (src.includes("jszip") && window.JSZip) continue;
     if (src.includes("epub") && window.ePub) continue;
@@ -266,8 +304,14 @@ async function epubniChiz(tana, url, id, himoya) {
   }
   const kalit = "sitataEpub:" + id;
   await r.display(xotiradanOl(kalit, undefined) || undefined);
+  // Butun kitob bo'yicha foiz: joylashuvlar (~1600 belgi = 1 sahifa) orqada hisoblanadi
+  const kitobi = epubKitob;
+  let joylarTayyor = false, oxirgiCfi = null;
+  const umumiyJoy = () => { if (joylarTayyor && oxirgiCfi && joyYoz) joyYoz(kitobi.locations.percentageFromCfi(oxirgiCfi)); };
+  kitobi.ready.then(() => kitobi.locations.generate(1600)).then(() => { joylarTayyor = true; umumiyJoy(); }).catch(() => {});
   r.on("relocated", (loc) => {
     xotiragaYoz(kalit, loc.start.cfi);
+    oxirgiCfi = loc.start.cfi; umumiyJoy();
     if (loc.start.displayed) joyMatn.textContent = `${loc.start.displayed.page} / ${loc.start.displayed.total}`;
   });
   orqa.addEventListener("click", () => r.prev());
@@ -280,11 +324,12 @@ async function epubniChiz(tana, url, id, himoya) {
 
 // PDF: PDF.js bilan sahifalarni chizamiz (telefondagi brauzerlar ichki PDF ko'ruvchisiga ega emas).
 // Sahifalar ekranga yaqinlashganda chiziladi; qayergacha o'qilgani eslab qolinadi.
-async function pdfniChiz(tana, url, id) {
+async function pdfniChiz(tana, url, id, joyYoz, jaminiBelgila) {
   if (!window.pdfjsLib) await skriptYukla(PDFJS + "pdf.min.js");
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
   const data = new Uint8Array(await (await fetch(url)).arrayBuffer());
   const hujjat = await window.pdfjsLib.getDocument({ data }).promise;
+  if (jaminiBelgila) jaminiBelgila(hujjat.numPages);
   const quti = yarat("div", "oquvchi-pdf-sahifalar");
   tana.appendChild(quti);
   const kenglik = Math.min(tana.clientWidth - 16, 900);
@@ -306,14 +351,22 @@ async function pdfniChiz(tana, url, id) {
     const masshtab = (kenglik / v.width) * zichlik;
     const vp = sahifa.getViewport({ scale: masshtab });
     const c = yarat("canvas"); c.width = vp.width; c.height = vp.height; c.style.width = "100%";
-    s.style.height = "auto";
     await sahifa.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
     s.insertBefore(c, s.firstChild);
+    s.style.height = "auto";   // balandlikni chizilgandan keyin bo'shatamiz — aks holda sahifa sakrab ketadi
   };
   const kuzatuvchi = new IntersectionObserver((yozuvlar) => yozuvlar.forEach((y) => { if (y.isIntersecting) chiz(y.target); }),
     { root: tana, rootMargin: "800px 0px" });
   sahifalar.forEach((s) => kuzatuvchi.observe(s));
-  oqishJoyiniTikla(tana, id);
+  // Ekranning yuqori uchdan biridagi sahifa — hozirgi sahifa; oxirigacha surilsa — oxirgi sahifa
+  const joriySahifa = () => {
+    if (tana.scrollTop + tana.clientHeight >= tana.scrollHeight - 4) return hujjat.numPages;
+    const chiziq = tana.scrollTop + tana.clientHeight / 3;
+    let n = 1;
+    for (const s of sahifalar) { if (s.offsetTop <= chiziq) n = Number(s.dataset.n); else break; }
+    return n;
+  };
+  oqishJoyiniTikla(tana, id, () => { if (joyYoz) { const n = joriySahifa(); joyYoz(n / hujjat.numPages, n); } });
 }
 
 // ===== FAYLDAN KITOB NOMI VA MUALLIFINI ANIQLASH =====
@@ -337,24 +390,38 @@ async function epubMalumoti(fayl) {
   const opf = opfYol && await zip.file(opfYol)?.async("string");
   if (!opf) return {};
   const x = new DOMParser().parseFromString(opf, "application/xml");
-  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator") };
+  // Sahifalar (taxminan): matn bo'limlaridagi belgilar / 1600
+  const papka = opfYol.includes("/") ? opfYol.replace(/[^/]+$/, "") : "";
+  let belgilar = 0;
+  for (const i of x.getElementsByTagNameNS("*", "item")) {
+    if (!/x?html/.test(i.getAttribute("media-type") || "") || /(^|\s)nav(\s|$)/.test(i.getAttribute("properties") || "")) continue;
+    const yol = decodeURIComponent(new URL(i.getAttribute("href"), "http://x/" + papka).pathname.slice(1));
+    const h = await zip.file(yol)?.async("string");
+    if (h) belgilar += h.replace(/<head[\s\S]*?<\/head>/i, "").replace(/<[^>]+>/g, "").replace(/&[a-z#0-9]+;/gi, " ").replace(/\s+/g, " ").length;
+  }
+  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator"), sahifalar: belgilardanSahifa(belgilar) };
 }
 
 async function docxMalumoti(fayl) {
   const zip = await (await jszipOl()).loadAsync(fayl);
   const core = await zip.file("docProps/core.xml")?.async("string");
-  if (!core) return {};
+  const app = await zip.file("docProps/app.xml")?.async("string");
+  const sahifalar = app ? Number((app.match(/<Pages>(\d+)<\/Pages>/) || [])[1]) || null : null;
+  if (!core) return { sahifalar };
   const x = new DOMParser().parseFromString(core, "application/xml");
-  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator") };
+  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator"), sahifalar };
 }
 
 async function fb2Malumoti(fayl) {
-  const matn = matnniOch(await fayl.slice(0, 200000).arrayBuffer());
+  const toliq = matnniOch(await fayl.arrayBuffer());
+  const tana = (toliq.match(/<body[\s\S]*?<\/body>/g) || []).join(" ");
+  const sahifalar = belgilardanSahifa(tana.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").length);
+  const matn = toliq.slice(0, 200000);
   const x = new DOMParser().parseFromString(matn.replace(/<binary[\s\S]*$/, "</FictionBook>"), "application/xml");
   const ti = x.getElementsByTagName("title-info")[0] || x;
   const a = ti.getElementsByTagName("author")[0];
   const muallif = a ? ["first-name", "middle-name", "last-name"].map((t) => (a.getElementsByTagName(t)[0] || {}).textContent || "").filter(Boolean).join(" ") : "";
-  return { kitob: (ti.getElementsByTagName("book-title")[0] || {}).textContent || "", muallif };
+  return { kitob: (ti.getElementsByTagName("book-title")[0] || {}).textContent || "", muallif, sahifalar };
 }
 
 async function pdfMalumoti(fayl) {
@@ -362,8 +429,9 @@ async function pdfMalumoti(fayl) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
   const h = await window.pdfjsLib.getDocument({ data: new Uint8Array(await fayl.arrayBuffer()) }).promise;
   const { info } = await h.getMetadata();
+  const sahifalar = h.numPages;
   h.destroy();
-  return { kitob: info && info.Title, muallif: info && info.Author };
+  return { kitob: info && info.Title, muallif: info && info.Author, sahifalar };
 }
 
 // MOBI/AZW3: PalmDB → 0-yozuv → MOBI sarlavhasi → EXTH (100 — muallif, 503 — nom) yoki to'liq nom
@@ -374,7 +442,7 @@ async function mobiMalumoti(fayl) {
   if (String.fromCharCode(...new Uint8Array(buf, r0 + 16, 4)) !== "MOBI") return {};
   const mobiUzun = v.getUint32(r0 + 20), kodlash = v.getUint32(r0 + 28) === 65001 ? "utf-8" : "windows-1252";
   const dek = new TextDecoder(kodlash);
-  const natija = {};
+  const natija = { sahifalar: belgilardanSahifa(v.getUint32(r0 + 4) * 0.75) };   // matn uzunligi (HTML belgilar bilan)
   const nomJoy = v.getUint32(r0 + 84), nomUzun = v.getUint32(r0 + 88);
   if (nomUzun && r0 + nomJoy + nomUzun <= buf.byteLength) natija.kitob = dek.decode(new Uint8Array(buf, r0 + nomJoy, nomUzun));
   if (v.getUint32(r0 + 128) & 0x40) {
@@ -426,17 +494,22 @@ function nomdanMalumot(nom) {
   if (juft.length === 2) {
     const [a, b] = juft.map(tozaMatn);
     const muallifMi = (s) => !!MUALLIFLAR[s] || /^[A-ZА-ЯЎҚҒҲ][\wʻ'’]+\s+[A-ZА-ЯЎҚҒҲ][\wʻ'’]+$/.test(s);
-    return muallifMi(a) && !muallifMi(b) ? { muallif: a, kitob: b } : { kitob: a, muallif: b };
+    // Odatda «Muallif - Kitob»; faqat ikkinchi qism muallifga o'xshasa — teskari
+    return muallifMi(b) && !muallifMi(a) ? { kitob: a, muallif: b } : { muallif: a, kitob: b };
   }
   const qavs = n.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   if (qavs) return { kitob: tozaMatn(qavs[1]), muallif: tozaMatn(qavs[2]) };
   return { kitob: t };
 }
 
+// Taxminiy sahifa: kitobning bir sahifasida ~1600 belgi
+const belgilardanSahifa = (n) => n > 200 ? Math.min(20000, Math.max(1, Math.round(n / 1600))) : null;
+
 async function faylMalumoti(fayl) {
   const k = kengaytma(fayl.name);
   let m = {};
   try {
+    if (k === "txt") m = { sahifalar: belgilardanSahifa(matnniOch(await fayl.arrayBuffer()).replace(/\s+/g, " ").length) };
     if (k === "epub") m = await epubMalumoti(fayl);
     else if (k === "fb2") m = await fb2Malumoti(fayl);
     else if (k === "pdf") m = await pdfMalumoti(fayl);
@@ -447,6 +520,8 @@ async function faylMalumoti(fayl) {
   const nomdan = nomdanMalumot(fayl.name);
   let kitob = tozaMatn(m.kitob), muallif = tozaMatn(m.muallif);
   // PDF va DOCX xossalarida ko'pincha keraksiz qiymat bo'ladi ("Microsoft Word - ...", "Untitled", foydalanuvchi nomi)
+  // Xossadagi nom fayl nomining o'zi bo'lsa (ko'p dasturlar shunday yozadi) — fayl nomidan ajratamiz
+  if (kitob && kitob === tozaMatn(String(fayl.name).replace(/\.[^.]+$/, "").replace(/_/g, " "))) kitob = "";
   if (/^(untitled|document\d*|microsoft word.*|без названия|новый документ.*)$/i.test(kitob) || /\.(docx?|pdf|indd)$/i.test(kitob)) kitob = "";
   if (/^(user|admin|author|unknown|пользователь|windows user)$/i.test(muallif)) muallif = "";
   // Muallif bir nechta bo'lsa (";" yoki "&") — birinchisi
@@ -457,6 +532,7 @@ async function faylMalumoti(fayl) {
     kitob: kitob || nomdan.kitob || "",
     muallif: muallif || (royxatda && royxatda.muallif) || nomdan.muallif || "",
     manba: kitob || muallif ? "fayl" : "nom",
+    sahifalar: Number.isInteger(m.sahifalar) && m.sahifalar > 0 && m.sahifalar <= 20000 ? m.sahifalar : null,
   };
 }
 

@@ -60,7 +60,7 @@ function rejaMatni(soni, maqsad) {
 async function javonMalumoti(m, profilId) {
   const yil = joriyYil();
   const [{ data: kitoblar }, { data: maqsad }] = await Promise.all([
-    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan,fayl_yoli,fayl_nomi,fayl_hajmi,fayl_turi,muqova").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
+    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan,fayl_yoli,fayl_nomi,fayl_hajmi,fayl_turi,muqova,sahifalar,sahifa").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
     m.from("yillik_maqsad").select("maqsad").eq("profil_id", profilId).eq("yil", yil).maybeSingle(),
   ]);
   const royxat = kitoblar || [];
@@ -158,6 +158,8 @@ function kitobQoshishFormasi(m) {
   KITOBLAR.forEach((k) => { const o = yarat("option"); o.value = k.nom; royxat.appendChild(o); });
   const muallif = yarat("input", "matn-maydon bir-qator"); muallif.placeholder = "Muallifi (ixtiyoriy)"; muallif.maxLength = 60;
   kitob.addEventListener("change", () => { const k = KITOBLAR.find((x) => x.nom === kitob.value.trim()); if (k && !muallif.value) muallif.value = k.muallif; });
+  const sahifaMaydon = yarat("input", "matn-maydon bir-qator"); sahifaMaydon.type = "number"; sahifaMaydon.min = 1; sahifaMaydon.max = 20000;
+  sahifaMaydon.inputMode = "numeric"; sahifaMaydon.placeholder = "Sahifalar soni (ixtiyoriy)";
   const faylQuti = yarat("label", "fayl-tanlash");
   const fayl = yarat("input"); fayl.type = "file";
   const faylMatn = yarat("span", "", "📎 Kitob fayli (ixtiyoriy) — PDF, EPUB, FB2, TXT, audio va boshqa formatlar, 50 MB gacha");
@@ -184,7 +186,7 @@ function kitobQoshishFormasi(m) {
   };
   muqChiz();
   // Fayl tanlanganda — nomi va muallifini fayl ichidan aniqlab, bo'sh (yoki avval o'zimiz to'ldirgan) maydonlarga yozamiz
-  let avtoKitob = "", avtoMuallif = "";
+  let avtoKitob = "", avtoMuallif = "", avtoSahifa = "";
   fayl.addEventListener("change", async () => {
     const f = fayl.files[0];
     if (!f) return;
@@ -195,6 +197,7 @@ function kitobQoshishFormasi(m) {
     if (!ozimTanlagan && mq) { muqova = mq; muqManba = "fayl"; muqChiz(); }
     if (!kitob.value.trim() || kitob.value === avtoKitob) { kitob.value = d.kitob; avtoKitob = d.kitob; }
     if (!muallif.value.trim() || muallif.value === avtoMuallif) { muallif.value = d.muallif; avtoMuallif = d.muallif; }
+    if (d.sahifalar && (!sahifaMaydon.value || sahifaMaydon.value === avtoSahifa)) { sahifaMaydon.value = avtoSahifa = String(d.sahifalar); }
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}` +
       (d.manba === "fayl" ? " — nomi va muallifi fayldan olindi ✓" : " — fayl nomidan to'ldirildi, tekshirib ko'ring");
   });
@@ -209,21 +212,23 @@ function kitobQoshishFormasi(m) {
     if (f && f.size > FAYL_CHEGARA) { xabar.textContent = "Fayl 50 MB dan katta — kichikroq faylni tanlang."; return; }
     tugma.disabled = true;
     const bugun = toshkentSana(), h = holat.value;
+    const jami = Math.round(Number(sahifaMaydon.value)) || null;
+    if (jami && (jami < 1 || jami > 20000)) { xabar.textContent = "Sahifalar soni 1 dan 20 000 gacha bo'lsin."; sahifaMaydon.focus(); tugma.disabled = false; return; }
     const { data: yangi, error } = await m.from("kitob_javoni").insert({
       profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h, muqova: muqova || null,
-      foiz: h === "oqidim" ? 100 : 0, boshlangan: h !== "oqimoqchi" ? bugun : null, tugatilgan: h === "oqidim" ? bugun : null,
+      foiz: h === "oqidim" ? 100 : 0, sahifalar: jami, sahifa: jami ? (h === "oqidim" ? jami : 0) : null, boshlangan: h !== "oqimoqchi" ? bugun : null, tugatilgan: h === "oqidim" ? bugun : null,
     }).select("id").single();
     if (error) { tugma.disabled = false; xabar.textContent = error.code === "23505" ? "Bu kitob javoningizda allaqachon bor." : "Qo'shib bo'lmadi."; return; }
     if (f) {
       xabar.textContent = "Fayl yuklanmoqda…";
-      try { await faylniBiriktir(m, { id: yangi.id, muqova: muqova || (muqManba === "olindi" ? "yoq" : null) }, f); }
+      try { await faylniBiriktir(m, { id: yangi.id, muqova: muqova || (muqManba === "olindi" ? "yoq" : null), sahifalar: jami }, f); }
       catch (e) { tugma.disabled = false; xabar.textContent = "Kitob qo'shildi, lekin: " + faylXatosi(e); javonHolati.tab = h; setTimeout(javonChiz, 2500); return; }
     }
     tugma.disabled = false;
     javonHolati.tab = h;
     javonChiz();
   });
-  ichi.append(kitob, royxat, muallif, faylQuti, muqQuti, holat, tugma, xabar,
+  ichi.append(kitob, royxat, muallif, sahifaMaydon, faylQuti, muqQuti, holat, tugma, xabar,
     yarat("p", "kichik-matn", "Fayllar faqat sizga ko'rinadi. Mualliflik huquqi bilan himoyalangan kitoblarni boshqalarga tarqatmang."));
   quti.appendChild(ichi);
   return quti;
@@ -247,22 +252,51 @@ function kitobKartasi(m, k) {
   const bugun = toshkentSana();
 
   if (k.holat === "oqiyapman") {
+    // Sahifalar soni ma'lum bo'lsa — surgich sahifa bo'yicha, bo'lmasa foiz bo'yicha
+    const S = k.sahifalar;
     const q = yarat("div", "surgich-qator");
-    const sur = yarat("input", "surgich"); sur.type = "range"; sur.min = 0; sur.max = 100; sur.step = 5; sur.value = k.foiz;
-    const fm = yarat("span", "foiz-matn kichik", k.foiz + "%");
+    const sur = yarat("input", "surgich"); sur.type = "range"; sur.min = 0;
+    if (S) { sur.max = S; sur.step = 1; sur.value = k.sahifa != null ? Math.min(k.sahifa, S) : Math.round((k.foiz / 100) * S); }
+    else { sur.max = 100; sur.step = 5; sur.value = k.foiz; }
+    sur.setAttribute("aria-label", S ? "Qaysi sahifadasiz" : "Necha foiz o'qildi");
+    const fm = yarat("span", "foiz-matn kichik");
+    const sahifaTugma = yarat("button", "matn-tugma sahifa-tugma"); sahifaTugma.type = "button";
+    const qiymat = () => { const v = Number(sur.value); return S ? { sahifa: v, foiz: Math.min(100, Math.round((v / S) * 100)) } : { foiz: v }; };
+    const korsat = () => {
+      const x = qiymat(); fm.textContent = x.foiz + "%";
+      sahifaTugma.textContent = S ? `📖 ${x.sahifa} / ${S} sahifa ✎` : "📖 sahifalar sonini kiritish";
+    };
+    korsat();
     let kech = null;
-    sur.addEventListener("input", () => { fm.textContent = sur.value + "%"; clearTimeout(kech); kech = setTimeout(() => { m.from("kitob_javoni").update({ foiz: Number(sur.value) }).eq("id", k.id).then(() => {}); }, 600); });
+    const saqla = () => { clearTimeout(kech); kech = setTimeout(() => { const x = qiymat(); Object.assign(k, x); m.from("kitob_javoni").update(x).eq("id", k.id).then(() => {}); }, 600); };
+    sur.addEventListener("input", () => { korsat(); saqla(); });
+    sahifaTugma.addEventListener("click", () => {
+      if (S) {
+        const j = prompt(`Hozir qaysi sahifadasiz? (0 – ${S})`, sur.value);
+        if (j === null) return;
+        const n = Math.round(Number(j));
+        if (!Number.isFinite(n) || n < 0) return;
+        if (n >= S) { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, sahifa: S, tugatilgan: bugun }); return; }
+        sur.value = n; korsat(); saqla();
+      } else {
+        const j = prompt("Kitobda necha sahifa bor?");
+        const n = Math.round(Number(j));
+        if (!j || !(n >= 1 && n <= 20000)) return;
+        yangila({ sahifalar: n, sahifa: Math.round((k.foiz / 100) * n) });
+      }
+    });
     q.append(sur, fm);
     const tugat = yarat("button", "amal tanlangan", "✓ Tugatdim"); tugat.type = "button";
-    tugat.addEventListener("click", () => { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, tugatilgan: bugun }); });
-    ong.append(q, tugat);
+    tugat.addEventListener("click", () => { javonHolati.tab = "oqidim"; yangila({ holat: "oqidim", foiz: 100, tugatilgan: bugun, ...(S ? { sahifa: S } : {}) }); });
+    ong.append(q, sahifaTugma, tugat);
   } else if (k.holat === "oqimoqchi") {
     const bosh = yarat("button", "amal tanlangan", "O'qishni boshlash"); bosh.type = "button";
     bosh.addEventListener("click", () => { javonHolati.tab = "oqiyapman"; yangila({ holat: "oqiyapman", boshlangan: bugun }); });
     ong.appendChild(bosh);
   } else {
     ong.appendChild(yulduzlarEl(k.baho, (n) => yangila({ baho: n })));
-    if (k.tugatilgan) ong.appendChild(yarat("span", "kichik-matn", "O'qildi: " + new Date(k.tugatilgan).toLocaleDateString("uz")));
+    if (k.tugatilgan || k.sahifalar) ong.appendChild(yarat("span", "kichik-matn",
+      [k.tugatilgan ? "O'qildi: " + new Date(k.tugatilgan).toLocaleDateString("uz") : "", k.sahifalar ? k.sahifalar + " sahifa" : ""].filter(Boolean).join(" · ")));
     if (k.sharh) ong.appendChild(yarat("p", "kitob-sharh", "«" + k.sharh + "»"));
     const sharhTugma = yarat("button", "matn-tugma", k.sharh ? "sharhni tahrirlash" : "sharh yozish"); sharhTugma.type = "button";
     sharhTugma.addEventListener("click", () => {
@@ -317,7 +351,7 @@ function javonQismi(profil, ozimniki) {
         quti.appendChild(yarat("small", "javon-sarlavha", "Hozir o'qiyapti"));
         oqiyapti.forEach((k) => {
           const q = yarat("div", "javon-qator"); q.appendChild(muqovaEl(k.kitob, true, k.muqova));
-          const t = yarat("div", ""); t.append(yarat("b", "", k.kitob), yarat("span", "kichik-matn", (k.muallif ? k.muallif + " · " : "") + k.foiz + "%"));
+          const t = yarat("div", ""); t.append(yarat("b", "", k.kitob), yarat("span", "kichik-matn", (k.muallif ? k.muallif + " · " : "") + (k.sahifalar && k.sahifa != null ? `${k.sahifa}/${k.sahifalar} sahifa · ` : "") + k.foiz + "%"));
           q.appendChild(t); quti.appendChild(q);
         });
       }
