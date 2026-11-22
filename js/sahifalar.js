@@ -769,6 +769,16 @@ function profilimniChiz() {
   kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
   qator.append(kirit, tugma);
   s.append(qator, xato);
+
+  // Avval profil ochgan bo'lsa — Google orqali kirish
+  const ajrat = yarat("p", "ajratgich", "yoki");
+  const eski = yarat("p", "kichik-matn", "Avval profil ochib, uni Google'ga bog'laganmisiz? Shu yerdan kiring:");
+  const g = yarat("button", "google-tugma"); g.type = "button";
+  g.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google orqali kirish';
+  const gXabar = yarat("p", "kichik-matn", kirishXatosi || "");
+  kirishXatosi = null;
+  g.addEventListener("click", () => { g.disabled = true; googleBilanKir(gXabar).finally(() => { g.disabled = false; }); });
+  s.append(ajrat, eski, g, gXabar);
 }
 
 // ---------- Admin: takliflarni ko'rib chiqish (#admin, menyuda yo'q) ----------

@@ -503,3 +503,16 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .ishtirokchi-yuqori { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .ishtirokchi-izoh { margin: 8px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); }
 .dost-tanlov { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #fff; border: 1px solid var(--chegara); border-radius: 6px; }
+
+/* ===== 12. GOOGLE ORQALI KIRISH ===== */
+.hisob-quti { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px dashed var(--chegara); border-bottom: 1px dashed var(--chegara); }
+.hisob-quti .kichik-matn { margin: 0; }
+.google-tugma {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 48px; border-radius: 6px; cursor: pointer;
+  background: #fff; color: #3C4043; border: 1px solid #DADCE0; font: 600 15px Inter, sans-serif;
+}
+.google-tugma:disabled { opacity: .6; cursor: default; }
+.g-belgi { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: conic-gradient(#EA4335 0 25%, #FBBC05 0 50%, #34A853 0 75%, #4285F4 0); color: #fff; font: 700 13px Inter, sans-serif; }
+.ajratgich { display: flex; align-items: center; gap: 10px; margin: 18px 0 4px; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.ajratgich::before, .ajratgich::after { content: ""; flex: 1; border-top: 1px solid var(--chegara); }

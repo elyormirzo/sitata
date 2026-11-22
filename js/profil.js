@@ -27,7 +27,10 @@ async function mijozOl() {
   if (mijoz) return mijoz;
   if (window.__supabaseSinov) { mijoz = window.__supabaseSinov; return mijoz; }   // avtomatik sinovlar uchun
   if (!window.supabase) await skriptYukla(SUPABASE_SKRIPT);
-  mijoz = window.supabase.createClient(SUPABASE_URL, SUPABASE_KALIT);
+  // pkce: Google'dan qaytganda kod manzilning ?code= qismida keladi (bizning #sahifa yo'llarimizga xalaqit bermaydi)
+  mijoz = window.supabase.createClient(SUPABASE_URL, SUPABASE_KALIT, {
+    auth: { flowType: "pkce", detectSessionInUrl: true, persistSession: true },
+  });
   return mijoz;
 }
 
@@ -222,6 +225,7 @@ async function profilSahifasiniKor(kod) {
   const xabar = el("p", "kichik-matn");
   if (ozimniki) {
     xabar.textContent = "Bu sizning profilingiz — havolani ulashing, do'stlaringiz baho bersin.";
+    sahifa.appendChild(hisobQutisi());
   } else {
     xabar.textContent = meningBaham ? "Bahoingizni o'zgartirishingiz mumkin:" : "Baho bering:";
     const yulduzlar = el("div", "yulduzlar");
@@ -263,3 +267,103 @@ async function profilSahifasiniKor(kod) {
   sahifa.appendChild(oyna);
 }
 
+
+// ===== GOOGLE ORQALI KIRISH =====
+// Anonim profil Google hisobiga bog'lanadi (ID o'zgarmaydi — natijalar, kitobdoshlar saqlanadi).
+// Boshqa qurilmada «Google orqali kirish» o'sha profilni ochadi.
+// Supabase'da: Google provayderi yoqilgan, «Manual linking» yoqilgan, Redirect URLs'da sayt manzili bo'lishi kerak.
+let kirishXatosi = null;   // Google'dan xato bilan qaytilganda ko'rsatiladi
+
+async function sessiyaOl() {
+  if (!BAZA_YOQIQ) return null;
+  const m = await mijozOl();
+  const { data } = await m.auth.getSession();
+  return data && data.session ? data.session.user : null;
+}
+
+function googleKelganYol(keyin) { try { sessionStorage.setItem("sitataKirishdanKeyin", keyin); } catch (e) {} }
+
+// Joriy anonim profilni Google'ga bog'lash
+async function googleBilanBogla(xabar) {
+  const m = await mijozOl();
+  googleKelganYol("#profilim");
+  const { error } = await m.auth.linkIdentity({ provider: "google", options: { redirectTo: SAYT_MANZILI } });
+  if (error) xabar.textContent = "Bog'lab bo'lmadi: " + error.message;
+}
+
+// Google hisobi orqali kirish (boshqa qurilmada yoki brauzer tozalangandan keyin)
+async function googleBilanKir(xabar) {
+  const m = await mijozOl();
+  googleKelganYol("#profilim");
+  const { error } = await m.auth.signInWithOAuth({ provider: "google", options: { redirectTo: SAYT_MANZILI } });
+  if (error) xabar.textContent = "Kirib bo'lmadi: " + error.message;
+}
+
+// Sessiyadagi foydalanuvchiga mos profilni yuklab, shu brauzerda eslab qolish
+async function profilniSinxronla(uid) {
+  if (mening && mening.id === uid) return;
+  const m = await mijozOl();
+  const { data } = await m.from("profillar").select("id,kod,ism").eq("id", uid).maybeSingle();
+  if (data) profilniEsla(data);
+  else { mening = null; try { localStorage.removeItem("kimAytganProfil"); } catch (e) {} }
+}
+
+// Google'dan qaytishni sahifa yuklanganda qayta ishlash (?code=... yoki ?error_description=...)
+async function kirishQaytishiniTugat() {
+  const q = new URLSearchParams(location.search);
+  const xato = q.get("error_description") || new URLSearchParams(location.hash.slice(1)).get("error_description");
+  if (!BAZA_YOQIQ || (!q.has("code") && !xato)) return;
+  let keyin = "#profilim";
+  try { keyin = sessionStorage.getItem("sitataKirishdanKeyin") || keyin; sessionStorage.removeItem("sitataKirishdanKeyin"); } catch (e) {}
+  if (xato) {
+    kirishXatosi = /already|linked|exists/i.test(xato)
+      ? "Bu Google hisobi boshqa profilga bog'langan. O'sha profilni ochish uchun «Google orqali kirish»ni bosing."
+      : "Google orqali kirib bo'lmadi: " + xato;
+  } else {
+    try {
+      const user = await sessiyaOl();          // mijoz yaratilganda kod sessiyaga almashtiriladi
+      if (user) await profilniSinxronla(user.id);
+    } catch (e) { kirishXatosi = "Google orqali kirib bo'lmadi — qayta urinib ko'ring."; }
+  }
+  history.replaceState(null, "", location.pathname + keyin);
+}
+
+// O'z profil sahifasidagi hisob qutisi
+function hisobQutisi() {
+  const quti = document.createElement("div");
+  quti.className = "hisob-quti";
+  const xabar = document.createElement("p"); xabar.className = "kichik-matn";
+  (async () => {
+    const user = await sessiyaOl();
+    if (!user) return;
+    if (kirishXatosi) { xabar.textContent = kirishXatosi; kirishXatosi = null; }
+    if (user.is_anonymous) {
+      const p = document.createElement("p"); p.className = "kichik-matn";
+      p.textContent = "Profilingiz hozir faqat shu brauzerda saqlanadi. Google hisobingizga bog'lang — boshqa telefon yoki kompyuterdan ham kira olasiz.";
+      const b = document.createElement("button"); b.type = "button"; b.className = "google-tugma";
+      b.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan bog\'lash';
+      b.addEventListener("click", () => { b.disabled = true; googleBilanBogla(xabar).finally(() => { b.disabled = false; }); });
+      const boshqa = document.createElement("button"); boshqa.type = "button"; boshqa.className = "matn-tugma";
+      boshqa.textContent = "Boshqa qurilmada Google'ga bog'langan profilim bor — Google orqali kirish";
+      boshqa.addEventListener("click", () => {
+        if (!confirm("Google orqali kirsangiz, shu brauzerdagi hozirgi profil o'rniga Google'ga bog'langan profilingiz ochiladi. Davom etasizmi?")) return;
+        googleBilanKir(xabar);
+      });
+      quti.append(p, b, boshqa, xabar);
+    } else {
+      const p = document.createElement("p"); p.className = "kichik-matn";
+      p.textContent = "✓ Google hisobiga bog'langan" + (user.email ? ": " + user.email : "");
+      const chiq = document.createElement("button"); chiq.type = "button"; chiq.className = "matn-tugma"; chiq.textContent = "Shu qurilmadan chiqish";
+      chiq.addEventListener("click", async () => {
+        if (!confirm("Shu qurilmadan chiqasizmi? Keyin Google orqali qayta kirishingiz mumkin.")) return;
+        const m = await mijozOl();
+        await m.auth.signOut();
+        mening = null;
+        try { localStorage.removeItem("kimAytganProfil"); } catch (e) {}
+        location.hash = "#profilim"; location.reload();
+      });
+      quti.append(p, chiq, xabar);
+    }
+  })();
+  return quti;
+}
