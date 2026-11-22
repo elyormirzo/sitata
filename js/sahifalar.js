@@ -538,6 +538,7 @@ function viktorinaBoshi() {
   b.addEventListener("click", viktorinaniBoshla);
   quti.appendChild(b);
   s.appendChild(quti);
+  if (typeof adabiyotBolimi === "function") s.appendChild(adabiyotBolimi());
 }
 
 function viktorinaniBoshla() {
