@@ -182,7 +182,7 @@ const JADIDLAR = [
 ];
 const jadidRasmi = (k) => `rasmlar/jadidlar/${k}.jpg`;
 // Surati hali qo'shilmaganlar ro'yxatda ko'rinmaydi
-const JADID_SURATLARI = new Set(["qodiriy", "gaspirali"]);
+const JADID_SURATLARI = new Set(["qodiriy", "gaspirali", "hamza"]);
 
 // Muallif portretlari (rasmlar/ papkasidagi suratlar)
 function muallifQahramonlari() {

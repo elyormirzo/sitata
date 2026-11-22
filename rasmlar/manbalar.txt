@@ -20,3 +20,4 @@ eynshteyn.jpg: https://commons.wikimedia.org/wiki/File:Albert_Einstein_Head_clea
 Jadidlar (rasmlar/jadidlar/, profil rasmi uchun kvadratga qirqilgan; barchasi jamoat mulki):
 qodiriy.jpg: https://commons.wikimedia.org/wiki/File:Stamps_of_Uzbekistan,_2004-07.jpg
 gaspirali.jpg: https://commons.wikimedia.org/wiki/File:Ismail_Gaspirali.jpg
+hamza.jpg: https://commons.wikimedia.org/wiki/File:Hamza_Niyazi.jpg
