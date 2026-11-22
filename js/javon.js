@@ -55,7 +55,7 @@ function rejaMatni(soni, maqsad) {
 async function javonMalumoti(m, profilId) {
   const yil = joriyYil();
   const [{ data: kitoblar }, { data: maqsad }] = await Promise.all([
-    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
+    m.from("kitob_javoni").select("id,kitob,muallif,holat,foiz,baho,sharh,boshlangan,tugatilgan,qoshilgan,fayl_yoli,fayl_nomi,fayl_hajmi,fayl_turi").eq("profil_id", profilId).order("qoshilgan", { ascending: false }),
     m.from("yillik_maqsad").select("maqsad").eq("profil_id", profilId).eq("yil", yil).maybeSingle(),
   ]);
   const royxat = kitoblar || [];
@@ -139,6 +139,16 @@ function kitobQoshishFormasi(m) {
   KITOBLAR.forEach((k) => { const o = yarat("option"); o.value = k.nom; royxat.appendChild(o); });
   const muallif = yarat("input", "matn-maydon bir-qator"); muallif.placeholder = "Muallifi (ixtiyoriy)"; muallif.maxLength = 60;
   kitob.addEventListener("change", () => { const k = KITOBLAR.find((x) => x.nom === kitob.value.trim()); if (k && !muallif.value) muallif.value = k.muallif; });
+  const faylQuti = yarat("label", "fayl-tanlash");
+  const fayl = yarat("input"); fayl.type = "file";
+  const faylMatn = yarat("span", "", "📎 Kitob fayli (ixtiyoriy) — PDF, EPUB, FB2, TXT, audio va boshqa formatlar, 50 MB gacha");
+  faylQuti.append(fayl, faylMatn);
+  fayl.addEventListener("change", () => {
+    const f = fayl.files[0];
+    if (!f) return;
+    faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}`;
+    if (!kitob.value.trim()) kitob.value = fayldanNom(f.name);
+  });
   const holat = yarat("select", "tanlash");
   Object.entries(JAVONLAR).forEach(([k, v]) => { const o = yarat("option", "", v); o.value = k; o.selected = k === javonHolati.tab; holat.appendChild(o); });
   const tugma = yarat("button", "asosiy", "Javonga qo'yish"); tugma.type = "button";
@@ -146,18 +156,26 @@ function kitobQoshishFormasi(m) {
   tugma.addEventListener("click", async () => {
     const nom = kitob.value.trim();
     if (!nom) { kitob.focus(); return; }
+    const f = fayl.files[0];
+    if (f && f.size > FAYL_CHEGARA) { xabar.textContent = "Fayl 50 MB dan katta — kichikroq faylni tanlang."; return; }
     tugma.disabled = true;
     const bugun = toshkentSana(), h = holat.value;
-    const { error } = await m.from("kitob_javoni").insert({
+    const { data: yangi, error } = await m.from("kitob_javoni").insert({
       profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h,
       foiz: h === "oqidim" ? 100 : 0, boshlangan: h !== "oqimoqchi" ? bugun : null, tugatilgan: h === "oqidim" ? bugun : null,
-    });
+    }).select("id").single();
+    if (error) { tugma.disabled = false; xabar.textContent = error.code === "23505" ? "Bu kitob javoningizda allaqachon bor." : "Qo'shib bo'lmadi."; return; }
+    if (f) {
+      xabar.textContent = "Fayl yuklanmoqda…";
+      try { await faylniBiriktir(m, { id: yangi.id }, f); }
+      catch (e) { tugma.disabled = false; xabar.textContent = "Kitob qo'shildi, lekin: " + faylXatosi(e); javonHolati.tab = h; setTimeout(javonChiz, 2500); return; }
+    }
     tugma.disabled = false;
-    if (error) { xabar.textContent = error.code === "23505" ? "Bu kitob javoningizda allaqachon bor." : "Qo'shib bo'lmadi."; return; }
     javonHolati.tab = h;
     javonChiz();
   });
-  ichi.append(kitob, royxat, muallif, holat, tugma, xabar);
+  ichi.append(kitob, royxat, muallif, faylQuti, holat, tugma, xabar,
+    yarat("p", "kichik-matn", "Fayllar faqat sizga ko'rinadi. Mualliflik huquqi bilan himoyalangan kitoblarni boshqalarga tarqatmang."));
   quti.appendChild(ichi);
   return quti;
 }
@@ -197,9 +215,11 @@ function kitobKartasi(m, k) {
     });
     ong.appendChild(sharhTugma);
   }
+  ong.appendChild(faylQatori(m, k, javonChiz));
   const ochir = yarat("button", "kitob-ochir", "×"); ochir.type = "button"; ochir.setAttribute("aria-label", "Javondan olib tashlash");
   ochir.addEventListener("click", async () => {
-    if (!confirm(`«${k.kitob}»ni javondan olib tashlaysizmi?`)) return;
+    if (!confirm(`«${k.kitob}»ni javondan olib tashlaysizmi?` + (k.fayl_yoli ? " Biriktirilgan fayl ham o'chiriladi." : ""))) return;
+    if (k.fayl_yoli) await m.storage.from("kitoblar").remove([k.fayl_yoli]);
     await m.from("kitob_javoni").delete().eq("id", k.id); javonChiz();
   });
   karta.append(ong, ochir);

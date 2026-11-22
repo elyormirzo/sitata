@@ -697,3 +697,49 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .profil-tablar { margin-bottom: 14px; }
 .profil-tablar .manba-tab { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 #darajaSahifa > .sahifa-sarlavha, #reytingSahifa > .sahifa-sarlavha { display: none; }
+
+/* ===== 20. KITOB FAYLLARI VA O'QUVCHI ===== */
+.fayl-tanlash { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px dashed #C9A887; border-radius: 6px;
+  background: #fff; cursor: pointer; font: 14px Lora, Georgia, serif; color: var(--kulrang); }
+.fayl-tanlash input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.fayl-tanlash:focus-within { outline: 2px solid var(--zaytun); }
+.fayl-qator { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--chegara); }
+.fayl-belgi { font: 600 12px Inter, sans-serif; color: var(--kulrang); background: #EFE6D2; padding: 3px 8px; border-radius: 4px; }
+.fayl-qator .amal { margin-top: 0; }
+.fayl-qator .kichik-matn { width: 100%; margin: 0; }
+body.oquvchi-ochiq { overflow: hidden; }
+.oquvchi { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; background: #FBF5E6; }
+.oquvchi-bosh { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--chegara); background: var(--qogoz); }
+.oquvchi-bosh b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 17px Lora, Georgia, serif; }
+.oquvchi-yop { width: 40px; height: 40px; border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--qora); }
+.oquvchi-tana { position: relative; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
+.oquvchi-pdf { flex: 1; width: 100%; border: 0; min-height: 70vh; }
+.oquvchi-eslatma { text-align: center; padding: 8px; font: italic 13px Lora, Georgia, serif; color: var(--teri); }
+.oquvchi-matn { max-width: 680px; margin: 0 auto; padding: 20px 18px 60px; font: 18px/1.7 Lora, Georgia, serif; color: var(--qora); }
+.oquvchi-matn p { margin: 0 0 .8em; text-indent: 1.5em; }
+.oquvchi-matn p.sher, .oquvchi-matn .fb2-band p { text-indent: 0; margin: 0; }
+.oquvchi-matn .fb2-band { margin: 0 0 1em 1.5em; }
+.oquvchi-matn .fb2-sarlavha { text-align: center; font: 600 22px Lora, Georgia, serif; margin: 1.4em 0 .8em; }
+.oquvchi-matn .fb2-sarlavha p { text-indent: 0; }
+.oquvchi-matn .fb2-iqtibos { margin: 1em 0 1em 2em; font-style: italic; color: var(--kulrang); }
+.oquvchi-epub { flex: 1; min-height: 60vh; }
+.oquvchi-boshqaruv { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; border-top: 1px solid var(--chegara); background: var(--qogoz); }
+.oquvchi-audio-quti { margin: auto; padding: 30px 18px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; width: 100%; max-width: 420px; }
+.oquvchi-audio-quti .muqova { width: 140px; height: 200px; font-size: 40px; }
+.oquvchi-audio-quti b { font: 600 22px Lora, Georgia, serif; }
+.oquvchi-audio { width: 100%; margin-top: 12px; }
+.oquvchi-pdf-sahifalar { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 8px 40px; background: #E9DFCA; }
+.pdf-sahifa { position: relative; max-width: 100%; background: #fff; box-shadow: 0 2px 8px rgba(40,25,10,.2); }
+.pdf-sahifa canvas { display: block; }
+.pdf-raqam { position: absolute; right: 6px; bottom: 4px; font: 11px Inter, sans-serif; color: #9A8E78; }
+
+/* ===== 21. HIMOYALANGAN O'QISH ===== */
+.oquvchi.himoyali { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.himoya-belgi { font: 600 12px Inter, sans-serif; color: var(--zaytun); background: var(--zaytun-och); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+.suv-belgi { position: absolute; inset: 56px 0 0 0; z-index: 5; pointer-events: none; overflow: hidden; display: flex; flex-wrap: wrap;
+  align-content: space-around; justify-content: space-around; opacity: .09; transform: rotate(-24deg) scale(1.4); }
+.suv-belgi span { font: 600 16px Inter, sans-serif; color: #3B2A1A; padding: 22px 18px; white-space: nowrap; }
+@media print { .oquvchi.himoyali { display: none !important; } }
+.ulashilgan-fayl { display: flex; align-items: center; gap: 12px; margin: 12px auto 0; padding: 12px; max-width: 360px; text-align: left;
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; }
+.ulashilgan-fayl > div { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
