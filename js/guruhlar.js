@@ -101,27 +101,63 @@ async function guruhlarniChiz() {
 }
 
 // ---------- #qoshil/<kod> ----------
+// Profili yo'q odam ham shu sahifaning o'zida kiradi: Google bilan (tavsiya) yoki ism bilan — va darhol guruhga qo'shiladi
 async function qoshilishniChiz(kod) {
   const s = $("guruhlarSahifa");
   s.innerHTML = "";
   s.appendChild(havola("#guruhlar", "orqaga", "← Guruhlar"));
-  const m = await profilniTekshir(s);
-  if (!m) return;
+  if (!BAZA_YOQIQ) { s.appendChild(yarat("p", "bosh-holat", "Bu bo'lim hali sozlanmagan.")); return; }
   kod = String(kod || "").toLowerCase();
+  let m;
+  try { m = await mijozOl(); await kirish(); } catch (e) { s.appendChild(yarat("p", "bosh-holat", "Internetni tekshirib, qayta urinib ko'ring.")); return; }
   const { data } = await m.rpc("guruh_koddan", { p_kod: kod });
   const g = data && data[0];
   const q = yarat("div", "vik-quti markaz");
   if (!g) { q.appendChild(yarat("p", "", "Bunday guruh topilmadi — havola eskirgan bo'lishi mumkin.")); s.appendChild(q); return; }
   q.append(yarat("p", "katta-belgi", g.tur === "sinf" ? "🏫" : "👥"), yarat("h3", "", g.nom), yarat("p", "kichik-matn", `${g.azolar} a'zo · sizni taklif qilishdi`));
-  const b = yarat("button", "asosiy", "Guruhga qo'shilish"); b.type = "button";
-  const x = yarat("p", "kichik-matn");
-  b.addEventListener("click", async () => {
-    b.disabled = true;
+  const x = yarat("p", "kichik-matn", kirishXatosi || "");
+  kirishXatosi = null;
+  const qoshil = async () => {
     const { data: id, error } = await m.rpc("guruhga_qoshil", { p_kod: kod });
-    if (error) { b.disabled = false; x.textContent = guruhXatosi(error); return; }
+    if (error) { x.textContent = guruhXatosi(error); return false; }
     location.hash = "#guruh/" + id;
+    return true;
+  };
+  let avto = false;
+  try { avto = sessionStorage.getItem("sitataQoshil") === kod; sessionStorage.removeItem("sitataQoshil"); } catch (e) {}
+
+  if (mening) {
+    if (avto) { q.appendChild(yarat("p", "", "Qo'shilmoqda…")); s.appendChild(q); if (await qoshil()) return; q.lastChild.remove(); }
+    const b = yarat("button", "asosiy", "Guruhga qo'shilish"); b.type = "button";
+    b.addEventListener("click", async () => { b.disabled = true; if (!(await qoshil())) b.disabled = false; });
+    q.append(b, x);
+    if (!s.contains(q)) s.appendChild(q);
+    return;
+  }
+
+  // Profil yo'q: Google bilan (istalgan qurilmadan kiriladi) yoki ism bilan
+  const gTugma = yarat("button", "google-tugma"); gTugma.type = "button";
+  gTugma.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan kirib qo\'shilish';
+  gTugma.addEventListener("click", () => {
+    gTugma.disabled = true;
+    try { sessionStorage.setItem("sitataQoshil", kod); } catch (e) {}
+    googleBilanKir(x, "#qoshil/" + kod).finally(() => { gTugma.disabled = false; });
   });
-  q.append(b, x);
+  const izoh = yarat("p", "kichik-matn", "Tavsiya etiladi: natijalaringiz saqlanadi va istalgan telefon yoki kompyuterdan kira olasiz.");
+  const ajrat = yarat("p", "ajratgich", "yoki");
+  const ism = yarat("input", "matn-maydon bir-qator"); ism.placeholder = "Ismingiz (masalan, Dilnoza Karimova)"; ism.maxLength = 30; ism.autocomplete = "name";
+  const ismTugma = yarat("button", "ikkilamchi", "Ism bilan qo'shilish"); ismTugma.type = "button";
+  ismTugma.addEventListener("click", async () => {
+    const i = ism.value.trim();
+    if (i.length < 2) { x.textContent = "Ismingizni yozing."; ism.focus(); return; }
+    ismTugma.disabled = true; ismTugma.textContent = "Qo'shilmoqda…";
+    try {
+      await profilYarat(i, null);
+      if (!(await qoshil())) { ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
+    } catch (e) { x.textContent = "Profil ochilmadi — qayta urinib ko'ring."; ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
+  });
+  ism.addEventListener("keydown", (e) => { if (e.key === "Enter") ismTugma.click(); });
+  q.append(gTugma, izoh, ajrat, ism, ismTugma, x);
   s.appendChild(q);
 }
 
@@ -148,6 +184,21 @@ async function guruhniChiz(param) {
   t.append(yarat("h2", "", g.nom), yarat("span", "kichik-matn", `${GURUH_TURLARI[g.tur]} · ${g.azolar} a'zo`));
   bosh.appendChild(t);
   s.appendChild(bosh);
+
+  // Profil faqat shu brauzerda (Google'ga bog'lanmagan) bo'lsa — eslatma
+  try {
+    const user = await sessiyaOl();
+    if (user && user.is_anonymous) {
+      const e = yarat("div", "google-eslatma");
+      const gx = yarat("p", "kichik-matn", kirishXatosi || "");
+      kirishXatosi = null;
+      const gb = yarat("button", "google-tugma"); gb.type = "button";
+      gb.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan bog\'lash';
+      gb.addEventListener("click", () => { gb.disabled = true; googleBilanBogla(gx, "#guruh/" + g.id).finally(() => { gb.disabled = false; }); });
+      e.append(yarat("p", "", "⚠️ Profilingiz faqat shu brauzerda saqlanmoqda. Brauzer tozalansa yoki telefon almashsa, natijalaringiz yo'qolishi mumkin."), gb, gx);
+      s.appendChild(e);
+    }
+  } catch (e) { /* jim */ }
 
   // Taklif qilish: kod va havola
   const taklif = yarat("div", "guruh-taklif");

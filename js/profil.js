@@ -559,17 +559,17 @@ async function sessiyaOl() {
 function googleKelganYol(keyin) { try { sessionStorage.setItem("sitataKirishdanKeyin", keyin); } catch (e) {} }
 
 // Joriy anonim profilni Google'ga bog'lash
-async function googleBilanBogla(xabar) {
+async function googleBilanBogla(xabar, keyin = "#profilim") {
   const m = await mijozOl();
-  googleKelganYol("#profilim");
+  googleKelganYol(keyin);
   const { error } = await m.auth.linkIdentity({ provider: "google", options: { redirectTo: SAYT_MANZILI } });
   if (error) xabar.textContent = "Bog'lab bo'lmadi: " + error.message;
 }
 
 // Google hisobi orqali kirish (boshqa qurilmada yoki brauzer tozalangandan keyin)
-async function googleBilanKir(xabar) {
+async function googleBilanKir(xabar, keyin = "#profilim") {
   const m = await mijozOl();
-  googleKelganYol("#profilim");
+  googleKelganYol(keyin);
   const { error } = await m.auth.signInWithOAuth({ provider: "google", options: { redirectTo: SAYT_MANZILI } });
   if (error) xabar.textContent = "Kirib bo'lmadi: " + error.message;
 }
@@ -581,6 +581,21 @@ async function profilniSinxronla(uid) {
   const { data } = await m.from("profillar").select("id,kod,ism,taxallus,rasm").eq("id", uid).maybeSingle();
   if (data) profilniEsla(data);
   else { mening = null; try { localStorage.removeItem("kimAytganProfil"); } catch (e) {} }
+}
+
+// Google bilan birinchi marta kirganda: Google'dagi ism bilan profil ochamiz (email ishlatilmaydi)
+async function googledanProfilOch(user) {
+  const md = user.user_metadata || {};
+  const toliq = String(md.full_name || md.name || "").trim();
+  const ism = (String(md.given_name || "").trim() || toliq.split(/\s+/)[0] || "Kitobxon").slice(0, 30);
+  let taxallus = null;
+  const asos = taxallusTaklifi(toliq || ism).slice(0, 16);
+  for (const t of [asos, asos + Math.floor(10 + Math.random() * 90), asos + Math.floor(100 + Math.random() * 900)]) {
+    if (taxallusXatosi(t)) continue;
+    try { if (!(await taxallusEgasi(t))) { taxallus = t; break; } } catch (e) { break; }
+  }
+  try { await profilYarat(ism, taxallus); }
+  catch (e) { try { await profilYarat(ism, null); } catch (e2) { kirishXatosi = "Profil ochilmadi — qayta urinib ko'ring."; } }
 }
 
 // Google'dan qaytishni sahifa yuklanganda qayta ishlash (?code=... yoki ?error_description=...)
@@ -598,6 +613,7 @@ async function kirishQaytishiniTugat() {
     try {
       const user = await sessiyaOl();          // mijoz yaratilganda kod sessiyaga almashtiriladi
       if (user) await profilniSinxronla(user.id);
+      if (user && !mening && !user.is_anonymous) await googledanProfilOch(user);
     } catch (e) { kirishXatosi = "Google orqali kirib bo'lmadi — qayta urinib ko'ring."; }
   }
   history.replaceState(null, "", location.pathname + keyin);
