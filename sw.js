@@ -1,9 +1,9 @@
 // sitata.uz xizmat ishchisi (service worker): oflayn ishlash va push-eslatmalar.
 // Sayt fayllari o'zgarganda VERSIYA ni oshiring — eski kesh tozalanadi.
-const VERSIYA = "sitata-v1";
+const VERSIYA = "sitata-v3";
 const ASOSIY = [
   "./", "index.html", "uslub.css", "manifest.webmanifest",
-  "js/malumotlar.js", "js/oyin.js", "js/profil.js", "js/sahifalar.js", "js/birga.js", "js/daraja.js", "js/pwa.js", "js/boshlash.js",
+  "js/malumotlar.js", "js/oyin.js", "js/profil.js", "js/sahifalar.js", "js/birga.js", "js/daraja.js", "js/kitobcha.js", "js/pwa.js", "js/boshlash.js",
   "ikonkalar/ikonka-192.png", "ikonkalar/ikonka-512.png",
 ];
 
@@ -57,7 +57,8 @@ self.addEventListener("push", (e) => {
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data && e.data.text() }; }
   e.waitUntil(self.registration.showNotification(d.title || "sitata.uz", {
     body: d.body || "",
-    icon: "ikonkalar/ikonka-192.png",
+    icon: d.icon || "ikonkalar/ikonka-192.png",
+    image: d.rasm,
     badge: "ikonkalar/ikonka-192.png",
     tag: d.tag,
     data: { url: d.url || "./" },

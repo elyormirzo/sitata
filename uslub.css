@@ -601,3 +601,25 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .eslatma-ichi { display: flex; flex-direction: column; gap: 8px; }
 .eslatma-ichi .kichik-matn, .eslatma-quti > .kichik-matn { margin: 0; }
 .eslatma-tugmalar { display: flex; gap: 6px; }
+
+/* ===== 16. KITOBCHA ===== */
+.kitobcha-karta {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 10px 14px 10px 8px; text-decoration: none; color: var(--qora);
+  background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 12px; box-shadow: 0 4px 12px rgba(80,50,20,.1);
+}
+.kitobcha-rasm { flex: none; line-height: 0; }
+.kitobcha-gap {
+  position: relative; flex: 1; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid var(--chegara);
+  font: 500 15px/1.45 Lora, Georgia, serif;
+}
+.kitobcha-gap::before {
+  content: ""; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: #fff;
+  border-left: 1px solid var(--chegara); border-bottom: 1px solid var(--chegara); transform: rotate(45deg);
+}
+.kayfiyat-xursand .kitobcha-rasm svg { animation: sakrash 1.6s ease-in-out infinite; }
+.kayfiyat-jahldor { border-color: #D9A08F; background: #FBEDE7; }
+.kayfiyat-jahldor .kitobcha-rasm svg { animation: silkinish .5s ease-in-out infinite; }
+.kayfiyat-chang { filter: saturate(.55); }
+.kayfiyat-skelet { background: #EFEBE2; border-style: dashed; }
+.kayfiyat-skelet .kitobcha-gap { font-style: italic; color: #6E685E; }
+@media (prefers-reduced-motion: reduce) { .kitobcha-rasm svg { animation: none !important; } }

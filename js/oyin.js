@@ -228,6 +228,7 @@ function joyla(k, h) {
   saqlash();
   chiz();
   if (holat.tugadi) natijaniYoz();
+  if (holat.tugadi && typeof kitobchaBelgisiniYangila === "function") kitobchaBelgisiniYangila();
 
   // Natijani katakning o'zida ko'rsatamiz
   const katak = $("ism").querySelector(`[data-k="${k}"]`);

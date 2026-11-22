@@ -150,6 +150,7 @@ function boshniChiz() {
   qahramon.append(yarat("h1", "", "Hikmatli so'zlar maskani"),
     yarat("p", "", "Buyuk mutafakkirlarning iqtiboslarini o'qing, mualliflarini kashf eting va o'yinda bilimingizni sinang."));
   s.appendChild(qahramon);
+  s.appendChild(kitobchaKartasi());
   s.appendChild(ilovaBanneri());
 
   // Kunlik o'yin kartasi
