@@ -516,3 +516,18 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
   background: conic-gradient(#EA4335 0 25%, #FBBC05 0 50%, #34A853 0 75%, #4285F4 0); color: #fff; font: 700 13px Inter, sans-serif; }
 .ajratgich { display: flex; align-items: center; gap: 10px; margin: 18px 0 4px; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
 .ajratgich::before, .ajratgich::after { content: ""; flex: 1; border-top: 1px solid var(--chegara); }
+
+/* ===== 13. TAXALLUS ===== */
+.taxallus-maydon { display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+.taxallus-qator { display: flex; align-items: center; height: 44px; border: 1px solid var(--chegara); border-radius: 4px; background: #fff; overflow: hidden; }
+.taxallus-belgi { padding: 0 4px 0 12px; font: 600 17px Lora, Georgia, serif; color: var(--teri); }
+.taxallus-qator input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; padding: 0 12px 0 0; font: 16px Lora, Georgia, serif; color: var(--qora); background: transparent; }
+.taxallus-qator:focus-within { border-color: var(--zaytun); box-shadow: 0 0 0 2px rgba(79,91,58,.18); }
+.taxallus-holat { margin: 0; min-height: 18px; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); text-align: left; }
+.taxallus-holat.bosh { color: var(--zaytun); }
+.taxallus-holat.xato { color: #9A3B1E; }
+.taxallus-yozuv { margin: -8px 0 0; font: 500 16px Lora, Georgia, serif; color: var(--teri); }
+.taxallus-quti { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px dashed var(--chegara); }
+.taxallus-quti .kichik-matn { margin: 0; }
+.profil-taxallus { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.profil-quti .taxallus-maydon, .profil-quti .asosiy { width: 100%; }

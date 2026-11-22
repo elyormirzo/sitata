@@ -310,7 +310,7 @@ const SAYT_MANZILI = location.protocol.startsWith("http")
   ? location.origin + location.pathname.replace(/index\.html$/, "")
   : "https://sitata.uz/";
 // Ulashiladigan havola: profil bo'lsa — profil sahifasi, bo'lmasa — sayt
-const ulashHavolasi = () => (mening && mening.kod ? profilHavolasi(mening.kod) : SAYT_MANZILI);
+const ulashHavolasi = () => (mening && mening.kod ? profilManzili(mening) : SAYT_MANZILI);
 
 function ulashMatni() {
   const qator = holat.urinishlar.map((t) => (t ? "🟩" : "🟥")).join("");

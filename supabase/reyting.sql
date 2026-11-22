@@ -42,7 +42,8 @@ select
   coalesce((select s.uzunlik from seriyalar s, bugun b
             where s.profil_id = p.id and s.oxirgi >= b.kun - 1), 0)               as joriy_seriya,
   b.ortacha_baho,
-  coalesce(b.baholar_soni, 0) as baholar_soni
+  coalesce(b.baholar_soni, 0) as baholar_soni,
+  p.taxallus                                     -- taxallus.sql dan keyin
 from public.profillar p
 left join oyin_stat o on o.profil_id = p.id
 left join baho_stat b on b.profil_id = p.id;

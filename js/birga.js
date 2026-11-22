@@ -30,13 +30,17 @@ async function profilniTekshir(s) {
 async function profillarniOl(m, idlar) {
   const royxat = [...new Set(idlar)].filter(Boolean);
   if (!royxat.length) return {};
-  const { data } = await m.from("profillar").select("id,kod,ism").in("id", royxat);
+  const { data } = await m.from("profillar").select("id,kod,ism,taxallus").in("id", royxat);
   const natija = {};
   (data || []).forEach((p) => { natija[p.id] = p; });
   return natija;
 }
 
-function profilHavola(p) { return havola("?p=" + (p ? p.kod : ""), "profil-nom", p ? p.ism : "Noma'lum"); }
+function profilHavola(p) {
+  const a = havola(profilIchkiHavola(p), "profil-nom", p ? p.ism : "Noma'lum");
+  if (p && p.taxallus) a.appendChild(yarat("small", "profil-taxallus", " @" + p.taxallus));
+  return a;
+}
 function kichikTugma(matn, sinf) { const b = yarat("button", "amal " + (sinf || ""), matn); b.type = "button"; return b; }
 function bolim(s, sarlavha) { s.appendChild(yarat("h3", "bolim-sarlavha", sarlavha)); const q = yarat("div", "royxat"); s.appendChild(q); return q; }
 
@@ -50,27 +54,27 @@ async function kitobdoshlarniChiz() {
 
   // Kod bo'yicha qo'shish
   const qosh = yarat("div", "iqtibos-karta");
-  qosh.appendChild(yarat("p", "kichik-matn", "Do'stingizning profil kodini yoki havolasini kiriting:"));
+  qosh.appendChild(yarat("p", "kichik-matn", "Do'stingizning @taxallusini, profil kodini yoki havolasini kiriting:"));
   const qator = yarat("div", "profil-forma");
-  const kirit = yarat("input"); kirit.placeholder = "masalan: t2h2pm yoki sitata.uz/?p=t2h2pm"; kirit.autocapitalize = "off";
+  const kirit = yarat("input"); kirit.placeholder = "masalan: @mirzo"; kirit.autocapitalize = "off";
   const yubor = yarat("button", "kichik", "Taklif yuborish"); yubor.type = "button";
   qator.append(kirit, yubor);
   const xabar = yarat("p", "kichik-matn");
   const meniki = yarat("p", "kichik-matn");
-  meniki.append(document.createTextNode("Sizning kodingiz: "), yarat("b", "", mening.kod), document.createTextNode(" — "));
+  meniki.append(document.createTextNode(mening.taxallus ? "Siz: " : "Sizning kodingiz: "), yarat("b", "", mening.taxallus ? "@" + mening.taxallus : mening.kod), document.createTextNode(" — "));
   const nusxa = yarat("button", "matn-tugma", "havolani nusxalash"); nusxa.type = "button";
-  nusxa.addEventListener("click", async () => { nusxa.textContent = (await nusxaOl(profilHavolasi(mening.kod))) ? "nusxalandi ✓" : "nusxa olinmadi"; });
+  nusxa.addEventListener("click", async () => { nusxa.textContent = (await nusxaOl(profilManzili(mening))) ? "nusxalandi ✓" : "nusxa olinmadi"; });
   meniki.appendChild(nusxa);
   qosh.append(qator, xabar, meniki);
   s.appendChild(qosh);
 
   yubor.addEventListener("click", async () => {
     const t = kirit.value.trim().toLowerCase();
-    const kod = (t.match(/[?&]p=([a-z0-9]{6})/) || t.match(/^([a-z0-9]{6})$/) || [])[1];
-    if (!kod) { xabar.textContent = "Kod 6 belgidan iborat bo'ladi (masalan: t2h2pm)."; return; }
-    if (kod === mening.kod) { xabar.textContent = "Bu sizning o'z kodingiz."; return; }
+    const izlash = izlashniAniqla(t);
+    if (!izlash) { xabar.textContent = "Taxallus (masalan: @mirzo) yoki 6 belgili kod kiriting."; return; }
+    if (izlash === mening.kod || izlash === "@" + mening.taxallus || izlash === mening.taxallus) { xabar.textContent = "Bu sizning o'zingiz."; return; }
     yubor.disabled = true;
-    const natija = await kitobdoshTaklifi(m, kod);
+    const natija = await kitobdoshTaklifi(m, izlash);
     yubor.disabled = false;
     xabar.textContent = natija;
     if (natija.startsWith("Taklif yuborildi")) { kirit.value = ""; setTimeout(kitobdoshlarniChiz, 800); }
@@ -128,10 +132,26 @@ async function kitobdoshlarniChiz() {
   }
 }
 
-// Kod bo'yicha kitobdoshlik taklifi; natija matnini qaytaradi
-async function kitobdoshTaklifi(m, kod) {
-  const { data: p } = await m.from("profillar").select("id,ism").eq("kod", kod).maybeSingle();
-  if (!p) return "Bunday kodli profil topilmadi.";
+// Kiritilgan matndan qidiruvni ajratish: "@mirzo", "mirzo", "sitata.uz/@mirzo", "#@mirzo", "?p=t2h2pm", "t2h2pm"
+function izlashniAniqla(t) {
+  const kod = (t.match(/[?&]p=([a-z0-9]{6})/) || [])[1];
+  if (kod) return kod;
+  const tx = (t.match(/(?:^|[\/#])@([a-z0-9_]{3,20})\/?$/) || [])[1];
+  if (tx) return "@" + tx;
+  return /^[a-z0-9_]{3,20}$/.test(t) ? t : null;
+}
+
+// Taxallus yoki kod bo'yicha kitobdoshlik taklifi; natija matnini qaytaradi.
+// "@..." — faqat taxallus; 6 belgili qiymat — avval kod, keyin taxallus; boshqasi — taxallus.
+async function kitobdoshTaklifi(m, izlash) {
+  const ol = async (ustun, qiymat) => (await m.from("profillar").select("id,ism").eq(ustun, qiymat).maybeSingle()).data;
+  let p = null;
+  if (izlash.startsWith("@")) p = await ol("taxallus", taxallusniTozala(izlash));
+  else {
+    if (/^[a-z0-9]{6}$/.test(izlash)) p = await ol("kod", izlash);
+    if (!p && TAXALLUS_SHAKLI.test(izlash)) p = await ol("taxallus", izlash);
+  }
+  if (!p) return "Bunday foydalanuvchi topilmadi.";
   if (p.id === mening.id) return "Bu sizning o'z profilingiz.";
   const { error } = await m.from("kitobdoshlar").insert({ kimdan: mening.id, kimga: p.id });
   if (!error) return `Taklif yuborildi — ${p.ism} qabul qilsa, kitobdosh bo'lasiz.`;
@@ -162,7 +182,7 @@ function kitobdoshTugmasi(profil) {
         const b = yarat("button", "ikkilamchi", "Kitobdosh bo'lish"); b.type = "button";
         b.addEventListener("click", async () => {
           b.disabled = true;
-          const natija = await kitobdoshTaklifi(m, profil.kod);
+          const natija = await kitobdoshTaklifi(m, profil.kod);   // kod — eng aniq
           quti.innerHTML = ""; quti.appendChild(yarat("p", "kichik-matn", natija));
         });
         quti.appendChild(b);

@@ -102,6 +102,7 @@ const SARLAVHALAR = {
 
 function joriyYol() {
   const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash.startsWith("@")) return { nom: "profil", param: hash };
   if (hash) { const [nom, ...qolgan] = hash.split("/"); return { nom, param: qolgan.join("/") }; }
   if (parametrlar.has("p")) return { nom: "profil", param: parametrlar.get("p") };
   if (SINOV) return { nom: "kim-aytgan" };
@@ -726,7 +727,7 @@ async function reytingniChiz() {
   let javob;
   try {
     const m = await mijozOl();
-    javob = await tur.sozla(m.from("reyting").select("kod,ism,oyinlar,topilgan,ortacha_xato,joriy_seriya,eng_uzun_seriya,ortacha_baho,baholar_soni")).limit(50);
+    javob = await tur.sozla(m.from("reyting").select("kod,ism,taxallus,oyinlar,topilgan,ortacha_xato,joriy_seriya,eng_uzun_seriya,ortacha_baho,baholar_soni")).limit(50);
   } catch (e) { javob = { error: e }; }
   if (REYTING_TURLARI[reytingTuri] !== tur) return; // kutish paytida boshqa tab tanlangan
   if (javob.error) {
@@ -740,7 +741,7 @@ async function reytingniChiz() {
     const li = yarat("li", "reyting-qator" + (mening && r.kod === mening.kod ? " meniki" : ""));
     li.appendChild(yarat("span", "orin", i < 3 ? ["🥇", "🥈", "🥉"][i] : String(i + 1)));
     const nom = yarat("div", "reyting-nom");
-    nom.append(havola("?p=" + r.kod, "", r.ism), yarat("small", "", tur.izoh(r)));
+    nom.append(havola(profilIchkiHavola(r), "", r.ism), yarat("small", "", (r.taxallus ? "@" + r.taxallus + " · " : "") + tur.izoh(r)));
     li.append(nom, yarat("b", "reyting-ball", tur.asosiy(r)));
     royxat.appendChild(li);
   });
@@ -748,7 +749,7 @@ async function reytingniChiz() {
 
 // ---------- Profilim ----------
 function profilimniChiz() {
-  if (mening) { profilSahifasiniKor(mening.kod); return; }
+  if (mening) { profilSahifasiniKor(mening.kod); return; }   // kod o'zgarmaydi, taxallus o'zgarishi mumkin
   const s = $("profilSahifa");
   s.classList.remove("yashirin");
   s.innerHTML = "";
@@ -757,18 +758,24 @@ function profilimniChiz() {
   s.appendChild(yarat("p", "kichik-matn", "Profil oching — natijalaringiz saqlanadi, reytingga kirasiz va do'stlaringiz sizga baho beradi. Ro'yxatdan o'tish shart emas."));
   const qator = yarat("div", "qator profil-forma");
   const kirit = yarat("input"); kirit.placeholder = "Ismingiz"; kirit.maxLength = 30; kirit.autocomplete = "nickname";
-  const tugma = yarat("button", "kichik", "Profil ochish"); tugma.type = "button";
+  const tx = taxallusMaydoni("");
+  kirit.addEventListener("input", () => tx.ismdanTaklif(kirit.value));
+  const tugma = yarat("button", "asosiy", "Profil ochish"); tugma.type = "button";
   const xato = yarat("p", "kichik-matn");
   tugma.addEventListener("click", async () => {
     const ism = kirit.value.trim();
     if (!ism) { xato.textContent = "Ismingizni yozing."; kirit.focus(); return; }
+    if (await tx.tekshir()) { xato.textContent = "Taxallusni tuzating."; tx.kirit.focus(); return; }
     tugma.disabled = true; tugma.textContent = "Ochilmoqda…";
-    try { await profilYarat(ism); await natijaniYoz(); profilSahifasiniKor(mening.kod); }
-    catch (e) { tugma.disabled = false; tugma.textContent = "Profil ochish"; xato.textContent = "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring."; }
+    try { await profilYarat(ism, tx.qiymat()); await natijaniYoz(); profilSahifasiniKor(mening.taxallus ? "@" + mening.taxallus : mening.kod); }
+    catch (e) {
+      tugma.disabled = false; tugma.textContent = "Profil ochish";
+      xato.textContent = e.message === "band" ? "Bu taxallus band — boshqasini tanlang." : "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring.";
+    }
   });
   kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
-  qator.append(kirit, tugma);
-  s.append(qator, xato);
+  qator.append(kirit);
+  s.append(qator, yarat("p", "sozlama-nom", "Taxallus — boshqalar sizni shu nom bilan topadi"), tx.el, tugma, xato);
 
   // Avval profil ochgan bo'lsa — Google orqali kirish
   const ajrat = yarat("p", "ajratgich", "yoki");

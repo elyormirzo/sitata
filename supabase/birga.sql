@@ -107,13 +107,13 @@ language plpgsql security definer set search_path = '' as $$
 declare kimdan_ism text; kimga_ism text; kimga_kod text;
 begin
   select ism into kimdan_ism from public.profillar where id = new.kimdan;
-  select ism, kod into kimga_ism, kimga_kod from public.profillar where id = new.kimga;
+  select ism, coalesce('#@' || taxallus, '?p=' || kod) into kimga_ism, kimga_kod from public.profillar where id = new.kimga;
   if tg_op = 'INSERT' then
     insert into public.bildirishnomalar (kimga, matn, havola)
     values (new.kimga, kimdan_ism || ' sizni kitobdosh bo''lishga taklif qildi', '#kitobdoshlar');
   elsif new.holat = 'qabul' and old.holat <> 'qabul' then
     insert into public.bildirishnomalar (kimga, matn, havola)
-    values (new.kimdan, kimga_ism || ' kitobdosh bo''lish taklifingizni qabul qildi', '?p=' || kimga_kod);
+    values (new.kimdan, kimga_ism || ' kitobdosh bo''lish taklifingizni qabul qildi', kimga_kod);
   end if;
   return new;
 end;

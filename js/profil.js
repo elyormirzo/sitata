@@ -12,6 +12,74 @@ let mening = null; // { id, kod, ism } — shu brauzerdagi o'yinchi profili
 try { mening = JSON.parse(localStorage.getItem("kimAytganProfil")); } catch (e) {}
 
 const profilHavolasi = (kod) => SAYT_MANZILI + "?p=" + kod;
+// Profil manzillari: tashqariga ulashish uchun sitata.uz/@taxallus (404.html yo'naltiradi), sayt ichida #@taxallus
+const profilManzili = (p) => (p && p.taxallus ? SAYT_MANZILI + "@" + p.taxallus : profilHavolasi(p ? p.kod : ""));
+const profilIchkiHavola = (p) => (p && p.taxallus ? "#@" + p.taxallus : "?p=" + (p ? p.kod : ""));
+
+// ---------- Taxallus (@foydalanuvchi_nomi) ----------
+const TAXALLUS_SHAKLI = /^[a-z0-9_]{3,20}$/;
+const BAND_TAXALLUSLAR = ["admin", "sitata", "sitatauz", "support", "yordam", "moderator", "null", "undefined", "profil", "reyting"];
+const taxallusniTozala = (t) => String(t || "").trim().toLowerCase().replace(/^@+/, "");
+function taxallusTaklifi(ism) {
+  let t = String(ism || "").toLowerCase().replace(/([og])['ʻʼ‘’`]/g, "$1").replace(/[^a-z0-9_]/g, "");
+  if (t.length < 3) t = (t + "kitobxon").slice(0, 8);
+  return t.slice(0, 20);
+}
+function taxallusXatosi(t) {
+  if (!t) return "Taxallus yozing.";
+  if (!TAXALLUS_SHAKLI.test(t)) return "Faqat lotin harflari, raqam va _ — 3 dan 20 belgigacha.";
+  if (BAND_TAXALLUSLAR.includes(t)) return "Bu taxallusni olib bo'lmaydi.";
+  return null;
+}
+async function taxallusEgasi(t) {
+  const m = await mijozOl();
+  const { data } = await m.from("profillar").select("id").eq("taxallus", t).maybeSingle();
+  return data ? data.id : null;
+}
+
+// Taxallus kiritish maydoni: yozish paytida bo'sh-bandligini tekshiradi
+function taxallusMaydoni(boshlangich) {
+  const quti = document.createElement("div"); quti.className = "taxallus-maydon";
+  const belgi = document.createElement("span"); belgi.className = "taxallus-belgi"; belgi.textContent = "@";
+  const kirit = document.createElement("input"); kirit.placeholder = "taxallus"; kirit.maxLength = 21;
+  kirit.autocapitalize = "off"; kirit.autocomplete = "username"; kirit.spellcheck = false; kirit.value = boshlangich || "";
+  const holatMatni = document.createElement("p"); holatMatni.className = "taxallus-holat";
+  const qator = document.createElement("div"); qator.className = "taxallus-qator"; qator.append(belgi, kirit);
+  quti.append(qator, holatMatni);
+  let navbat = 0, kechik = null, qolda = false;
+  const tekshir = async () => {
+    const t = taxallusniTozala(kirit.value);
+    const n = ++navbat;
+    const xato = taxallusXatosi(t);
+    if (xato) { holatMatni.textContent = xato; holatMatni.className = "taxallus-holat xato"; return xato; }
+    if (mening && mening.taxallus === t) { holatMatni.textContent = "Bu sizning hozirgi taxallusingiz."; holatMatni.className = "taxallus-holat"; return null; }
+    holatMatni.textContent = "Tekshirilmoqda…"; holatMatni.className = "taxallus-holat";
+    let egasi;
+    try { egasi = await taxallusEgasi(t); } catch (e) { return null; }   // tekshira olmasak, baza o'zi rad etadi
+    if (n !== navbat) return null;
+    if (egasi && (!mening || egasi !== mening.id)) { holatMatni.textContent = `@${t} band — boshqasini tanlang.`; holatMatni.className = "taxallus-holat xato"; return "band"; }
+    holatMatni.textContent = `✓ @${t} bo'sh`; holatMatni.className = "taxallus-holat bosh"; return null;
+  };
+  kirit.addEventListener("input", () => {
+    qolda = true;
+    const toza = kirit.value.toLowerCase().replace(/[^a-z0-9_@]/g, "");
+    if (toza !== kirit.value) kirit.value = toza;
+    clearTimeout(kechik); kechik = setTimeout(tekshir, 400);
+  });
+  if (kirit.value) setTimeout(tekshir, 0);
+  return {
+    el: quti, kirit, tekshir,
+    qiymat: () => taxallusniTozala(kirit.value),
+    ismdanTaklif: (ism) => { if (!qolda) { kirit.value = taxallusTaklifi(ism); clearTimeout(kechik); kechik = setTimeout(tekshir, 400); } },
+  };
+}
+
+async function taxallusniSaqla(t) {
+  const m = await mijozOl();
+  const { error } = await m.from("profillar").update({ taxallus: t }).eq("id", mening.id);
+  if (error) throw error.code === "23505" ? new Error("band") : error;
+  profilniEsla({ ...mening, taxallus: t });
+}
 const haqiqiyBugun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000);
 
 function skriptYukla(src) {
@@ -63,20 +131,24 @@ function tasodifiyKod() {
   return kod;
 }
 
-async function profilYarat(ism) {
+async function profilYarat(ism, taxallus) {
   const m = await mijozOl();
   const uid = await kirish();
-  const bor = await m.from("profillar").select("id,kod,ism").eq("id", uid).maybeSingle();
+  const bor = await m.from("profillar").select("id,kod,ism,taxallus").eq("id", uid).maybeSingle();
   if (bor.data) {
-    if (bor.data.ism !== ism) await m.from("profillar").update({ ism }).eq("id", uid);
-    profilniEsla({ ...bor.data, ism });
+    const yangi = { ism, taxallus: taxallus || bor.data.taxallus };
+    const { error } = await m.from("profillar").update(yangi).eq("id", uid);
+    if (error && error.code === "23505") throw new Error("band");
+    profilniEsla({ ...bor.data, ...yangi });
     return mening;
   }
   for (let urinish = 0; urinish < 5; urinish++) {
     const kod = tasodifiyKod();
-    const { error } = await m.from("profillar").insert({ id: uid, kod, ism });
-    if (!error) { profilniEsla({ id: uid, kod, ism }); return mening; }
-    if (error.code !== "23505") throw error;   // 23505 — bunday kod bor, boshqasini sinaymiz
+    const { error } = await m.from("profillar").insert({ id: uid, kod, ism, taxallus: taxallus || null });
+    if (!error) { profilniEsla({ id: uid, kod, ism, taxallus: taxallus || null }); return mening; }
+    if (error.code !== "23505") throw error;
+    if (/taxallus/.test(error.message || "")) throw new Error("band");   // taxallus band
+    // aks holda kod band — boshqasini sinaymiz
   }
   throw new Error("Profil kodi yaratilmadi");
 }
@@ -104,8 +176,8 @@ function profilQutiniChiz() {
     const p = document.createElement("p");
     p.textContent = "Profilingiz — do'stlaringiz kirib natijalaringizni ko'radi va baho beradi:";
     const a = document.createElement("a");
-    a.href = profilHavolasi(mening.kod);
-    a.textContent = profilHavolasi(mening.kod).replace(/^https?:\/\//, "");
+    a.href = profilIchkiHavola(mening);
+    a.textContent = profilManzili(mening).replace(/^https?:\/\//, "");
     quti.append(p, a);
     if (SINOV) {
       const s = document.createElement("p");
@@ -122,6 +194,8 @@ function profilQutiniChiz() {
   kirit.placeholder = "Ismingiz";
   kirit.maxLength = 30;
   kirit.autocomplete = "nickname";
+  const tx = taxallusMaydoni("");
+  kirit.addEventListener("input", () => tx.ismdanTaklif(kirit.value));
   const tugma = document.createElement("button");
   tugma.type = "button";
   tugma.className = "kichik";
@@ -130,21 +204,22 @@ function profilQutiniChiz() {
   tugma.addEventListener("click", async () => {
     const ism = kirit.value.trim();
     if (!ism) { xato.textContent = "Ismingizni yozing."; kirit.focus(); return; }
+    if (await tx.tekshir()) { xato.textContent = "Taxallusni tuzating."; tx.kirit.focus(); return; }
     tugma.disabled = true; tugma.textContent = "Ochilmoqda…"; xato.textContent = "";
     try {
-      await profilYarat(ism);
+      await profilYarat(ism, tx.qiymat());
       await natijaniYoz();
       natijaFayli = null; natijaFaylObj = null;       // rasmga profil havolasini qo'shamiz
       await natijaRasminiTayyorla();
       profilQutiniChiz();
     } catch (e) {
       tugma.disabled = false; tugma.textContent = "Profil ochish";
-      xato.textContent = "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring.";
+      xato.textContent = e.message === "band" ? "Bu taxallus band — boshqasini tanlang." : "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring.";
     }
   });
   kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
-  qator.append(kirit, tugma);
-  quti.append(p, qator, xato);
+  qator.append(kirit);
+  quti.append(p, qator, tx.el, tugma, xato);
 }
 
 // Ketma-ket yutilgan kunlar
@@ -171,7 +246,10 @@ async function profilSahifasiniKor(kod) {
   let profil, oyinlar, baholar, uid;
   try {
     const m = await mijozOl();
-    const p = await m.from("profillar").select("id,kod,ism").eq("kod", String(kod).toLowerCase()).maybeSingle();
+    const izlash = String(kod).toLowerCase();
+    const p = izlash.startsWith("@")
+      ? await m.from("profillar").select("id,kod,ism,taxallus").eq("taxallus", taxallusniTozala(izlash)).maybeSingle()
+      : await m.from("profillar").select("id,kod,ism,taxallus").eq("kod", izlash).maybeSingle();
     profil = p.data;
     if (!profil) { sahifa.innerHTML = '<p class="kichik-matn">Bunday profil topilmadi.</p>'; return; }
     const [o, b, u] = await Promise.all([
@@ -200,6 +278,11 @@ async function profilSahifasiniKor(kod) {
 
   sahifa.appendChild(el("p", "kichik-matn", "«Kim aytgan?» o'yinchisi"));
   sahifa.appendChild(el("h2", "", profil.ism));
+  if (profil.taxallus) sahifa.appendChild(el("p", "taxallus-yozuv", "@" + profil.taxallus));
+  if (ozimniki) {
+    if (!mening || mening.taxallus !== profil.taxallus) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus });
+    sahifa.appendChild(taxallusQutisi(profil));
+  }
 
   const statlar = el("div", "statlar");
   [[jami, "o'yin"], [foiz + "%", "topgan"], [ortachaXato, "o'rtacha xato"],
@@ -303,7 +386,7 @@ async function googleBilanKir(xabar) {
 async function profilniSinxronla(uid) {
   if (mening && mening.id === uid) return;
   const m = await mijozOl();
-  const { data } = await m.from("profillar").select("id,kod,ism").eq("id", uid).maybeSingle();
+  const { data } = await m.from("profillar").select("id,kod,ism,taxallus").eq("id", uid).maybeSingle();
   if (data) profilniEsla(data);
   else { mening = null; try { localStorage.removeItem("kimAytganProfil"); } catch (e) {} }
 }
@@ -365,5 +448,36 @@ function hisobQutisi() {
       quti.append(p, chiq, xabar);
     }
   })();
+  return quti;
+}
+
+// O'z profilida: taxallus tanlash yoki o'zgartirish
+function taxallusQutisi(profil) {
+  const quti = document.createElement("div"); quti.className = "taxallus-quti";
+  const forma = (sarlavha) => {
+    quti.innerHTML = "";
+    const p = document.createElement("p"); p.className = "kichik-matn"; p.textContent = sarlavha;
+    const tx = taxallusMaydoni(profil.taxallus || taxallusTaklifi(profil.ism));
+    const saqla = document.createElement("button"); saqla.type = "button"; saqla.className = "kichik"; saqla.textContent = "Saqlash";
+    const xabar = document.createElement("p"); xabar.className = "kichik-matn";
+    saqla.addEventListener("click", async () => {
+      if (await tx.tekshir()) return;
+      saqla.disabled = true;
+      try { await taxallusniSaqla(tx.qiymat()); location.hash = "#@" + tx.qiymat(); if (joriyYol().nom === "profilim") sahifaniKor(); }
+      catch (e) { saqla.disabled = false; xabar.textContent = e.message === "band" ? "Bu taxallus band — boshqasini tanlang." : "Saqlanmadi — qayta urinib ko'ring."; }
+    });
+    quti.append(p, tx.el, saqla, xabar);
+  };
+  if (!profil.taxallus) {
+    forma("Taxallus tanlang — do'stlaringiz sizni @taxallus orqali topadi, profilingiz manzili esa sitata.uz/@taxallus bo'ladi.");
+  } else {
+    const havola = document.createElement("p"); havola.className = "kichik-matn";
+    havola.append(document.createTextNode("Profilingiz manzili: "));
+    const b = document.createElement("b"); b.textContent = profilManzili(profil).replace(/^https?:\/\//, ""); havola.appendChild(b);
+    const ozgartir = document.createElement("button"); ozgartir.type = "button"; ozgartir.className = "matn-tugma"; ozgartir.textContent = "taxallusni o'zgartirish";
+    ozgartir.addEventListener("click", () => forma("Yangi taxallus (eski havolalar ishlamay qoladi):"));
+    havola.append(document.createTextNode(" · "), ozgartir);
+    quti.appendChild(havola);
+  }
   return quti;
 }
