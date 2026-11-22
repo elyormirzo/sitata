@@ -23,6 +23,15 @@ const QAHRAMONLAR = {
     ["robinzon", "Robinzon Kruzo", "Defo", { fon: "#3E8C7A", teri: 2, bosh: "telpak", yuz: "soqol", sochRang: "#5A3A22", kiyim: "#8C6A3F", buyum: "toti" }],
     ["anna", "Anna Karenina", "Tolstoy", { fon: "#5E3A6B", teri: 0, soch: "turmak", sochRang: "#2A1D14", kiyim: "#3A2440", yoqa: "#EDE6D6", ayol: 1 }],
   ],
+  // Tarixiy qahramonlar (haqiqiy suratlari yo'q — sayt uchun chizilgan obrazlar)
+  tarix: [
+    ["temur", "Amir Temur", "1336–1405", { fon: "#1F4E79", teri: 1, bosh: "temur", yuz: "soqol", sochRang: "#3A2A1C", kiyim: "#7B2E2E", chiziq: "#D9B26A", yoqa: "#D9B26A", buyum: "qilich" }],
+    ["manguberdi", "Jaloliddin Manguberdi", "1199–1231", { fon: "#5A3A22", teri: 1, bosh: "manguberdi", yuz: "moylov", sochRang: "#1A1410", kiyim: "#6B7A88", sovutKiyim: 1, buyum: "qilich" }],
+    ["tomaris", "To'maris", "massaget malikasi", { fon: "#8E5A1E", teri: 1, bosh: "saka", soch: "ormaq", sochRang: "#2A1D14", kiyim: "#7B2E2E", chiziq: "#F2D06B", ayol: 1, buyum: "kamon" }],
+    ["shiroq", "Shiroq", "jasur cho'pon", { fon: "#9A7B4F", teri: 2, bosh: "telpak", yuz: "soqol", sochRang: "#3A2A1C", kiyim: "#6E5A3A", buyum: "tayoq" }],
+    ["spitamen", "Spitamen", "Sug'd sarkardasi", { fon: "#3E5B4F", teri: 1, bosh: "dubulga", yuz: "soqol", sochRang: "#2A1D14", kiyim: "#8C4A2F", pat: 1, buyum: "nayza" }],
+    ["muqanna", "Muqanna", "oq kiyimlilar sardori", { fon: "#2F6B4F", teri: 1, parda: 1, kiyim: "#F4EFE4", bosh: "salla" }],
+  ],
   // sitata.uz uchun o'ylab topilgan original superqahramonlar
   super: [
     ["kitobmen", "Kitobmen", "o'qigan sari kuchayadi", { fon: "#1F6F78", teri: 1, soch: "qisqa", sochRang: "#2A1D14", kiyim: "#1F6F78", plash: "#E8742C", emblem: "kitob", niqobRang: "#E8742C" }],
@@ -63,6 +72,7 @@ function qahramonSVG(t) {
     if (t.chiziq) for (let x = 24; x <= 76; x += 9) s.push(`<path d="M${x} 100 Q${x + 1} 84 ${x + (x < 50 ? 4 : -4)} 72" stroke="${t.chiziq}" stroke-width="2" fill="none" opacity=".75"/>`);
     if (t.yoqa) s.push(`<path d="M38 70 L50 82 L62 70 Z" fill="${t.yoqa}"/>`);
     if (t.mumiyo) s.push(`<path d="M18 86 L82 80 M16 94 L84 90" stroke="#C9BC9C" stroke-width="3"/>`);
+    if (t.sovutKiyim) for (let yy = 76; yy < 100; yy += 6) s.push(`<path d="M${22 + (yy - 76) * 0.2} ${yy} Q50 ${yy + 4} ${78 - (yy - 76) * 0.2} ${yy}" stroke="#4A5A68" stroke-width="1.5" fill="none"/>`);
   }
   // Ko'krakdagi belgi
   if (t.emblem) {
@@ -130,6 +140,11 @@ function qahramonSVG(t) {
   // Bosh kiyimlar
   const b = t.bosh;
   if (b === "doppi") s.push(`<path d="M32 32 L35 18 Q50 13 65 18 L68 32 Q50 27 32 32 Z" fill="#1F1F24"/><path d="M38 20 l3 4 l-3 4 l-3 -4 z M50 17 l3 4 l-3 4 l-3 -4 z M62 20 l3 4 l-3 4 l-3 -4 z" fill="#F8F1E1"/>`);
+  if (b === "temur") s.push(`<path d="M28 32 Q28 16 50 14 Q72 16 72 32 Z" fill="#D9B26A" stroke="#8A6A1E" stroke-width="1.5"/><path d="M27 32 Q50 24 73 32 L72 36 Q50 29 28 36 Z" fill="#F4EFE4"/><path d="M50 14 L50 4" stroke="#8A6A1E" stroke-width="3"/><circle cx="50" cy="3" r="2.5" fill="#C62828"/><circle cx="50" cy="22" r="3" fill="#1F6F78"/>`);
+  if (b === "manguberdi") s.push(`<path d="M30 46 L30 34 Q30 18 50 6 Q70 18 70 34 L70 46 L66 46 L66 36 Q50 30 34 36 L34 46 Z" fill="#9AA4AE" stroke="#5D6D7E" stroke-width="1.5"/><path d="M30 46 Q30 58 36 62 L36 48 Z M70 46 Q70 58 64 62 L64 48 Z" fill="#7F8C8D"/><path d="M33 50 h3 M33 54 h3 M64 50 h3 M64 54 h3" stroke="#5D6D7E"/><rect x="48.5" y="32" width="3" height="16" fill="#5D6D7E"/>`);
+  if (b === "saka") s.push(`<path d="M30 36 Q30 20 50 2 Q70 20 70 36 Q50 30 30 36 Z" fill="#B03A2E"/><path d="M31 34 Q50 28 69 34 L69 38 Q50 32 31 38 Z" fill="#F2D06B"/><circle cx="40" cy="22" r="1.6" fill="#F2D06B"/><circle cx="50" cy="16" r="1.6" fill="#F2D06B"/><circle cx="60" cy="22" r="1.6" fill="#F2D06B"/>`);
+  if (t.pat) s.push(`<path d="M50 4 Q60 -2 66 8 Q58 6 52 12 Z" fill="#C62828"/>`);
+  if (t.parda) s.push(`<path d="M30 40 Q30 64 50 70 Q70 64 70 40 Q50 36 30 40 Z" fill="#2F8F5B"/><path d="M34 40 Q50 37 66 40 L66 45 Q50 42 34 45 Z" fill="#1E5E3C"/><ellipse cx="43" cy="42.5" rx="3" ry="2" fill="#F8F1E1"/><ellipse cx="57" cy="42.5" rx="3" ry="2" fill="#F8F1E1"/><circle cx="43" cy="42.5" r="1.2" fill="#111"/><circle cx="57" cy="42.5" r="1.2" fill="#111"/>`);
   if (b === "sehrgar") s.push(`<path d="M28 32 L50 0 L72 32 Q50 26 28 32 Z" fill="#5B2C6F"/><circle cx="46" cy="18" r="1.6" fill="#F2D06B"/><circle cx="55" cy="24" r="1.3" fill="#F2D06B"/><circle cx="51" cy="10" r="1.2" fill="#F2D06B"/>`);
   if (b === "salla") s.push(`<ellipse cx="50" cy="24" rx="26" ry="14" fill="#F4EFE4" stroke="#D8CFBD" stroke-width="1.5"/><path d="M28 26 Q50 16 72 24 M30 20 Q50 12 70 18" stroke="#D8CFBD" stroke-width="1.5" fill="none"/><circle cx="50" cy="12" r="4" fill="#2F6B4F"/>`);
   if (b === "dubulga") s.push(`<path d="M30 36 Q30 14 50 12 Q70 14 70 36 Z" fill="#9AA4AE" stroke="#6B7A88" stroke-width="1.5"/><path d="M50 12 L50 2" stroke="#6B7A88" stroke-width="3"/><rect x="48" y="30" width="4" height="14" fill="#6B7A88"/>`);
@@ -156,6 +171,19 @@ function qahramonSVG(t) {
 }
 const svgOrami = (s) => `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${s.join("")}</svg>`;   // doira — CSS (border-radius)
 
+// Jadidlar — haqiqiy suratlari va pochta markalaridagi portretlari (jamoat mulki, manbalar: rasmlar/manbalar.txt)
+const JADIDLAR = [
+  ["behbudiy", "Mahmudxo'ja Behbudiy", "1875–1919"], ["munavvarqori", "Munavvar qori", "1878–1931"],
+  ["fitrat", "Abdurauf Fitrat", "1886–1938"], ["avloniy", "Abdulla Avloniy", "1878–1934"],
+  ["qodiriy", "Abdulla Qodiriy", "1894–1938"], ["cholpon", "Cho'lpon", "1897–1938"],
+  ["hamza", "Hamza Hakimzoda Niyoziy", "1889–1929"], ["ibrat", "Is'hoqxon Ibrat", "1862–1937"],
+  ["fayzulla", "Fayzulla Xo'jayev", "1896–1938"], ["gaspirali", "Ismoil Gaspirali", "1851–1914"],
+  ["ayniy", "Sadriddin Ayniy", "1878–1954"],
+];
+const jadidRasmi = (k) => `rasmlar/jadidlar/${k}.jpg`;
+// Surati hali qo'shilmaganlar ro'yxatda ko'rinmaydi
+const JADID_SURATLARI = new Set(["qodiriy", "gaspirali"]);
+
 // Muallif portretlari (rasmlar/ papkasidagi suratlar)
 function muallifQahramonlari() {
   return Object.entries(MUALLIFLAR).filter(([, m]) => m.rasm).map(([ism, m]) => ["m-" + m.rasm.replace(/^.*\//, "").replace(/\.\w+$/, ""), ism, m.yillar || "", m.rasm]);
@@ -164,6 +192,7 @@ function muallifQahramonlari() {
 // Kalit bo'yicha rasm manbasi: { img } yoki { svg }
 function profilRasmiManbasi(rasm) {
   if (!rasm) return null;
+  if (rasm.startsWith("q:j-")) { const q = JADIDLAR.find((x) => x[0] === rasm.slice(4)); return q ? { img: jadidRasmi(q[0]), nom: q[1] } : null; }
   if (rasm.startsWith("q:m-")) { const q = muallifQahramonlari().find((x) => x[0] === rasm.slice(2)); return q ? { img: q[3], nom: q[1] } : null; }
   if (rasm.startsWith("q:")) {
     for (const guruh of Object.values(QAHRAMONLAR)) {
@@ -280,7 +309,7 @@ function avatarTanlash(profil, saqlandi) {
     return true;
   };
 
-  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["kino", "🎬 Kino qahramonlari"], ["super", "🦸 Superqahramonlar"]];
+  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["kino", "🎬 Kino qahramonlari"], ["tarix", "⚔ Tarixiy qahramonlar"], ["jadidlar", "📜 Jadidlar"], ["super", "🦸 Superqahramonlar"]];
   let joriy = "asar";
   const katak = (kalit, nom, izoh, el) => {
     const b = yarat("button", "avatar-katak" + (profil.rasm === "q:" + kalit ? " tanlangan" : "")); b.type = "button";
@@ -323,7 +352,11 @@ function avatarTanlash(profil, saqlandi) {
       return;
     }
     const panjara = yarat("div", "avatar-panjara");
-    if (joriy === "mualliflar") muallifQahramonlari().forEach(([k, nom, izoh, src]) => {
+    if (joriy === "jadidlar") JADIDLAR.filter(([k]) => JADID_SURATLARI.has(k)).forEach(([k, nom, yillar]) => {
+      const s = yarat("span", "avatar"); const i = yarat("img"); i.src = jadidRasmi(k); i.alt = ""; i.loading = "lazy"; s.appendChild(i);
+      panjara.appendChild(katak("j-" + k, nom, yillar, s));
+    });
+    else if (joriy === "mualliflar") muallifQahramonlari().forEach(([k, nom, izoh, src]) => {
       const s = yarat("span", "avatar"); const i = yarat("img"); i.src = src; i.alt = ""; i.loading = "lazy"; s.appendChild(i);
       panjara.appendChild(katak(k, nom, izoh, s));
     });
