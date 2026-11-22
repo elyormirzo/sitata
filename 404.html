@@ -5,11 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>sitata.uz</title>
 <script>
-  // sitata.uz/@taxallus — chiroyli profil manzillari. GitHub Pages bunday sahifani topmay, shu faylni ochadi;
-  // biz uni saytning o'zidagi #@taxallus yo'liga yo'naltiramiz.
+  // sitata.uz/taxallus (va eski sitata.uz/@taxallus) — chiroyli profil manzillari. GitHub Pages bunday sahifani topmay,
+  // shu faylni ochadi; biz uni saytning o'zidagi #@taxallus yo'liga yo'naltiramiz.
+  // Saytning o'z sahifalari nomi (javon, lenta…) taxallus bo'la olmaydi — ular #bo'limga o'tadi.
   (function () {
-    var m = location.pathname.match(/^\/@([A-Za-z0-9_]{3,20})\/?$/);
-    if (m) location.replace("/#@" + m[1].toLowerCase());
+    var BOLIMLAR = ["bosh", "lenta", "viktorina", "mualliflar", "karta", "reyting", "kitobdoshlar", "javon", "liga", "daraja", "birga", "qoidalar", "haqida", "profilim", "admin"];
+    var m = location.pathname.match(/^\/(@?)([A-Za-z0-9_]{3,20})\/?$/);
+    if (!m) return;
+    var nom = m[2].toLowerCase();
+    if (!m[1] && BOLIMLAR.indexOf(nom) >= 0) { location.replace("/#" + nom); return; }
+    location.replace("/#@" + nom);
   })();
 </script>
 <style>

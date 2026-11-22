@@ -169,11 +169,12 @@ async function kitobdoshlarOqiyapti(m, s, idlar, profillar) {
   });
 }
 
-// Kiritilgan matndan qidiruvni ajratish: "@mirzo", "mirzo", "sitata.uz/@mirzo", "#@mirzo", "?p=t2h2pm", "t2h2pm"
+// Kiritilgan matndan qidiruvni ajratish: "@mirzo", "mirzo", "sitata.uz/mirzo", "sitata.uz/@mirzo", "#@mirzo", "?p=t2h2pm", "t2h2pm"
 function izlashniAniqla(t) {
   const kod = (t.match(/[?&]p=([a-z0-9]{6})/) || [])[1];
   if (kod) return kod;
-  const tx = (t.match(/(?:^|[\/#])@([a-z0-9_]{3,20})\/?$/) || [])[1];
+  const tx = (t.match(/(?:^|[\/#])@([a-z0-9_]{3,20})\/?$/) || [])[1]
+    || (t.match(/sitata\.uz\/([a-z0-9_]{3,20})\/?$/) || [])[1];   // yangi manzil: sitata.uz/mirzo
   if (tx) return "@" + tx;
   return /^[a-z0-9_]{3,20}$/.test(t) ? t : null;
 }

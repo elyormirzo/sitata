@@ -12,13 +12,17 @@ let mening = null; // { id, kod, ism } — shu brauzerdagi o'yinchi profili
 try { mening = JSON.parse(localStorage.getItem("kimAytganProfil")); } catch (e) {}
 
 const profilHavolasi = (kod) => SAYT_MANZILI + "?p=" + kod;
-// Profil manzillari: tashqariga ulashish uchun sitata.uz/@taxallus (404.html yo'naltiradi), sayt ichida #@taxallus
-const profilManzili = (p) => (p && p.taxallus ? SAYT_MANZILI + "@" + p.taxallus : profilHavolasi(p ? p.kod : ""));
+// Profil manzillari: tashqariga ulashish uchun sitata.uz/taxallus (404.html yo'naltiradi; eski sitata.uz/@taxallus ham), sayt ichida #@taxallus
+const profilManzili = (p) => (p && p.taxallus ? SAYT_MANZILI + p.taxallus : profilHavolasi(p ? p.kod : ""));   // sitata.uz/mirzo
 const profilIchkiHavola = (p) => (p && p.taxallus ? "#@" + p.taxallus : "?p=" + (p ? p.kod : ""));
 
 // ---------- Taxallus (@foydalanuvchi_nomi) ----------
 const TAXALLUS_SHAKLI = /^[a-z0-9_]{3,20}$/;
-const BAND_TAXALLUSLAR = ["admin", "sitata", "sitatauz", "support", "yordam", "moderator", "null", "undefined", "profil", "reyting"];
+// Saytning o'z sahifalari va fayllari nomlari — manzil sitata.uz/taxallus bo'lgani uchun taxallus bo'la olmaydi (bazada ham shu ro'yxat)
+const BAND_TAXALLUSLAR = ["admin", "sitata", "sitatauz", "support", "yordam", "moderator", "null", "undefined", "profil", "profilim", "reyting",
+  "bosh", "lenta", "viktorina", "mualliflar", "muallif", "karta", "kitobdoshlar", "javon", "liga", "daraja", "birga", "qoidalar", "haqida",
+  "iqtiboslar", "kitoblar", "sozlamalar", "bildirishnomalar", "kirish", "login", "api", "www", "mail", "about", "help", "settings",
+  "js", "rasmlar", "ikonkalar", "supabase", "assets", "static", "index", "manifest", "sw", "favicon", "robots", "sitemap", "cname"];
 const taxallusniTozala = (t) => String(t || "").trim().toLowerCase().replace(/^@+/, "");
 function taxallusTaklifi(ism) {
   let t = String(ism || "").toLowerCase().replace(/([og])['ʻʼ‘’`]/g, "$1").replace(/[^a-z0-9_]/g, "");
@@ -653,7 +657,7 @@ function taxallusQutisi(profil) {
     quti.append(p, tx.el, saqla, xabar);
   };
   if (!profil.taxallus) {
-    forma("Taxallus tanlang — do'stlaringiz sizni @taxallus orqali topadi, profilingiz manzili esa sitata.uz/@taxallus bo'ladi.");
+    forma("Taxallus tanlang — do'stlaringiz sizni @taxallus orqali topadi, profilingiz manzili esa sitata.uz/taxallus bo'ladi.");
   } else {
     const havola = document.createElement("p"); havola.className = "kichik-matn";
     havola.append(document.createTextNode("Profilingiz manzili: "));

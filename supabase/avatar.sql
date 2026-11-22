@@ -17,3 +17,6 @@ alter table public.profillar
   add column if not exists banner text check (banner is null or banner ~ '^#[0-9a-f]{6}(,#[0-9a-f]{6}){1,2}$');
 grant select (banner) on public.profillar to anon, authenticated;
 grant insert (banner), update (banner) on public.profillar to authenticated;
+
+-- Profil manzili endi sitata.uz/taxallus — saytning o'z sahifalari nomlari taxallus bo'la olmaydi
+-- (migratsiya: taxallus_band_sozlar_kengaytirildi; ro'yxat js/profil.js dagi BAND_TAXALLUSLAR bilan bir xil)
