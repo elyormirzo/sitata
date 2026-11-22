@@ -964,3 +964,12 @@ a.post-ism:hover { text-decoration: underline; }
 .lenta-plyus:hover { filter: brightness(1.08); }
 .lenta-plyus:active { transform: scale(.95); }
 #lentaSahifa.yashirin .lenta-plyus { display: none; }
+/* Qayta ulashilgan post: tepasida «🔁 Dilnoza qayta ulashdi» */
+.post.ulashilgan { flex-wrap: wrap; padding-top: 8px; }
+.post-ulashdi { flex: 0 0 100%; display: flex; align-items: center; gap: 8px; margin-bottom: -6px; padding-left: 22px; font: 600 13px Inter, system-ui, sans-serif; color: var(--kulrang); }
+.post-ulashdi svg { width: 15px; height: 15px; }
+.post-ulashdi a { color: inherit; text-decoration: none; }
+.post-ulashdi a:hover { text-decoration: underline; }
+.post-amal.qayta:hover, .post-amal.qayta.tanlangan { color: var(--zaytun); }
+.post-amal.qayta:hover { background: rgba(79,91,58,.1); }
+.post-amal.qayta:disabled:hover { background: none; color: var(--kulrang); }

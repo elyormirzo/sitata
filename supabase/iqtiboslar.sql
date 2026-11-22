@@ -28,3 +28,9 @@ as $$
 $$;
 revoke all on function public.profil_statistikasi(uuid) from public, anon;
 grant execute on function public.profil_statistikasi(uuid) to authenticated;
+
+-- ===== Qayta ulashish (migratsiya: iqtibos_qayta_ulashish) =====
+-- iqtibos_ulashishlar(iqtibos_id, profil_id, vaqt); kitob_iqtiboslari.ulashishlar — trigger bilan hisob.
+-- Ko'rish: egasi, kitobdoshlari, uni qayta ulashganlar va ularning kitobdoshlari — iqtibosni_koradimi(id, profil_id).
+-- O'z iqtibosini qayta ulashib bo'lmaydi; faqat ko'ra oladigan iqtibos ulashiladi. Egasiga «🔁 … qayta ulashdi» bildirishnomasi.
+-- Rasm ruxsati (iqtibos_rasmiga_ruxsat) ham qayta ulashganlar orqali kengaytirilgan.

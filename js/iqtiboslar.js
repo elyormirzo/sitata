@@ -15,12 +15,24 @@ async function kitobdoshIqtiboslariniChiz(s) {
   royxat.appendChild(yarat("p", "bosh-holat", "Yuklanmoqda…"));
   s.appendChild(royxat);
 
-  const [{ data: iqtiboslar, error }, { data: dostlar }] = await Promise.all([
-    m.from("kitob_iqtiboslari").select("id,profil_id,manba_turi,kitob,muallif,matn,sahifa,yoqtirishlar,vaqt,rasm_yoli").order("vaqt", { ascending: false }).limit(60),
-    m.from("kitobdoshlar").select("id").eq("holat", "qabul").limit(1),
+  const USTUNLAR = "id,profil_id,manba_turi,kitob,muallif,matn,sahifa,yoqtirishlar,ulashishlar,vaqt,rasm_yoli";
+  const [{ data: oddiy, error }, { data: dostlar }, { data: ulashishlar }] = await Promise.all([
+    m.from("kitob_iqtiboslari").select(USTUNLAR).order("vaqt", { ascending: false }).limit(60),
+    m.from("kitobdoshlar").select("kimdan,kimga").eq("holat", "qabul").limit(1000),
+    // Qayta ulashishlar: o'zim va kitobdoshlarim ulashganlari (RLS)
+    m.from("iqtibos_ulashishlar").select("iqtibos_id,profil_id,vaqt").order("vaqt", { ascending: false }).limit(60),
   ]);
   royxat.innerHTML = "";
   if (error) { royxat.appendChild(yarat("p", "bosh-holat", "Iqtiboslarni yuklab bo'lmadi.")); return; }
+  const ulash = ulashishlar || [];
+  // Qayta ulashilgan, lekin birinchi 60 tada yo'q iqtiboslarni alohida olamiz
+  const borIdlar = new Set(oddiy.map((i) => i.id));
+  const yetmagan = [...new Set(ulash.map((u) => u.iqtibos_id))].filter((id) => !borIdlar.has(id));
+  let iqtiboslar = oddiy;
+  if (yetmagan.length) {
+    const { data } = await m.from("kitob_iqtiboslari").select(USTUNLAR).in("id", yetmagan);
+    iqtiboslar = oddiy.concat(data || []);
+  }
   if (!iqtiboslar.length) {
     const q = yarat("div", "vik-quti markaz");
     q.appendChild(yarat("p", "", dostlar && dostlar.length
@@ -30,20 +42,36 @@ async function kitobdoshIqtiboslariniChiz(s) {
     royxat.appendChild(q);
     return;
   }
+  const boyicha = new Map(iqtiboslar.map((i) => [i.id, i]));
+  // Har bir iqtibos lentada bir marta — eng so'nggi hodisa bo'yicha: joylangan payti yoki kimdir qayta ulashgan payti.
+  // Muallifi kitobdoshim bo'lmasa, iqtibos faqat qayta ulashish orqali chiqadi.
+  const dostIdlar = new Set((dostlar || []).map((d) => (d.kimdan === mening.id ? d.kimga : d.kimdan)));
+  const korinadi = (iq) => iq.profil_id === mening.id || dostIdlar.has(iq.profil_id);
+  const hodisalar = new Map();
+  iqtiboslar.forEach((iq) => { if (korinadi(iq)) hodisalar.set(iq.id, { iq, vaqt: iq.vaqt, kim: null }); });
+  ulash.forEach((u) => {
+    const iq = boyicha.get(u.iqtibos_id); if (!iq) return;
+    const eski = hodisalar.get(iq.id);
+    if (!eski || new Date(u.vaqt) > new Date(eski.vaqt)) hodisalar.set(iq.id, { iq, vaqt: u.vaqt, kim: u.profil_id });
+  });
+  const tartib = [...hodisalar.values()].sort((a, b) => new Date(b.vaqt) - new Date(a.vaqt));
+  const ulashganlarim = new Set(ulash.filter((u) => u.profil_id === mening.id).map((u) => u.iqtibos_id));
+
   const idlar = iqtiboslar.map((i) => i.id);
   const [profillar, { data: yoqtirganlarim }] = await Promise.all([
-    profillarniOl(m, iqtiboslar.map((i) => i.profil_id)),
+    profillarniOl(m, [...iqtiboslar.map((i) => i.profil_id), ...ulash.map((u) => u.profil_id)]),
     m.from("iqtibos_yoqtirishlar").select("iqtibos_id").eq("profil_id", mening.id).in("iqtibos_id", idlar),
   ]);
   const yoqqan = new Set((yoqtirganlarim || []).map((y) => y.iqtibos_id));
-  // Rasmlar maxfiy — ko'rish uchun vaqtinchalik havolalar (RLS: egasi va kitobdoshlari)
+  // Rasmlar maxfiy — ko'rish uchun vaqtinchalik havolalar (RLS: egasi, kitobdoshlari va qayta ulashganlar orqali)
   const rasmYollari = iqtiboslar.filter((i) => i.rasm_yoli).map((i) => i.rasm_yoli);
   const havolalar = {};
   if (rasmYollari.length) {
     const { data } = await m.storage.from("iqtibos-rasmlar").createSignedUrls(rasmYollari, 3600);
     (data || []).forEach((d) => { if (d.signedUrl) havolalar[d.path] = d.signedUrl; });
   }
-  iqtiboslar.forEach((iq) => royxat.appendChild(kitobdoshIqtibosKartasi(m, iq, profillar[iq.profil_id], yoqqan.has(iq.id), havolalar[iq.rasm_yoli])));
+  tartib.forEach(({ iq, kim }) => royxat.appendChild(kitobdoshIqtibosKartasi(m, iq, profillar[iq.profil_id], yoqqan.has(iq.id), havolalar[iq.rasm_yoli],
+    { ulashgan: kim ? profillar[kim] || { id: kim } : null, ulashdimmi: ulashganlarim.has(iq.id) })));
 }
 
 function iqtibosJoylashFormasi(m, s) {
@@ -179,12 +207,12 @@ function iqtibosJoylashFormasi(m, s) {
 
   turgaQarab();
   ichi.append(turlar, tanlov, kitob, muallif, rasmQuti, matn, hisob, sahifa, tugma, xabar,
-    yarat("p", "kichik-matn", "🔒 Iqtibosingizni faqat kitobdoshlaringiz ko'radi."));
+    yarat("p", "kichik-matn", "🔒 Iqtibosingizni kitobdoshlaringiz ko'radi. Ulardan biri qayta ulashsa — uning kitobdoshlari ham ko'radi."));
   quti.appendChild(ichi);
   return quti;
 }
 
-function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
+function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl, q = {}) {
   const ism = p && p.ism;
   const ichki = profilIchkiHavola(p);
   const avatar = havola(ichki, "", ""); avatar.setAttribute("aria-label", ism || "Profil");
@@ -194,6 +222,14 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
   bosh.appendChild(yarat("span", "post-meta", (p && p.taxallus ? "@" + p.taxallus + " · " : "") + vaqtOldin(iq.vaqt)));
   const { k, tana } = postQobigi(avatar, bosh);
   k.classList.add("kitobdosh-iqtibos");
+  // «🔁 Dilnoza qayta ulashdi» — post tepasida
+  if (q.ulashgan) {
+    const u = yarat("div", "post-ulashdi");
+    u.innerHTML = IKON.ulashQayta;
+    const kim = q.ulashgan.id === mening.id ? "Siz" : (q.ulashgan.ism || "Kitobdoshingiz");
+    u.appendChild(q.ulashgan.id === mening.id ? yarat("span", "", "Siz qayta ulashdingiz") : havola(profilIchkiHavola(q.ulashgan), "", kim + " qayta ulashdi"));
+    k.prepend(u); k.classList.add("ulashilgan");
+  }
 
   if (iq.matn) tana.appendChild(yarat("blockquote", "post-matn" + (iq.rasm_yoli ? " rasm-izohi" : ""), iq.matn));
   if (iq.rasm_yoli) {
@@ -227,6 +263,30 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
     yurak.disabled = false;
   });
   amallar.appendChild(yurak);
+  // Qayta ulashish: o'zgalar iqtibosini kitobdoshlaringizga ko'rsatish
+  let ulashSon = iq.ulashishlar || 0, ulashdim = !!q.ulashdimmi;
+  const qayta = postAmal(IKON.ulashQayta, "", ozimniki ? "Qayta ulashishlar" : "Qayta ulashish", "qayta");
+  const qaytaChiz = () => {
+    qayta.innerHTML = IKON.ulashQayta;
+    if (ulashSon) qayta.appendChild(yarat("span", "", String(ulashSon)));
+    qayta.classList.toggle("tanlangan", ulashdim);
+    qayta.setAttribute("aria-pressed", String(ulashdim));
+    qayta.title = ozimniki ? "Qayta ulashishlar" : ulashdim ? "Qayta ulashishni bekor qilish" : "Qayta ulashish — kitobdoshlaringiz ko'radi";
+  };
+  qaytaChiz();
+  if (ozimniki) qayta.disabled = true;
+  else qayta.addEventListener("click", async () => {
+    if (!ulashdim && !confirm("Bu iqtibosni kitobdoshlaringizga qayta ulashasizmi?")) return;
+    qayta.disabled = true;
+    const oldin = ulashdim;
+    ulashdim = !ulashdim; ulashSon += ulashdim ? 1 : -1; qaytaChiz();
+    const { error } = oldin
+      ? await m.from("iqtibos_ulashishlar").delete().eq("iqtibos_id", iq.id).eq("profil_id", mening.id)
+      : await m.from("iqtibos_ulashishlar").insert({ iqtibos_id: iq.id });
+    if (error && error.code !== "23505") { ulashdim = oldin; ulashSon += ulashdim ? 1 : -1; qaytaChiz(); }
+    qayta.disabled = false;
+  });
+  amallar.appendChild(qayta);
   if (iq.matn) amallar.appendChild(nusxaAmali(() => `“${iq.matn || ""}”\n${manbaMatni(iq, ism)}`));
   if (ozimniki) {
     const ochir = postAmal(IKON.ochir, "", "O'chirish", "ochir");
