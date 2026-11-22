@@ -155,3 +155,9 @@ grant execute on function public.oqish_azosimi(bigint) to authenticated;
 -- * kitob_javoni.yangilangan — foiz/sahifa/holat o'zgarganda trigger (kitob_javoni_yangilandi) yangilaydi;
 --   Kitobdoshlar sahifasidagi «Kitobdoshlar nima o'qiyapti» bo'limi shu bo'yicha tartiblanadi.
 -- * oqish_azolari.sahifa — birga o'qishda ishtirokchi qaysi sahifada (o'quvchi oynasidan avtomatik yoziladi).
+
+-- «kitobdosh_kitob_tugatdi_bildirishnoma» migratsiyasi:
+-- bildir_kitob_tugatdi() — kitob_javoni.holat «oqidim»ga o'tganda (update) barcha kitobdoshlarga bildirishnoma
+-- («📚 Ism «Kitob»ni o'qib tugatdi (N sahifa) — tabriklang!», havola — profil). Bir xil xabar 7 kun ichida takrorlanmaydi.
+-- Javonga to'g'ridan-to'g'ri «o'qidim» bo'lib qo'shilgan eski kitoblar uchun bildirishnoma yuborilmaydi.
+-- Push — mavjud bildirishnoma_push trigger orqali avtomatik.
