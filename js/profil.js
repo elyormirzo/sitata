@@ -175,7 +175,7 @@ function profilQutiniChiz() {
   quti.innerHTML = "";
   if (mening) {
     const p = document.createElement("p");
-    p.textContent = "Profilingiz — do'stlaringiz kirib natijalaringizni ko'radi va baho beradi:";
+    p.textContent = "Profilingiz — do'stlaringiz kirib natijalaringizni ko'radi:";
     const a = document.createElement("a");
     a.href = profilIchkiHavola(mening);
     a.textContent = profilManzili(mening).replace(/^https?:\/\//, "");
@@ -194,7 +194,7 @@ function profilQutiniChiz() {
     return;
   }
   const p = document.createElement("p");
-  p.textContent = "Profil oching — ulashganingizda havolasi ham qo'shiladi, do'stlaringiz kirib baho beradi.";
+  p.textContent = "Profil oching — ulashganingizda havolasi ham qo'shiladi, do'stlaringiz kirib natijalaringizni ko'radi.";
   const qator = document.createElement("div");
   qator.className = "qator";
   const kirit = document.createElement("input");
@@ -277,7 +277,7 @@ async function profilSahifasiniKor(kod) {
   sahifa.innerHTML = '<p class="kichik-matn">Profil yuklanmoqda…</p>';
   if (!BAZA_YOQIQ) { sahifa.innerHTML = '<p class="kichik-matn">Profillar hali sozlanmagan.</p>'; return; }
 
-  let profil, oyinlar, baholar, uid;
+  let profil, oyinlar, uid;
   try {
     const m = await mijozOl();
     const izlash = String(kod).toLowerCase();
@@ -286,12 +286,11 @@ async function profilSahifasiniKor(kod) {
       : await m.from("profillar").select("id,kod,ism,taxallus,rasm,bio,instagram,x,telegram").eq("kod", izlash).maybeSingle();
     profil = p.data;
     if (!profil) { sahifa.innerHTML = '<p class="kichik-matn">Bunday profil topilmadi.</p>'; return; }
-    const [o, b, u] = await Promise.all([
+    const [o, u] = await Promise.all([
       m.from("oyinlar").select("kun,yutdi,xatolar").eq("profil_id", profil.id).order("kun", { ascending: false }).limit(1000),
-      m.from("baholar").select("baho,baholovchi").eq("profil_id", profil.id),
       joriyFoydalanuvchi(),
     ]);
-    oyinlar = o.data || []; baholar = b.data || []; uid = u;
+    oyinlar = o.data || []; uid = u;
   } catch (e) {
     sahifa.innerHTML = '<p class="kichik-matn">Profilni yuklab bo\'lmadi — internetni tekshiring.</p>';
     return;
@@ -303,8 +302,6 @@ async function profilSahifasiniKor(kod) {
   const ortachaXato = yutganlar.length
     ? (yutganlar.reduce((s, o) => s + o.xatolar, 0) / yutganlar.length).toFixed(1).replace(".0", "") : "—";
   const { joriy, eng } = seriyalar(oyinlar);
-  const ortachaBaho = baholar.length ? (baholar.reduce((s, b) => s + b.baho, 0) / baholar.length) : 0;
-  const meningBaham = uid ? (baholar.find((b) => b.baholovchi === uid) || {}).baho || 0 : 0;
   const ozimniki = uid && uid === profil.id;
 
   sahifa.innerHTML = "";
@@ -343,14 +340,14 @@ async function profilSahifasiniKor(kod) {
   bosh.appendChild(ostiQator);
   if (ozimniki && (!mening || mening.taxallus !== profil.taxallus || mening.rasm !== profil.rasm)) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus, rasm: profil.rasm || null });
 
-  // Raqamlar: iqtibos, yoqtirma, kitobdosh, baho
+  // Raqamlar: iqtibos, yoqtirma, kitobdosh
   const raqamlar = el("div", "profil-raqamlar");
   const raqam = (son, nom, href) => {
     const r = el(href ? "a" : "div", "raqam"); if (href) r.href = href;
     r.append(el("b", "", String(son)), el("span", "", nom)); return r;
   };
   const iq = raqam("–", "iqtibos"), yo = raqam("–", "yoqtirma"), kd = raqam("–", "kitobdosh", ozimniki ? "#kitobdoshlar" : null);
-  raqamlar.append(iq, yo, kd, raqam(baholar.length ? "★ " + ortachaBaho.toFixed(1) : "★ –", baholar.length ? baholar.length + " ta baho" : "baho yo'q"));
+  raqamlar.append(iq, yo, kd);
   bosh.appendChild(raqamlar);
   (async () => {
     try {
@@ -392,42 +389,6 @@ async function profilSahifasiniKor(kod) {
   });
   amallar.appendChild(ulash);
   bosh.appendChild(amallar);
-
-  // Boshqa odamning profiliga baho berish
-  const xabar = el("p", "kichik-matn");
-  if (!ozimniki) {
-    const bahoQator = el("div", "profil-baho");
-    bahoQator.appendChild(el("span", "kichik-matn", meningBaham ? "Bahoingiz:" : "Baho bering:"));
-    const yulduzlar = el("div", "yulduzlar");
-    const chizYulduz = (n) => [...yulduzlar.children].forEach((b, i) => b.classList.toggle("tola", i < n));
-    for (let n = 1; n <= 5; n++) {
-      const b = el("button", "", "★");
-      b.type = "button";
-      b.setAttribute("aria-label", n + " yulduz");
-      b.addEventListener("mouseenter", () => chizYulduz(n));
-      b.addEventListener("mouseleave", () => chizYulduz(meningBaham));
-      b.addEventListener("click", async () => {
-        [...yulduzlar.children].forEach((x) => (x.disabled = true));
-        xabar.textContent = "Saqlanmoqda…";
-        try {
-          const m = await mijozOl();
-          const men = await kirish();
-          if (men === profil.id) { xabar.textContent = "O'zingizga baho bera olmaysiz."; return; }
-          const { error } = await m.from("baholar")
-            .upsert({ profil_id: profil.id, baholovchi: men, baho: n }, { onConflict: "profil_id,baholovchi" });
-          if (error) throw error;
-          profilSahifasiniKor(kod);
-        } catch (e) {
-          xabar.textContent = "Baho saqlanmadi — qayta urinib ko'ring.";
-          [...yulduzlar.children].forEach((x) => (x.disabled = false));
-        }
-      });
-      yulduzlar.appendChild(b);
-    }
-    chizYulduz(meningBaham);
-    bahoQator.appendChild(yulduzlar);
-    bosh.append(bahoQator, xabar);
-  }
 
   // Tahrirlash oynasi (bio va tarmoqlar)
   const tahrirQuti = el("div", "profil-tahrir yashirin");

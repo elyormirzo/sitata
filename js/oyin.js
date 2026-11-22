@@ -316,7 +316,7 @@ const ulashHavolasi = () => (mening && mening.kod ? profilManzili(mening) : SAYT
 function ulashMatni() {
   const qator = holat.urinishlar.map((t) => (t ? "🟩" : "🟥")).join("");
   const hisob = holat.yutdi ? `topdim, ${xatolarSoni()} ta xato bilan` : "topa olmadim";
-  const profil = mening ? `\nProfilim — kirib baho bering: ${ulashHavolasi()}` : `\n${SAYT_MANZILI}`;
+  const profil = mening ? `\nProfilim: ${ulashHavolasi()}` : `\n${SAYT_MANZILI}`;
   return `Kim aytgan? — ${hisob}\n${qator}${profil}`;
 }
 
