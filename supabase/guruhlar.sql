@@ -24,3 +24,8 @@
 -- Faqat kitobdoshni chaqirish (kitobdoshmi), bir vaqtda ≤10 ta kutilayotgan chaqiruv; faqat ikki ishtirokchi ko'radi.
 -- duelni_yakunla(id, ball, togri) — raqib natijasi + chaqiruvchiga bildirishnoma; duelni_rad_et(id).
 -- Chaqiruv yaratilganda raqibga bildirishnoma (duel_chaqiruvi_bildir).
+
+-- ===== Yillik o'qish xulosasi (migratsiyalar: yillik_xulosa, taxallus_band_xulosa) =====
+-- yillik_xulosa(yil) → jsonb: tugatilgan kitoblar, sahifalar, o'qilgan kunlar, eng uzun seriya, eng ko'p o'qilgan oy,
+--   sevimli muallif, iqtiboslar va yoqtirmalar, eng ko'p yoqtirilgan iqtibos, topilgan, duel g'alabalari, yangi kitobdoshlar.
+--   Faqat chaqiruvchining o'zi uchun (auth.uid()).

@@ -80,6 +80,7 @@ async function javonChiz() {
 
   // Kunlik o'qish seriyasi va maqsad
   if (typeof seriyaKartasi === "function") s.appendChild(seriyaKartasi(m));
+  if (typeof xulosaTugmasi === "function" && new Date().getMonth() === 11) s.appendChild(xulosaTugmasi());   // dekabrda javonda ham
   // Yillik challenge
   const ch = yarat("div", "challenge-quti");
   if (d.maqsad) {
