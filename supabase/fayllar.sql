@@ -17,3 +17,4 @@
 -- Muqova («kitob_muqovasi» migratsiyasi): kitob_javoni.muqova — fayldan olingan kichik JPEG (data:image/jpeg;base64,…, ≤ 80 000 belgi).
 -- alter table public.kitob_javoni add column if not exists muqova text
 --   check (muqova is null or (length(muqova) <= 80000 and muqova like 'data:image/jpeg;base64,%'));
+-- Muqovani foydalanuvchi o'zi ham yuklashi mumkin (rasm brauzerda ~240px JPEG'ga kichraytirilib, shu ustunga yoziladi).

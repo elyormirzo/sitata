@@ -135,6 +135,20 @@ function maqsadFormasi(ch, m, d) {
   ch.appendChild(matn);
 }
 
+// Rasm tanlash: yashirin input; rasm kichraytirilib (≈240px JPEG) qaytariladi
+function rasmTanlagich(tayyor, xato) {
+  const k = yarat("input"); k.type = "file"; k.accept = "image/*"; k.className = "yashirin";
+  k.addEventListener("change", async () => {
+    const f = k.files[0]; k.value = "";
+    if (!f) return;
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f.name)) { xato("Rasm faylini tanlang (JPG, PNG, WEBP)."); return; }
+    if (f.size > 20 * 1024 * 1024) { xato("Rasm juda katta (20 MB gacha)."); return; }
+    const mq = await rasmniKichrayt(f).catch(() => null);
+    if (mq) tayyor(mq); else xato("Bu rasmni ochib bo'lmadi — JPG yoki PNG tanlang.");
+  });
+  return k;
+}
+
 function kitobQoshishFormasi(m) {
   const quti = yarat("details", "kitob-qoshish");
   quti.appendChild(yarat("summary", "", "+ Kitob qo'shish"));
@@ -148,28 +162,37 @@ function kitobQoshishFormasi(m) {
   const fayl = yarat("input"); fayl.type = "file";
   const faylMatn = yarat("span", "", "📎 Kitob fayli (ixtiyoriy) — PDF, EPUB, FB2, TXT, audio va boshqa formatlar, 50 MB gacha");
   faylQuti.append(fayl, faylMatn);
-  // Muqova ko'rinishi: fayldan olingan rasm, xohlasa olib tashlaydi
-  let muqova = null;
-  const muqQuti = yarat("div", "muqova-korinish yashirin");
-  const muqOl = yarat("button", "matn-tugma", "muqovani olib tashlash"); muqOl.type = "button";
+  // Muqova: fayldan avtomatik olinadi yoki foydalanuvchi o'zi rasm tanlaydi
+  let muqova = null, muqManba = "";
+  const muqQuti = yarat("div", "muqova-korinish");
+  const muqKirit = rasmTanlagich(async (mq) => { muqova = mq; muqManba = "o'zim"; muqChiz(); }, (x) => { muqXabar = x; muqChiz(); });
+  let muqXabar = "";
   const muqChiz = () => {
     muqQuti.innerHTML = "";
-    muqQuti.classList.toggle("yashirin", !muqova);
-    if (!muqova) return;
-    const t = yarat("div", ""); t.append(yarat("small", "", "Muqova fayldan olindi ✓"), muqOl);
-    muqQuti.append(muqovaEl(kitob.value || "Kitob", false, muqova), t);
+    const t = yarat("div", "");
+    const tanla = yarat("button", "matn-tugma", muqova ? "boshqa rasm tanlash" : "🖼 Muqova rasmini yuklash (ixtiyoriy)"); tanla.type = "button";
+    tanla.addEventListener("click", () => muqKirit.click());
+    if (muqova) {
+      const ol = yarat("button", "matn-tugma", "muqovani olib tashlash"); ol.type = "button";
+      ol.addEventListener("click", () => { muqova = null; muqManba = "olindi"; muqChiz(); });
+      t.append(yarat("small", "", muqManba === "fayl" ? "Muqova fayldan olindi ✓" : "Muqova tanlandi ✓"), tanla, ol);
+      muqQuti.appendChild(muqovaEl(kitob.value || "Kitob", false, muqova));
+    } else t.appendChild(tanla);
+    if (muqXabar) t.appendChild(yarat("small", "", muqXabar));
+    muqQuti.append(t, muqKirit);
+    muqXabar = "";
   };
-  muqOl.addEventListener("click", () => { muqova = null; muqChiz(); });
+  muqChiz();
   // Fayl tanlanganda — nomi va muallifini fayl ichidan aniqlab, bo'sh (yoki avval o'zimiz to'ldirgan) maydonlarga yozamiz
   let avtoKitob = "", avtoMuallif = "";
   fayl.addEventListener("change", async () => {
     const f = fayl.files[0];
     if (!f) return;
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)} — ma'lumotlar aniqlanmoqda…`;
-    muqova = null; muqChiz();
-    const [d, mq] = await Promise.all([faylMalumoti(f), faylMuqovasi(f)]);
+    const ozimTanlagan = muqManba === "o'zim" || muqManba === "olindi";
+    const [d, mq] = await Promise.all([faylMalumoti(f), ozimTanlagan ? null : faylMuqovasi(f)]);
     if (fayl.files[0] !== f) return;
-    muqova = mq; muqChiz();
+    if (!ozimTanlagan && mq) { muqova = mq; muqManba = "fayl"; muqChiz(); }
     if (!kitob.value.trim() || kitob.value === avtoKitob) { kitob.value = d.kitob; avtoKitob = d.kitob; }
     if (!muallif.value.trim() || muallif.value === avtoMuallif) { muallif.value = d.muallif; avtoMuallif = d.muallif; }
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}` +
@@ -187,13 +210,13 @@ function kitobQoshishFormasi(m) {
     tugma.disabled = true;
     const bugun = toshkentSana(), h = holat.value;
     const { data: yangi, error } = await m.from("kitob_javoni").insert({
-      profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h, muqova: f ? muqova : null,
+      profil_id: mening.id, kitob: nom, muallif: muallif.value.trim() || null, holat: h, muqova: muqova || null,
       foiz: h === "oqidim" ? 100 : 0, boshlangan: h !== "oqimoqchi" ? bugun : null, tugatilgan: h === "oqidim" ? bugun : null,
     }).select("id").single();
     if (error) { tugma.disabled = false; xabar.textContent = error.code === "23505" ? "Bu kitob javoningizda allaqachon bor." : "Qo'shib bo'lmadi."; return; }
     if (f) {
       xabar.textContent = "Fayl yuklanmoqda…";
-      try { await faylniBiriktir(m, { id: yangi.id, muqova: muqova || "yoq" }, f); }
+      try { await faylniBiriktir(m, { id: yangi.id, muqova: muqova || (muqManba === "olindi" ? "yoq" : null) }, f); }
       catch (e) { tugma.disabled = false; xabar.textContent = "Kitob qo'shildi, lekin: " + faylXatosi(e); javonHolati.tab = h; setTimeout(javonChiz, 2500); return; }
     }
     tugma.disabled = false;
@@ -208,7 +231,16 @@ function kitobQoshishFormasi(m) {
 
 function kitobKartasi(m, k) {
   const karta = yarat("article", "kitob-karta");
-  karta.appendChild(muqovaEl(k.kitob, false, k.muqova));
+  // Muqova ustiga bosib — o'zi rasm tanlaydi
+  const muqTugma = yarat("button", "muqova-tugma"); muqTugma.type = "button";
+  muqTugma.title = "Muqovani o'zgartirish"; muqTugma.setAttribute("aria-label", "Muqovani o'zgartirish");
+  const muqKirit = rasmTanlagich(async (mq) => {
+    const { error } = await m.from("kitob_javoni").update({ muqova: mq }).eq("id", k.id);
+    if (error) alert("Muqovani saqlab bo'lmadi."); else javonChiz();
+  }, (x) => alert(x));
+  muqTugma.append(muqovaEl(k.kitob, false, k.muqova), yarat("span", "muqova-qalam", "✎"));
+  muqTugma.addEventListener("click", () => muqKirit.click());
+  karta.append(muqTugma, muqKirit);
   const ong = yarat("div", "kitob-ong");
   ong.append(yarat("b", "kitob-nomi", k.kitob), yarat("span", "kichik-matn", k.muallif || ""));
   const yangila = async (q) => { await m.from("kitob_javoni").update(q).eq("id", k.id); javonChiz(); };
@@ -242,6 +274,11 @@ function kitobKartasi(m, k) {
     ong.appendChild(sharhTugma);
   }
   ong.appendChild(faylQatori(m, k, javonChiz));
+  if (k.muqova) {
+    const muqOl = yarat("button", "matn-tugma", "muqovani olib tashlash"); muqOl.type = "button";
+    muqOl.addEventListener("click", async () => { await m.from("kitob_javoni").update({ muqova: null }).eq("id", k.id); javonChiz(); });
+    ong.appendChild(muqOl);
+  }
   ong.appendChild(havola("#birga/yangi/kitob-" + k.id, "matn-tugma birga-havola",
     k.fayl_yoli && faylTuri(k.fayl_nomi || k.fayl_yoli) !== "yuklab" ? "👥 Kitobdoshlar bilan birga o'qish (fayl bilan)" : "👥 Kitobdoshlar bilan birga o'qish"));
   const ochir = yarat("button", "kitob-ochir", "×"); ochir.type = "button"; ochir.setAttribute("aria-label", "Javondan olib tashlash");
