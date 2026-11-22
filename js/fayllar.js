@@ -406,11 +406,43 @@ async function docxMalumoti(fayl) {
   const zip = await (await jszipOl()).loadAsync(fayl);
   const core = await zip.file("docProps/core.xml")?.async("string");
   const app = await zip.file("docProps/app.xml")?.async("string");
-  const sahifalar = app ? Number((app.match(/<Pages>(\d+)<\/Pages>/) || [])[1]) || null : null;
+  let sahifalar = app ? Number((app.match(/<Pages>(\d+)<\/Pages>/) || [])[1]) || null : null;
+  if (!sahifalar) {   // Word sahifalar sonini yozmagan bo'lsa — matn uzunligidan taxminlaymiz
+    const hujjat = await zip.file("word/document.xml")?.async("string");
+    if (hujjat) sahifalar = belgilardanSahifa((hujjat.match(/<w:t[ >][^<]*/g) || []).reduce((n, t) => n + t.length - t.indexOf(">") - 1, 0));
+  }
   if (!core) return { sahifalar };
   const x = new DOMParser().parseFromString(core, "application/xml");
   return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "creator"), sahifalar };
 }
+
+// ODT (LibreOffice): meta.xml dagi page-count, bo'lmasa matn uzunligi
+async function odtMalumoti(fayl) {
+  const zip = await (await jszipOl()).loadAsync(fayl);
+  const meta = await zip.file("meta.xml")?.async("string") || "";
+  let sahifalar = Number((meta.match(/meta:page-count="(\d+)"/) || [])[1]) || null;
+  if (!sahifalar) {
+    const c = await zip.file("content.xml")?.async("string");
+    if (c) sahifalar = belgilardanSahifa(c.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").length);
+  }
+  const x = new DOMParser().parseFromString(meta || "<a/>", "application/xml");
+  return { kitob: xmlMatni(x, "title"), muallif: xmlMatni(x, "initial-creator") || xmlMatni(x, "creator"), sahifalar };
+}
+
+// DJVU: har bir sahifa — alohida "FORM....DJVU" bo'lagi
+async function djvuMalumoti(fayl) {
+  const b = new Uint8Array(await fayl.arrayBuffer());
+  let n = 0;
+  for (let i = 0; i + 12 <= b.length; i++) {
+    if (b[i] === 70 && b[i + 1] === 79 && b[i + 2] === 82 && b[i + 3] === 77 &&
+        b[i + 8] === 68 && b[i + 9] === 74 && b[i + 10] === 86 && b[i + 11] === 85) n++;   // FORM … DJVU
+  }
+  return { sahifalar: n || null };
+}
+
+// RTF / HTML: belgilarni tozalab, matn uzunligidan taxminlaymiz
+const rtfMatni = (t) => t.replace(/\{\\\*[^{}]*\}/g, "").replace(/\{\\pict[\s\S]*?\}/g, "").replace(/\\'[0-9a-f]{2}/gi, "x").replace(/\\u-?\d+\??/g, "x").replace(/\\[a-z]+-?\d* ?/gi, "").replace(/[{}]/g, "");
+const htmlMatni = (t) => t.replace(/<(script|style|head)[\s\S]*?<\/\1>/gi, "").replace(/<[^>]+>/g, "").replace(/&[a-z#0-9]+;/gi, " ");
 
 async function fb2Malumoti(fayl) {
   const toliq = matnniOch(await fayl.arrayBuffer());
@@ -510,12 +542,19 @@ async function faylMalumoti(fayl) {
   let m = {};
   try {
     if (k === "txt") m = { sahifalar: belgilardanSahifa(matnniOch(await fayl.arrayBuffer()).replace(/\s+/g, " ").length) };
-    if (k === "epub") m = await epubMalumoti(fayl);
+    else if (k === "epub") m = await epubMalumoti(fayl);
     else if (k === "fb2") m = await fb2Malumoti(fayl);
     else if (k === "pdf") m = await pdfMalumoti(fayl);
     else if (["mobi", "azw", "azw3", "prc"].includes(k)) m = await mobiMalumoti(fayl);
     else if (k === "docx") m = await docxMalumoti(fayl);
     else if (k === "mp3") m = await mp3Malumoti(fayl);
+    else if (k === "odt") m = await odtMalumoti(fayl);
+    else if (k === "djvu" || k === "djv") m = await djvuMalumoti(fayl);
+    else if (k === "rtf") m = { sahifalar: belgilardanSahifa(rtfMatni(matnniOch(await fayl.arrayBuffer())).replace(/\s+/g, " ").length) };
+    else if (k === "html" || k === "htm") {
+      const t = matnniOch(await fayl.arrayBuffer());
+      m = { kitob: (t.match(/<title[^>]*>([^<]*)/i) || [])[1], sahifalar: belgilardanSahifa(htmlMatni(t).replace(/\s+/g, " ").length) };
+    }
   } catch (e) { m = {}; }
   const nomdan = nomdanMalumot(fayl.name);
   let kitob = tozaMatn(m.kitob), muallif = tozaMatn(m.muallif);

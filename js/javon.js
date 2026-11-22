@@ -199,7 +199,8 @@ function kitobQoshishFormasi(m) {
     if (!muallif.value.trim() || muallif.value === avtoMuallif) { muallif.value = d.muallif; avtoMuallif = d.muallif; }
     if (d.sahifalar && (!sahifaMaydon.value || sahifaMaydon.value === avtoSahifa)) { sahifaMaydon.value = avtoSahifa = String(d.sahifalar); }
     faylMatn.textContent = `📎 ${f.name} · ${hajmMatni(f.size)}` +
-      (d.manba === "fayl" ? " — nomi va muallifi fayldan olindi ✓" : " — fayl nomidan to'ldirildi, tekshirib ko'ring");
+      (d.manba === "fayl" ? " — nomi va muallifi fayldan olindi ✓" : " — fayl nomidan to'ldirildi, tekshirib ko'ring") +
+      (d.sahifalar ? ` · ${d.sahifalar} sahifa hisoblandi` : "");
   });
   const holat = yarat("select", "tanlash");
   Object.entries(JAVONLAR).forEach(([k, v]) => { const o = yarat("option", "", v); o.value = k; o.selected = k === javonHolati.tab; holat.appendChild(o); });
