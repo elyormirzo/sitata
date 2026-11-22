@@ -843,3 +843,4 @@ body.oquvchi-ochiq { overflow: hidden; }
 .avatar-telefon .asosiy, .avatar-telefon .ikkilamchi { width: 100%; max-width: 320px; }
 .avatar-kanvas { touch-action: none; cursor: grab; border-radius: 8px; }
 .profil-nom { display: inline-flex; align-items: center; flex-wrap: wrap; }
+.reyting-qator .avatar.jadval { box-shadow: 0 0 0 2px var(--qogoz), 0 0 0 3px var(--chegara); }

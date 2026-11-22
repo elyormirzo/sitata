@@ -77,12 +77,14 @@ async function ligaChiz() {
   if (liga > 0) qoida.push(quyi ? `oxirgi ${quyi} kishi va hafta davomida ball to'plamaganlar tushadi` : "hafta davomida ball to'plamaganlar tushadi");
   if (qoida.length) s.appendChild(yarat("p", "kichik-matn markaz", "Hafta oxirida " + qoida.join(", ") + "."));
 
+  const rasmlar = await rasmlarniOl(m, qatorlar.map((r) => r.kod));
   const royxat = yarat("ol", "reyting-royxat liga-royxat");
   qatorlar.forEach((r, i) => {
     if (i === yuqori && yuqori > 0 && i < n) royxat.appendChild(yarat("li", "liga-chegara kotarilish", "⬆ Ko'tarilish chegarasi"));
     if (quyi && i === n - quyi) royxat.appendChild(yarat("li", "liga-chegara tushish", "⬇ Tushish chegarasi"));
     const li = yarat("li", "reyting-qator" + (r.meniki ? " meniki" : "") + (i < yuqori ? " zona-yuqori" : "") + ((quyi && i >= n - quyi) || (liga > 0 && r.xp === 0) ? " zona-quyi" : ""));
     li.appendChild(yarat("span", "orin", i < 3 && r.xp > 0 ? ["🥇", "🥈", "🥉"][i] : String(r.orin)));
+    li.appendChild(avatarEl({ ism: r.ism, rasm: rasmlar[r.kod] }, 38, "jadval"));
     const nom = yarat("div", "reyting-nom");
     nom.append(havola(profilIchkiHavola(r), "", r.ism + (r.meniki ? " (siz)" : "")), yarat("small", "", r.taxallus ? "@" + r.taxallus : ""));
     li.append(nom, yarat("b", "reyting-ball", `${r.xp} ball`));

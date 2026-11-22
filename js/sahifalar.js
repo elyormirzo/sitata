@@ -792,12 +792,15 @@ async function reytingniChiz() {
     return;
   }
   const qatorlar = javob.data || [];
+  const rasmlar = await rasmlarniOl(await mijozOl(), qatorlar.map((r) => r.kod));
+  if (REYTING_TURLARI[reytingTuri] !== tur) return;
   holatMatni.textContent = qatorlar.length ? "" : "Hali hech kim yo'q — birinchi bo'ling!";
   qatorlar.forEach((r, i) => {
     const li = yarat("li", "reyting-qator" + (mening && r.kod === mening.kod ? " meniki" : ""));
     li.appendChild(yarat("span", "orin", i < 3 ? ["🥇", "🥈", "🥉"][i] : String(i + 1)));
     const nom = yarat("div", "reyting-nom");
     nom.append(havola(profilIchkiHavola(r), "", r.ism), yarat("small", "", (r.taxallus ? "@" + r.taxallus + " · " : "") + tur.izoh(r)));
+    li.appendChild(avatarEl({ ism: r.ism, rasm: rasmlar[r.kod] }, 38, "jadval"));
     if (tur.nishon) li.appendChild(nishonEl(darajaIndeksi(r.ball), 30));
     li.append(nom, yarat("b", "reyting-ball", tur.asosiy(r)));
     royxat.appendChild(li);

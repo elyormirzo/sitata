@@ -297,3 +297,15 @@ function avatarTanlash(profil, saqlandi) {
   };
   chiz();
 }
+
+// Jadvallar (reyting, liga) uchun: kodlar bo'yicha profil rasmlari → { kod: rasm }
+async function rasmlarniOl(m, kodlar) {
+  const royxat = [...new Set(kodlar)].filter(Boolean);
+  if (!royxat.length) return {};
+  try {
+    const { data } = await m.from("profillar").select("kod,rasm").in("kod", royxat);
+    const natija = {};
+    (data || []).forEach((p) => { natija[p.kod] = p.rasm; });
+    return natija;
+  } catch (e) { return {}; }
+}
