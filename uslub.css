@@ -584,3 +584,20 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .daraja-yorliq:empty { display: none; }
 .daraja-yorliq span { color: var(--kulrang); }
 .reyting-qator .nishon-svg { flex: none; }
+
+/* ===== 15. ILOVA VA ESLATMALAR ===== */
+.ilova-banner {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; padding: 12px 40px 12px 14px;
+  background: var(--zaytun); color: #F8F1E1; border-radius: 8px; box-shadow: 0 6px 14px rgba(50,60,30,.25);
+}
+.ilova-banner-matn { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; }
+.ilova-banner-matn b { font: 600 16px Lora, Georgia, serif; }
+.ilova-banner-matn span { font: italic 13px Lora, Georgia, serif; opacity: .9; }
+.ilova-banner .kichik { background: #F8F1E1; color: var(--zaytun); border-color: #F8F1E1; }
+.ilova-banner .kichik-matn { width: 100%; margin: 0; color: #F8F1E1; }
+.banner-yop { position: absolute; top: 6px; right: 8px; width: 28px; height: 28px; border: 0; background: none; color: #F8F1E1; font-size: 22px; cursor: pointer; }
+.eslatma-quti { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px dashed var(--chegara); text-align: left; }
+.eslatma-quti > b { font: 600 17px Lora, Georgia, serif; }
+.eslatma-ichi { display: flex; flex-direction: column; gap: 8px; }
+.eslatma-ichi .kichik-matn, .eslatma-quti > .kichik-matn { margin: 0; }
+.eslatma-tugmalar { display: flex; gap: 6px; }

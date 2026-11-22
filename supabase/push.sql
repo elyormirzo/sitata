@@ -1,0 +1,9 @@
+-- «sitata.uz» — push-eslatmalar. Server funksiyasi: supabase/functions/push-yubor (verify_jwt = false, o'zi tekshiradi).
+-- Bazada qilinganlar (Supabase'da allaqachon qo'llangan):
+--   * pg_net, pg_cron kengaytmalari
+--   * push_obunalar — qurilmalar obunalari (har kim faqat o'zinikini ko'radi/o'zgartiradi)
+--   * push_sozlama — VAPID kalitlari (funksiya birinchi chaqiruvda o'zi yaratadi; faqat service_role o'qiydi)
+--   * Vault: sitata_push_kalit — ichki chaqiruvlar uchun tasodifiy kalit (bazada yaratilgan, hech qayerda ko'rsatilmaydi)
+--   * push_chaqir(jsonb) — funksiyani pg_net orqali chaqiradi; bildirishnomalar jadvaliga trigger
+--   * cron: 'sitata-ertalab' 04:00 UTC (09:00 Toshkent), 'sitata-kechqurun' 15:00 UTC (20:00 Toshkent)
+-- To'liq SQL: Supabase → Database → Migrations: push_eslatmalar, push_service_role_ruxsatlari.

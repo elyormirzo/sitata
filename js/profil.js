@@ -316,6 +316,7 @@ async function profilSahifasiniKor(kod) {
   if (ozimniki) {
     xabar.textContent = "Bu sizning profilingiz — havolani ulashing, do'stlaringiz baho bersin.";
     sahifa.appendChild(hisobQutisi());
+    if (typeof eslatmaQutisi === "function") sahifa.appendChild(eslatmaQutisi());
   } else {
     xabar.textContent = meningBaham ? "Bahoingizni o'zgartirishingiz mumkin:" : "Baho bering:";
     const yulduzlar = el("div", "yulduzlar");
