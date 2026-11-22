@@ -2,6 +2,7 @@
 // profillar.rasm: 'q:<kalit>' — saytdagi tayyor qahramon (muallif portreti yoki chizilgan qahramon),
 //                 '<uid>/<uuid>.jpg' — foydalanuvchining o'z surati (ochiq «avatarlar» bucket'i).
 // Chizilgan qahramonlar — sayt uchun chizilgan oddiy SVG obrazlar (aktyorlar yoki rasmiy suratlar emas).
+// Superqahramonlar — sitata uchun o'ylab topilgan original obrazlar (Marvel/DC va boshqa studiyalar qahramonlari mualliflik huquqi bilan himoyalangan, ular chizilmaydi).
 
 const TERI = ["#F1C9A0", "#E0AC7E", "#C98E62"];
 
@@ -22,6 +23,17 @@ const QAHRAMONLAR = {
     ["robinzon", "Robinzon Kruzo", "Defo", { fon: "#3E8C7A", teri: 2, bosh: "telpak", yuz: "soqol", sochRang: "#5A3A22", kiyim: "#8C6A3F", buyum: "toti" }],
     ["anna", "Anna Karenina", "Tolstoy", { fon: "#5E3A6B", teri: 0, soch: "turmak", sochRang: "#2A1D14", kiyim: "#3A2440", yoqa: "#EDE6D6", ayol: 1 }],
   ],
+  // sitata.uz uchun o'ylab topilgan original superqahramonlar
+  super: [
+    ["kitobmen", "Kitobmen", "o'qigan sari kuchayadi", { fon: "#1F6F78", teri: 1, soch: "qisqa", sochRang: "#2A1D14", kiyim: "#1F6F78", plash: "#E8742C", emblem: "kitob", niqobRang: "#E8742C" }],
+    ["qalamqiz", "Qalam qiz", "yozgani ro'yobga chiqadi", { fon: "#6B3FA0", teri: 0, soch: "turmak", sochRang: "#3A2A1C", kiyim: "#6B3FA0", plash: "#F2C230", emblem: "qalam", niqobRang: "#F2C230", ayol: 1 }],
+    ["chaqmoq", "Chaqmoq", "yashindek tez", { fon: "#22325E", teri: 1, kiyim: "#F2C230", plash: "#22325E", emblem: "chaqmoq", kozoynak: 1, soch: "tartibsiz", sochRang: "#E8742C" }],
+    ["polatbotir", "Po'lat Botir", "temir sovut, oltin yurak", { fon: "#3E5B4F", kiyim: "#7F8C8D", emblem: "yulduz", vizor: "#2EC4B6", sovut: "#95A5A6" }],
+    ["bahodir", "Bahodir", "mahalla himoyachisi", { fon: "#2E7D5B", teri: 2, soch: "qisqa", sochRang: "#1A1410", yuz: "moylov", kiyim: "#1F4E79", plash: "#C0392B", plashNaqsh: 1, emblem: "yulduz", bosh: "doppi" }],
+    ["tunsoqchi", "Boyo'g'li", "qorong'ida ham ko'radi", { fon: "#6E4B2A", teri: 1, kiyim: "#A0703C", plash: "#4A3018", emblem: "boyqush", boyqush: 1, kozoynak: 1, kozRang: "#F2C230" }],
+    ["qormalika", "Qorbo'ron", "sovuqqonlik — kuch", { fon: "#1B4F72", teri: 2, soch: "turmak", sochRang: "#2A1D14", kiyim: "#2E86C1", yoqa: "#FDFEFE", emblem: "qor", ayol: 1, qulogchin: 1 }],
+    ["sehrgar", "Sehrgar Dono", "so'zlari sehrli", { fon: "#4A235A", teri: 1, bosh: "sehrgar", yuz: "oqsoqol", kiyim: "#5B2C6F", emblem: "yulduz", buyum: "tayoqcha" }],
+  ],
   kino: [
     ["shumbola", "Shum bola", "«Shum bola»", { fon: "#E0A040", teri: 1, bosh: "doppi", kiyim: "#3F6E99", chiziq: "#F8F1E1", sepkil: 1, kulgi: 1 }],
     ["sharlo", "Sharlo", "ovsiz kino", { fon: "#8A8F99", teri: 0, soch: "jingalak", sochRang: "#1A1410", bosh: "kotelok", yuz: "chaplinmoylov", kiyim: "#1F1F24", yoqa: "#EDE6D6", buyum: "tayoq" }],
@@ -38,6 +50,11 @@ function qahramonSVG(t) {
   const teri = t.rangpar ? "#E8E3EA" : TERI[t.teri || 0];
   const s = [];
   s.push(`<circle cx="50" cy="50" r="50" fill="${t.fon}"/>`);
+  // Plash (orqada)
+  if (t.plash) {
+    s.push(`<path d="M8 100 L22 66 Q50 60 78 66 L92 100 Z" fill="${t.plash}"/>`);
+    if (t.plashNaqsh) s.push(`<path d="M16 96 l4 -6 l4 6 z M32 98 l4 -6 l4 6 z M60 98 l4 -6 l4 6 z M76 96 l4 -6 l4 6 z" fill="#F2D06B"/>`);
+  }
   // Kiyim (yelka)
   if (t.skafandr) s.push(`<path d="M14 100 Q16 72 50 70 Q84 72 86 100 Z" fill="${t.kiyim}"/><rect x="42" y="78" width="16" height="10" rx="2" fill="#3F6E99"/><circle cx="46" cy="83" r="2" fill="#E04040"/><circle cx="54" cy="83" r="2" fill="#F2D06B"/>`);
   else if (t.robot) s.push(`<path d="M18 100 L22 74 L78 74 L82 100 Z" fill="${t.kiyim}"/><rect x="40" y="80" width="20" height="10" rx="2" fill="#2A4357"/><circle cx="45" cy="85" r="2" fill="#6BE06B"/><circle cx="55" cy="85" r="2" fill="#E04040"/>`);
@@ -46,6 +63,19 @@ function qahramonSVG(t) {
     if (t.chiziq) for (let x = 24; x <= 76; x += 9) s.push(`<path d="M${x} 100 Q${x + 1} 84 ${x + (x < 50 ? 4 : -4)} 72" stroke="${t.chiziq}" stroke-width="2" fill="none" opacity=".75"/>`);
     if (t.yoqa) s.push(`<path d="M38 70 L50 82 L62 70 Z" fill="${t.yoqa}"/>`);
     if (t.mumiyo) s.push(`<path d="M18 86 L82 80 M16 94 L84 90" stroke="#C9BC9C" stroke-width="3"/>`);
+  }
+  // Ko'krakdagi belgi
+  if (t.emblem) {
+    s.push(`<circle cx="50" cy="87" r="9" fill="#FBF5E6" stroke="${t.plash || "#F2D06B"}" stroke-width="2"/>`);
+    const e = {
+      kitob: `<path d="M43 83 Q47 81 50 84 Q53 81 57 83 L57 91 Q53 89 50 92 Q47 89 43 91 Z" fill="#1F6F78"/><path d="M50 84 L50 92" stroke="#FBF5E6" stroke-width="1"/>`,
+      qalam: `<path d="M45 92 L47 86 L55 80 L57 82 L49 88 Z" fill="#6B3FA0"/><path d="M45 92 L47 86 L49 88 Z" fill="#F2C230"/>`,
+      chaqmoq: `<path d="M52 80 L45 88 L50 88 L47 95 L55 86 L50 86 Z" fill="#E8742C"/>`,
+      yulduz: `<path d="M50 80 L52 85 L57 85 L53 88.5 L54.5 93.5 L50 90.5 L45.5 93.5 L47 88.5 L43 85 L48 85 Z" fill="#C0392B"/>`,
+      boyqush: `<path d="M44 84 Q50 80 56 84 Q57 92 50 94 Q43 92 44 84 Z" fill="#2C3E50"/><circle cx="47.5" cy="86" r="1.8" fill="#F2C230"/><circle cx="52.5" cy="86" r="1.8" fill="#F2C230"/>`,
+      qor: `<path d="M50 80 L50 94 M44 83.5 L56 90.5 M44 90.5 L56 83.5" stroke="#2E86C1" stroke-width="2" stroke-linecap="round"/>`,
+    }[t.emblem];
+    if (e) s.push(e);
   }
   // Bo'yin
   if (!t.robot && !t.skafandr) s.push(`<rect x="43" y="58" width="14" height="13" rx="4" fill="${teri}"/>`);
@@ -72,6 +102,9 @@ function qahramonSVG(t) {
   if (t.mumiyo) s.push(`<path d="M32 30 L68 26 M31 38 L69 35 M32 50 L68 47 M34 58 L66 56" stroke="#C9BC9C" stroke-width="4"/>`);
   // Ko'zlar va qosh
   if (t.niqob) s.push(`<path d="M30 38 Q50 32 70 38 L70 46 Q50 42 30 46 Z" fill="#111"/>`);
+  if (t.niqobRang) s.push(`<path d="M31 37 Q40 33 50 37 Q60 33 69 37 L68 46 Q60 43 50 45 Q40 43 32 46 Z" fill="${t.niqobRang}"/><ellipse cx="43" cy="41.5" rx="4" ry="3" fill="#FFF"/><ellipse cx="57" cy="41.5" rx="4" ry="3" fill="#FFF"/>`);
+  if (t.kozoynak) s.push(`<rect x="34" y="36" width="32" height="11" rx="5" fill="#2C3E50"/><circle cx="43" cy="41.5" r="4" fill="${t.kozRang || "#85C1E9"}"/><circle cx="57" cy="41.5" r="4" fill="${t.kozRang || "#85C1E9"}"/>`);
+  if (t.qulogchin) s.push(`<path d="M30 40 Q28 20 50 18 Q72 20 70 40 Q66 26 50 26 Q34 26 30 40 Z" fill="#FDFEFE"/><circle cx="31" cy="46" r="6" fill="#FDFEFE"/><circle cx="69" cy="46" r="6" fill="#FDFEFE"/><path d="M50 10 L50 22 M44 13 L56 19 M44 19 L56 13" stroke="#85C1E9" stroke-width="2" stroke-linecap="round"/>`);
   if (t.skafandr) {} // ko'zlar quyida
   const kz = t.mumiyo ? "#3A2A1C" : "#2A1D14";
   s.push(`<circle cx="43" cy="42" r="${t.niqob ? 1.8 : 2.4}" fill="${t.niqob ? "#F8F1E1" : kz}"/><circle cx="57" cy="42" r="${t.niqob ? 1.8 : 2.4}" fill="${t.niqob ? "#F8F1E1" : kz}"/>`);
@@ -91,9 +124,13 @@ function qahramonSVG(t) {
     if (t.kulgi) s.push(`<path d="M44 54 Q50 59 56 54 Z" fill="#7B2E2E"/>`);
   }
   if (t.yuz === "echki") s.push(`<path d="M47 56 Q50 66 53 56 Z" fill="${t.sochRang2 || sr}"/><path d="M43 51 Q50 48 57 51" stroke="${t.sochRang2 || sr}" stroke-width="1.8" fill="none"/>`);
+  // Superqahramon dubulg'alari
+  if (t.boyqush) s.push(`<path d="M31 40 Q30 22 50 20 Q70 22 69 40 Q60 32 50 33 Q40 32 31 40 Z" fill="#A0703C"/><path d="M34 27 Q30 18 36 14 Q38 22 42 23 Z M66 27 Q70 18 64 14 Q62 22 58 23 Z" fill="#7A5230"/><path d="M40 26 q2 2 4 0 M48 24 q2 2 4 0 M56 26 q2 2 4 0" stroke="#F2D9A8" stroke-width="1.2" fill="none"/>`);
+  if (t.vizor) s.push(`<ellipse cx="50" cy="42" rx="21" ry="23" fill="${t.sovut}" stroke="#5D6D7E" stroke-width="2"/><path d="M34 38 Q50 32 66 38 L64 46 Q50 42 36 46 Z" fill="${t.vizor}"/><path d="M44 54 L56 54" stroke="#5D6D7E" stroke-width="2"/><path d="M50 19 L50 30" stroke="#5D6D7E" stroke-width="3"/>`);
   // Bosh kiyimlar
   const b = t.bosh;
   if (b === "doppi") s.push(`<path d="M32 32 L35 18 Q50 13 65 18 L68 32 Q50 27 32 32 Z" fill="#1F1F24"/><path d="M38 20 l3 4 l-3 4 l-3 -4 z M50 17 l3 4 l-3 4 l-3 -4 z M62 20 l3 4 l-3 4 l-3 -4 z" fill="#F8F1E1"/>`);
+  if (b === "sehrgar") s.push(`<path d="M28 32 L50 0 L72 32 Q50 26 28 32 Z" fill="#5B2C6F"/><circle cx="46" cy="18" r="1.6" fill="#F2D06B"/><circle cx="55" cy="24" r="1.3" fill="#F2D06B"/><circle cx="51" cy="10" r="1.2" fill="#F2D06B"/>`);
   if (b === "salla") s.push(`<ellipse cx="50" cy="24" rx="26" ry="14" fill="#F4EFE4" stroke="#D8CFBD" stroke-width="1.5"/><path d="M28 26 Q50 16 72 24 M30 20 Q50 12 70 18" stroke="#D8CFBD" stroke-width="1.5" fill="none"/><circle cx="50" cy="12" r="4" fill="#2F6B4F"/>`);
   if (b === "dubulga") s.push(`<path d="M30 36 Q30 14 50 12 Q70 14 70 36 Z" fill="#9AA4AE" stroke="#6B7A88" stroke-width="1.5"/><path d="M50 12 L50 2" stroke="#6B7A88" stroke-width="3"/><rect x="48" y="30" width="4" height="14" fill="#6B7A88"/>`);
   if (b === "telpak") s.push(`<path d="M28 34 Q26 12 50 10 Q74 12 72 34 Q50 28 28 34 Z" fill="#3A2A1C"/><path d="M30 30 q3 -4 6 0 q3 -4 6 0 q3 -4 6 0 q3 -4 6 0 q3 -4 6 0 q3 -4 6 0 q3 -4 4 0" stroke="#5A4330" stroke-width="2" fill="none"/>`);
@@ -113,6 +150,7 @@ function qahramonSVG(t) {
   if (u === "kalla") s.push(`<g transform="translate(70 78)"><ellipse cx="0" cy="0" rx="9" ry="10" fill="#EDE6D6"/><rect x="-5" y="6" width="10" height="7" rx="2" fill="#EDE6D6"/><circle cx="-3.5" cy="0" r="2.6" fill="#2A1D14"/><circle cx="3.5" cy="0" r="2.6" fill="#2A1D14"/></g>`);
   if (u === "trubka") s.push(`<path d="M55 55 Q62 60 66 58" stroke="#5A3A22" stroke-width="2.5" fill="none"/><rect x="64" y="52" width="6" height="8" rx="2" fill="#5A3A22"/>`);
   if (u === "toti") s.push(`<g transform="translate(76 66)"><ellipse cx="0" cy="0" rx="7" ry="10" fill="#3FA34D"/><circle cx="0" cy="-9" r="5.5" fill="#E04040"/><path d="M4 -9 L9 -7 L4 -5 Z" fill="#F2D06B"/><circle cx="1.5" cy="-10" r="1" fill="#111"/></g>`);
+  if (u === "tayoqcha") s.push(`<path d="M80 98 L86 62" stroke="#3A2A1C" stroke-width="3" stroke-linecap="round"/><path d="M86 52 L88 58 L94 58 L89 62 L91 68 L86 64 L81 68 L83 62 L78 58 L84 58 Z" fill="#F2D06B"/>`);
   if (u === "tayoq") s.push(`<path d="M80 100 L84 66 Q86 58 92 60" stroke="#3A2A1C" stroke-width="3" fill="none" stroke-linecap="round"/>`);
   return svgOrami(s);
 }
@@ -242,7 +280,7 @@ function avatarTanlash(profil, saqlandi) {
     return true;
   };
 
-  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["kino", "🎬 Kino qahramonlari"]];
+  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["kino", "🎬 Kino qahramonlari"], ["super", "🦸 Superqahramonlar"]];
   let joriy = "asar";
   const katak = (kalit, nom, izoh, el) => {
     const b = yarat("button", "avatar-katak" + (profil.rasm === "q:" + kalit ? " tanlangan" : "")); b.type = "button";
