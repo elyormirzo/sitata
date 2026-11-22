@@ -78,6 +78,8 @@ async function javonChiz() {
   let d;
   try { d = await javonMalumoti(m, mening.id); } catch (e) { s.appendChild(yarat("p", "bosh-holat", "Javonni yuklab bo'lmadi.")); return; }
 
+  // Kunlik o'qish seriyasi va maqsad
+  if (typeof seriyaKartasi === "function") s.appendChild(seriyaKartasi(m));
   // Yillik challenge
   const ch = yarat("div", "challenge-quti");
   if (d.maqsad) {

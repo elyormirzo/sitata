@@ -503,7 +503,10 @@ async function profilSahifasiniKor(kod) {
   const javonTab = tabTugma("📚 Javon", () => {
     if (typeof javonQismi === "function") tana.appendChild(javonQismi(profil, ozimniki));
   });
-  tabTugma("🎮 «Kim aytgan?»", () => {
+  tabTugma("🏅 Nishonlar", async () => {
+    if (typeof nishonlarQismi === "function") tana.appendChild(nishonlarQismi(await mijozOl(), profil, ozimniki));
+  });
+  tabTugma("🎮 O'yin", () => {
     const statlar = el("div", "statlar");
     [[jami, "o'yin"], [foiz + "%", "topgan"], [ortachaXato, "o'rtacha xato"],
      [joriy, "joriy seriya"], [eng, "eng uzun seriya"], [yutganlar.length, "topilgan"]].forEach(([son, nom]) => {

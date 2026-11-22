@@ -1021,3 +1021,33 @@ a.post-ism:hover { text-decoration: underline; }
 .odam-nom a:hover { text-decoration: underline; }
 .topshiriq-azolar .odam-qator { padding: 8px 10px; }
 .reyting-nom > b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
+
+/* ===== O'qish seriyasi va nishonlar ===== */
+.seriya-karta { display: flex; gap: 14px; align-items: center; padding: 14px; margin-bottom: 12px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 12px; }
+.seriya-olov { flex: none; width: 74px; height: 74px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #EFE4CC; filter: grayscale(1); opacity: .75; line-height: 1; }
+.seriya-olov.yondi { background: radial-gradient(circle at 50% 60%, #FFE3B0, #F4B266); filter: none; opacity: 1; box-shadow: 0 0 0 3px rgba(244,178,102,.3); }
+.seriya-olov span { font-size: 22px; }
+.seriya-olov b { font: 700 22px Lora, Georgia, serif; color: var(--qora); }
+.seriya-olov small { font-size: 11px; color: var(--kulrang); }
+.seriya-ong { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.seriya-ong > b { font: 600 16px Lora, Georgia, serif; }
+.seriya-ong .matn-tugma { align-self: flex-start; font-size: 13px; }
+.seriya-bar { height: 8px; border-radius: 4px; background: #E8DCC2; overflow: hidden; }
+.seriya-bar i { display: block; height: 100%; background: linear-gradient(90deg, #E8913A, #C0392B); border-radius: 4px; transition: width .4s; }
+.seriya-maqsad { margin: 2px 0 0; justify-content: flex-start; }
+.seriya-maqsad .filtr { font-size: 13px; padding: 4px 10px; }
+.nishonlar-qism { display: flex; flex-direction: column; gap: 12px; }
+.nishon-xulosa { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 600 14px Lora, Georgia, serif; color: var(--qora); }
+.nishon-panjara { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.nishon-k { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 6px 14px; text-align: center;
+  background: #FBF5E6; border: 1px solid var(--chegara); border-radius: 12px; }
+.nishon-k .nishon-belgi { font-size: 30px; line-height: 1.1; filter: grayscale(1); opacity: .35; }
+.nishon-k b { font: 600 13px Lora, Georgia, serif; line-height: 1.2; color: var(--kulrang); }
+.nishon-k small { font-size: 11px; color: var(--kulrang); line-height: 1.25; }
+.nishon-k.olingan { background: linear-gradient(160deg, #FFF8E6, #F6E5BF); border-color: #D9B26A; box-shadow: 0 2px 8px rgba(160,110,40,.15); }
+.nishon-k.olingan .nishon-belgi { filter: none; opacity: 1; }
+.nishon-k.olingan b { color: var(--qora); }
+.nishon-bar { position: absolute; left: 0; bottom: 0; height: 4px; width: var(--f); background: #D9B26A; }
+.qisqa-xabar { position: fixed; z-index: 80; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; transition: .3s;
+  max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 999px; background: var(--qora); color: #FBF5E6; font: 600 15px Lora, Georgia, serif; box-shadow: 0 8px 24px rgba(0,0,0,.3); pointer-events: none; }
+.qisqa-xabar.korin { opacity: 1; transform: translate(-50%, 0); }

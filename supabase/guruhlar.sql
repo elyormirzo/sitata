@@ -12,3 +12,9 @@
 -- RPC (security definer): guruh_yarat(nom, tur) — ko'pi bilan 10 ta; guruhga_qoshil(kod) — guruhda ≤300, odamda ≤20 guruh;
 --   guruhlarim(); guruh_koddan(kod); guruh_reytingi(g, 'hafta'|'oy'|'hammasi') — sahifalar, kitoblar, topilgan (faqat a'zolarga);
 --   topshiriq_jarayoni(t) — a'zolar javonidagi shu nomli kitob holati; guruhlar_bellashuvi(davr) — ≥3 a'zoli guruhlar.
+
+-- ===== O'qish seriyasi va nishonlar (migratsiyalar: oqish_seriyasi_va_nishonlar, oqish_holati_tuzatish) =====
+-- profillar.kunlik_maqsad (1–500 sahifa).
+-- ball_voqealari: 'oqish' — oqish_jurnali bo'yicha har 2 sahifaga 1 ball, kuniga ≤30; ball_haftalar: o'qish ham faollik.
+-- oqish_holati(p) — bugun, maqsad, joriy/eng uzun seriya, jami sahifa, kitoblar, iqtiboslar, yoqtirmalar, kitobdoshlar,
+--   guruhlar, topilgan, birga_oqishlar, jadid_kitoblar — nishonlar shu ko'rsatkichlardan saytda hisoblanadi (js/nishonlar.js).
