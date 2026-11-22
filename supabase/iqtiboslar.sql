@@ -1,0 +1,8 @@
+-- «sitata.uz» — kitobdoshlar iqtiboslari (Supabase'da «kitobdosh_iqtiboslari» va «kitob_iqtiboslari_chegara_tuzatish» migratsiyalari).
+-- * kitob_iqtiboslari: profil_id, kitob_javoni_id (o'z javonidagi kitob), kitob, muallif, matn (3–600), sahifa, yoqtirishlar, vaqt.
+--   Ko'rish — egasi va uning kitobdoshlari (kitobdoshmi()); qo'shish — o'zi, kuniga 50 tagacha (bugungi_iqtiboslarim_soni());
+--   o'chirish — o'zi. yoqtirishlar soni faqat trigger orqali o'zgaradi.
+-- * iqtibos_yoqtirishlar (iqtibos_id, profil_id): faqat ko'ra oladigan iqtibosni yoqtiradi; o'zinikini va o'z iqtiboslariga
+--   kelganlarni ko'radi. Trigger iqtibos_yoqtirish_hisobi — sonni yangilaydi va egasiga bildirishnoma yuboradi (1 kunda 1 marta).
+-- * iqtibos_statistikasi(p) — profil uchun: nechta iqtibos yozgan, jami nechta yoqtirma olgan (faqat sonlar, hammaga ochiq).
+-- To'liq SQL: Supabase → Database → Migrations.

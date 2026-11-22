@@ -297,6 +297,7 @@ async function profilSahifasiniKor(kod) {
     const s = el("div", "stat"); s.append(el("b", "", String(son)), el("span", "", nom)); statlar.appendChild(s);
   });
   sahifa.appendChild(statlar);
+  if (typeof iqtibosStatlari === "function") sahifa.appendChild(iqtibosStatlari(profil.id));
 
   if (jami) {
     sahifa.appendChild(el("p", "kichik-matn", "Oxirgi o'yinlar"));

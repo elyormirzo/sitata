@@ -763,3 +763,11 @@ body.oquvchi-ochiq { overflow: hidden; }
 .jarayon-kim small { flex: none; color: var(--kulrang); font-size: 12px; }
 .jarayon-ong > b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
 .jarayon-tugadi { color: var(--zaytun); font-weight: 600; }
+/* Kitobdoshlar iqtiboslari */
+.lenta-tablar { margin-top: 4px; }
+.iqtibos-joylash { margin-bottom: 14px; }
+.kitobdosh-iqtibos .jarayon-kim { margin-bottom: 8px; }
+.iqtibos-manba { margin: 6px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); overflow-wrap: anywhere; }
+.amal.yoqtirish.tanlangan { color: #B3261E; }
+.amal.yoqtirish:disabled { opacity: 1; cursor: default; }
+.iqtibos-statlar { margin-top: 8px; }

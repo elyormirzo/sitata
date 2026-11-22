@@ -143,7 +143,7 @@ function sahifaniKor() {
   if (profilTab !== null) profilTablariniChiz(profilTab);
 
   const chizuvchilar = {
-    bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
+    bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: () => lentaniChiz(param), mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: () => (profilTab === "daraja" ? darajaChiz() : profilTab === "reyting" ? reytingniChiz() : profilimniChiz()), profil: () => profilSahifasiniKor(param), admin: adminniChiz,
     kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
@@ -154,6 +154,7 @@ function sahifaniKor() {
   if (["bosh", "lenta", "muallif", "karta"].includes(nom) && !jamoaYuklanishi) {
     jamoaniYukla().then((bor) => {
       if (!bor || joriyYol().nom !== nom) return;
+      if (nom === "lenta" && joriyYol().param === "kitobdoshlar") return;
       if (nom === "karta" && karta.manba === "ozim") return;   // yozilayotgan matnni buzmaymiz
       const y = window.scrollY; chizuvchilar[nom](); window.scrollTo(0, y);
     });
@@ -264,10 +265,20 @@ function iqtibosKartasi(iq) {
 // ---------- Iqtiboslar lentasi ----------
 const lentaFiltri = { soz: "", kasb: "", sevimli: false };
 
-function lentaniChiz() {
+function lentaniChiz(param) {
   const s = $("lentaSahifa");
   s.innerHTML = "";
   s.appendChild(yarat("h2", "sahifa-sarlavha", "Iqtiboslar lentasi"));
+  // Bo'limlar: hamma uchun to'plam va faqat kitobdoshlar ko'radigan iqtiboslar
+  const kitobdosh = param === "kitobdoshlar";
+  const tablar = yarat("nav", "manba-tablar profil-tablar lenta-tablar"); tablar.setAttribute("aria-label", "Lenta bo'limlari");
+  [["#lenta", "📚 Hammasi", !kitobdosh], ["#lenta/kitobdoshlar", "👥 Kitobdoshlar", kitobdosh]].forEach(([h, nom, faol]) => {
+    const a = havola(h, "manba-tab" + (faol ? " faol" : ""), nom);
+    if (faol) a.setAttribute("aria-current", "page");
+    tablar.appendChild(a);
+  });
+  s.appendChild(tablar);
+  if (kitobdosh) { kitobdoshIqtiboslariniChiz(s); return; }
 
   const qidiruv = yarat("input", "qidiruv-maydon");
   qidiruv.type = "search"; qidiruv.placeholder = "Iqtibos yoki muallifni qidiring…"; qidiruv.value = lentaFiltri.soz;
