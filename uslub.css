@@ -531,3 +531,56 @@ a.asosiy { text-decoration: none; height: 52px; border-radius: 6px; margin-top: 
 .taxallus-quti .kichik-matn { margin: 0; }
 .profil-taxallus { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
 .profil-quti .taxallus-maydon, .profil-quti .asosiy { width: 100%; }
+
+/* ===== 14. DARAJALAR ===== */
+.nishon-svg { display: inline-flex; line-height: 0; }
+.nishon-svg svg { filter: drop-shadow(0 3px 6px rgba(80,50,20,.25)); }
+.nishon-svg svg.qulf { opacity: .38; }
+.nishon-karusel {
+  display: flex; align-items: center; gap: 6px; overflow-x: auto; scroll-behavior: smooth; padding: 10px 40%;
+  scrollbar-width: none; margin: 0 -16px;
+}
+.nishon-karusel::-webkit-scrollbar { display: none; }
+.nishon-tugma { flex: none; background: none; border: 0; padding: 4px; cursor: pointer; border-radius: 12px; }
+.nishon-tugma.tanlangan { padding: 0 6px; }
+.daraja-sarlavha { text-align: center; margin-top: 6px; }
+.daraja-sarlavha .kichik-matn { margin: 0; }
+.daraja-nom { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.daraja-nom h3 { margin: 0; font: 600 30px Lora, Georgia, serif; }
+.info-tugma {
+  width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--chegara); background: var(--qogoz); cursor: pointer;
+  color: var(--kulrang); font: italic 600 14px Lora, Georgia, serif;
+}
+.ball-qoidalari { margin: 10px 0; padding: 12px 14px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 6px;
+  font: 14px/1.5 Lora, Georgia, serif; }
+.ball-qoidalari ul { margin: 6px 0 0; padding-left: 18px; }
+.ball-chegaralar { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px;
+  font: 14px Lora, Georgia, serif; color: var(--kulrang); }
+.ball-chegaralar b { font: 600 30px Lora, Georgia, serif; color: var(--zaytun); }
+.ball-chiziq { height: 12px; border-radius: 6px; background: #E2D3B3; overflow: hidden; margin: 6px 0 8px; }
+.ball-chiziq span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--zaytun), #7A8C52); }
+.hafta-statlar { display: grid; grid-template-columns: 1fr 1fr; margin: 16px 0; border: 1px solid var(--chegara); border-radius: 8px; background: var(--qogoz); }
+.hafta-stat { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+.hafta-stat + .hafta-stat { border-left: 1px solid var(--chegara); }
+.hafta-stat b { font: 600 20px Lora, Georgia, serif; }
+.hafta-stat span { font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.kalendar { background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; padding: 12px; }
+.kalendar-yuqori { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font: 600 18px Lora, Georgia, serif; }
+.kalendar-tugma { width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; cursor: pointer; font-size: 24px; color: var(--qora); }
+.kalendar-tugma:disabled { opacity: .25; cursor: default; }
+.kalendar-jadval { display: grid; grid-template-columns: repeat(7, 1fr) 52px; row-gap: 6px; align-items: center; text-align: center; }
+.kalendar-bosh { font: italic 12px Lora, Georgia, serif; color: var(--kulrang); }
+.kalendar-kun { width: 34px; height: 34px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font: 500 15px Lora, Georgia, serif; }
+.kalendar-kun.boshqa-oy { color: #C2B49A; }
+.kalendar-kun.faol-kun { background: var(--zaytun-och); color: var(--zaytun); font-weight: 700; box-shadow: inset 0 0 0 2px #A9B585; }
+.kalendar-kun.bugun { background: var(--zaytun); color: #F8F1E1; }
+.hafta-delta { font: 600 13px Inter, sans-serif; color: #B0A288; border-left: 1px solid var(--chegara); height: 100%;
+  display: flex; align-items: center; justify-content: center; }
+.hafta-delta.musbat { color: var(--zaytun); }
+.hafta-delta.manfiy { color: #B5402A; }
+.daraja-yorliq { display: inline-flex; align-items: center; gap: 6px; margin: 0 auto; padding: 4px 12px 4px 4px; border-radius: 24px;
+  background: #FFFDF6; border: 1px solid var(--chegara); text-decoration: none; color: var(--qora); font: 15px Lora, Georgia, serif; min-height: 10px; }
+.daraja-yorliq:empty { display: none; }
+.daraja-yorliq span { color: var(--kulrang); }
+.reyting-qator .nishon-svg { flex: none; }

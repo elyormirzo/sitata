@@ -179,6 +179,12 @@ function profilQutiniChiz() {
     a.href = profilIchkiHavola(mening);
     a.textContent = profilManzili(mening).replace(/^https?:\/\//, "");
     quti.append(p, a);
+    if (!SINOV && holat.tugadi) {
+      const b = document.createElement("p");
+      const ball = holat.yutdi ? Math.max(25, 50 - 5 * xatolarSoni()) : 10;
+      b.innerHTML = `Bugungi o'yin: <b>+${ball} ball</b> — <a href="#daraja">darajangizni ko'ring</a>`;
+      quti.appendChild(b);
+    }
     if (SINOV) {
       const s = document.createElement("p");
       s.textContent = "Sinov rejimi: bu o'yin natijasi profilga yozilmaydi.";
@@ -279,6 +285,7 @@ async function profilSahifasiniKor(kod) {
   sahifa.appendChild(el("p", "kichik-matn", "«Kim aytgan?» o'yinchisi"));
   sahifa.appendChild(el("h2", "", profil.ism));
   if (profil.taxallus) sahifa.appendChild(el("p", "taxallus-yozuv", "@" + profil.taxallus));
+  if (typeof darajaYorligi === "function") sahifa.appendChild(darajaYorligi(profil.id));
   if (ozimniki) {
     if (!mening || mening.taxallus !== profil.taxallus) profilniEsla({ id: profil.id, kod: profil.kod, ism: profil.ism, taxallus: profil.taxallus });
     sahifa.appendChild(taxallusQutisi(profil));

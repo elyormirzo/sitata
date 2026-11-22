@@ -96,7 +96,7 @@ const SARLAVHALAR = {
   bosh: "sitata.uz — iqtiboslar, mualliflar va o'yinlar", "kim-aytgan": "Kim aytgan? — sitata.uz",
   viktorina: "Viktorina — sitata.uz", lenta: "Iqtiboslar lentasi — sitata.uz", mualliflar: "Mualliflar — sitata.uz",
   muallif: "Muallif — sitata.uz", karta: "Karta yaratish — sitata.uz", reyting: "Reyting — sitata.uz",
-  kitobdoshlar: "Kitobdoshlar — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
+  kitobdoshlar: "Kitobdoshlar — sitata.uz", daraja: "Darajam — sitata.uz", birga: "Birga o'qiymiz — sitata.uz",
   profil: "Profil — sitata.uz", admin: "Admin — sitata.uz", qoidalar: "Qanday o'ynash — sitata.uz", haqida: "Loyiha haqida — sitata.uz",
 };
 
@@ -126,7 +126,7 @@ function sahifaniKor() {
     bosh: boshniChiz, viktorina: viktorinaBoshi, lenta: lentaniChiz, mualliflar: mualliflarniChiz,
     muallif: () => muallifniChiz(param), karta: () => kartaniChiz(param), reyting: reytingniChiz,
     profilim: profilimniChiz, profil: () => profilSahifasiniKor(param), admin: adminniChiz,
-    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param),
+    kitobdoshlar: kitobdoshlarniChiz, birga: () => birgaChiz(param), daraja: darajaChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
   window.scrollTo(0, 0);
@@ -171,8 +171,8 @@ function boshniChiz() {
     ["#mualliflar", "Mualliflar", `${Object.keys(MUALLIFLAR).length} ta muallif`, "✒"],
     ["#karta", "Karta yaratish", "Story, post yoki kvadrat", "▣"],
     ["#birga", "Birga o'qiymiz", "Kitobdoshlar bilan bir kitob", "❦"],
-    ["#kitobdoshlar", "Kitobdoshlar", "Do'stlaringiz va takliflar", "☷"],
     ["#reyting", "Reyting", "Eng yaxshi o'yinchilar", "★"],
+    ["#daraja", "Darajam", "Bronzadan Afsonagacha", "◆"],
     ["#profilim", "Profilim", mening ? mening.ism : "Profil oching", "☺"],
   ];
   const panjara = yarat("div", "bolimlar");
@@ -440,6 +440,9 @@ function viktorinaYakuni() {
   quti.append(yarat("p", "katta-son", String(vik.ball)), yarat("p", "", "ball"),
     yarat("p", "", `${vik.savollar.length} tadan ${vik.togri} ta to'g'ri javob`),
     yarat("p", "eng-yaxshi", rekord ? "Yangi rekord! ★" : `Eng yaxshi natijangiz: ${avvalgi} ball`));
+  const ballXabari = yarat("p", "kichik-matn");
+  quti.appendChild(ballXabari);
+  viktorinaNatijasiniYoz(vik.ball, ballXabari);
   const qayta = yarat("button", "asosiy", "Qayta o'ynash"); qayta.type = "button";
   qayta.addEventListener("click", viktorinaniBoshla);
   const nusxa = yarat("button", "ikkilamchi", "Natijani nusxalash"); nusxa.type = "button";
@@ -697,6 +700,9 @@ function kartaniChiz(param) {
 
 // ---------- Reyting ----------
 const REYTING_TURLARI = {
+  ball: { nom: "Ballar", jadval: "ball_reytingi", ustunlar: "kod,ism,taxallus,ball",
+    sozla: (q) => q.gt("ball", 0).order("ball", { ascending: false }),
+    asosiy: (r) => `${r.ball}`, izoh: (r) => DARAJALAR[darajaIndeksi(r.ball)].nom, nishon: true },
   topilgan: { nom: "Ko'p topganlar", sozla: (q) => q.gt("topilgan", 0).order("topilgan", { ascending: false }).order("ortacha_xato", { ascending: true, nullsFirst: false }),
     asosiy: (r) => `${r.topilgan} ta`, izoh: (r) => `${r.oyinlar} o'yin · o'rtacha ${r.ortacha_xato ?? 0} xato` },
   seriya: { nom: "Seriya", sozla: (q) => q.gt("joriy_seriya", 0).order("joriy_seriya", { ascending: false }).order("eng_uzun_seriya", { ascending: false }),
@@ -704,7 +710,7 @@ const REYTING_TURLARI = {
   baho: { nom: "Baholar", sozla: (q) => q.gt("baholar_soni", 0).order("ortacha_baho", { ascending: false }).order("baholar_soni", { ascending: false }),
     asosiy: (r) => `★ ${Number(r.ortacha_baho).toFixed(1)}`, izoh: (r) => `${r.baholar_soni} ta baho` },
 };
-let reytingTuri = "topilgan";
+let reytingTuri = "ball";
 
 async function reytingniChiz() {
   const s = $("reytingSahifa");
@@ -727,7 +733,7 @@ async function reytingniChiz() {
   let javob;
   try {
     const m = await mijozOl();
-    javob = await tur.sozla(m.from("reyting").select("kod,ism,taxallus,oyinlar,topilgan,ortacha_xato,joriy_seriya,eng_uzun_seriya,ortacha_baho,baholar_soni")).limit(50);
+    javob = await tur.sozla(m.from(tur.jadval || "reyting").select(tur.ustunlar || "kod,ism,taxallus,oyinlar,topilgan,ortacha_xato,joriy_seriya,eng_uzun_seriya,ortacha_baho,baholar_soni")).limit(50);
   } catch (e) { javob = { error: e }; }
   if (REYTING_TURLARI[reytingTuri] !== tur) return; // kutish paytida boshqa tab tanlangan
   if (javob.error) {
@@ -742,6 +748,7 @@ async function reytingniChiz() {
     li.appendChild(yarat("span", "orin", i < 3 ? ["🥇", "🥈", "🥉"][i] : String(i + 1)));
     const nom = yarat("div", "reyting-nom");
     nom.append(havola(profilIchkiHavola(r), "", r.ism), yarat("small", "", (r.taxallus ? "@" + r.taxallus + " · " : "") + tur.izoh(r)));
+    if (tur.nishon) li.appendChild(nishonEl(darajaIndeksi(r.ball), 30));
     li.append(nom, yarat("b", "reyting-ball", tur.asosiy(r)));
     royxat.appendChild(li);
   });
