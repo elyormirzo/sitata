@@ -796,7 +796,20 @@ async function adminniChiz() {
       if (error) { kir.disabled = false; xato.textContent = "Kirib bo'lmadi: email yoki parol noto'g'ri."; return; }
       adminniChiz();
     });
-    forma.append(email, parol, kir, xato);
+    const royxat = yarat("button", "ikkilamchi", "Hisobim yo'q — ro'yxatdan o'tish"); royxat.type = "button";
+    royxat.addEventListener("click", async () => {
+      if (parol.value.length < 8) { xato.textContent = "Parol kamida 8 belgidan iborat bo'lsin."; return; }
+      royxat.disabled = true; xato.textContent = "";
+      const { data, error } = await m.auth.signUp({
+        email: email.value.trim(), password: parol.value,
+        options: { emailRedirectTo: SAYT_MANZILI + "#admin" },
+      });
+      royxat.disabled = false;
+      if (error) { xato.textContent = "Ro'yxatdan o'tib bo'lmadi: " + error.message; return; }
+      if (data.session) { adminniChiz(); return; }
+      xato.textContent = "Emailingizga tasdiqlash xati yuborildi. Xatdagi havolani bosing, so'ng shu sahifada «Kirish»ni bosing.";
+    });
+    forma.append(email, parol, kir, royxat, xato);
     s.appendChild(forma);
     return;
   }
