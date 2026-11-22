@@ -5,8 +5,13 @@
 async function kitobdoshIqtiboslariniChiz(s) {
   const m = await profilniTekshir(s);
   if (!m) return;
-  s.appendChild(iqtibosJoylashFormasi(m, s));
-  const royxat = yarat("div", "royxat");
+  const forma = iqtibosJoylashFormasi(m, s);
+  s.appendChild(forma);
+  if (typeof lentaFormaniOch !== "undefined" && lentaFormaniOch) {
+    lentaFormaniOch = false; forma.open = true;
+    setTimeout(() => { forma.scrollIntoView({ block: "start" }); const t = forma.querySelector("textarea"); if (t) t.focus({ preventScroll: true }); }, 50);
+  }
+  const royxat = yarat("div", "postlar");
   royxat.appendChild(yarat("p", "bosh-holat", "Yuklanmoqda…"));
   s.appendChild(royxat);
 
@@ -43,7 +48,11 @@ async function kitobdoshIqtiboslariniChiz(s) {
 
 function iqtibosJoylashFormasi(m, s) {
   const quti = yarat("details", "kitob-qoshish iqtibos-joylash");
-  quti.appendChild(yarat("summary", "", "❝ Iqtibos joylash"));
+  // Yig'ilgan holda — X dagi «Nima yangilik?» qatori kabi: rasm + taklif matni
+  const sarlavha = yarat("summary", "iqtibos-yozish");
+  if (typeof avatarEl === "function") sarlavha.appendChild(avatarEl(mening, 40, "kichik"));
+  sarlavha.append(yarat("span", "", "Qaysi jumla yoqdi? Iqtibos joylang…"), yarat("b", "", "Joylash"));
+  quti.appendChild(sarlavha);
   const ichi = yarat("div", "karta-sozlama");
   // Manba turi: kitob, ko'chadagi yozuv, o'zi yozgan fikr yoki boshqa (film, qo'shiq, sayt…)
   let tur = "kitob";
@@ -176,26 +185,32 @@ function iqtibosJoylashFormasi(m, s) {
 }
 
 function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
-  const k = yarat("article", "iqtibos-karta kitobdosh-iqtibos");
-  const bosh = yarat("div", "jarayon-kim");
-  bosh.append(profilHavola(p), yarat("small", "", vaqtOldin(iq.vaqt)));
-  k.appendChild(bosh);
+  const ism = p && p.ism;
+  const ichki = profilIchkiHavola(p);
+  const avatar = havola(ichki, "", ""); avatar.setAttribute("aria-label", ism || "Profil");
+  if (typeof avatarEl === "function") avatar.appendChild(avatarEl(p, 44, "post-rasm"));
+  const bosh = yarat("div", "post-bosh");
+  bosh.appendChild(havola(ichki, "post-ism", ism || "Noma'lum"));
+  bosh.appendChild(yarat("span", "post-meta", (p && p.taxallus ? "@" + p.taxallus + " · " : "") + vaqtOldin(iq.vaqt)));
+  const { k, tana } = postQobigi(avatar, bosh);
+  k.classList.add("kitobdosh-iqtibos");
+
+  if (iq.matn) tana.appendChild(yarat("blockquote", "post-matn" + (iq.rasm_yoli ? " rasm-izohi" : ""), iq.matn));
   if (iq.rasm_yoli) {
-    const img = yarat("img", "iqtibos-rasm"); img.alt = "Iqtibos rasmi: " + manbaMatni(iq, p && p.ism); img.loading = "lazy";
+    const img = yarat("img", "iqtibos-rasm"); img.alt = "Iqtibos rasmi: " + manbaMatni(iq, ism); img.loading = "lazy";
     if (rasmUrl) img.src = rasmUrl;
     img.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
-    k.appendChild(img);
+    tana.appendChild(img);
   }
-  if (iq.matn) k.appendChild(yarat("blockquote", iq.rasm_yoli ? "rasm-izohi" : "", iq.matn));
-  const manba = yarat("p", "iqtibos-manba", manbaMatni(iq, p && p.ism));
-  k.appendChild(manba);
+  tana.appendChild(yarat("p", "post-izoh", manbaMatni(iq, ism)));
 
-  const amallar = yarat("div", "amallar");
+  const amallar = yarat("div", "post-amallar");
   const ozimniki = iq.profil_id === mening.id;
   let son = iq.yoqtirishlar, bor = yoqtirdimmi;
-  const yurak = yarat("button", "amal yoqtirish"); yurak.type = "button";
+  const yurak = postAmal(IKON.yurak, "", ozimniki ? "Yoqtirmalar" : "Yoqtirish", "yurak");
   const chiz = () => {
-    yurak.textContent = (bor ? "♥ " : "♡ ") + (son ? son : "") + (ozimniki ? (son ? " yoqtirma" : "Hali yoqtirma yo'q") : (son ? "" : "Yoqtirish"));
+    yurak.innerHTML = bor ? IKON.yurakTola : IKON.yurak;
+    if (son) yurak.appendChild(yarat("span", "", String(son)));
     yurak.classList.toggle("tanlangan", bor);
     yurak.setAttribute("aria-pressed", String(bor));
   };
@@ -212,16 +227,9 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
     yurak.disabled = false;
   });
   amallar.appendChild(yurak);
-
-  const nusxa = yarat("button", "amal", "Nusxa"); nusxa.type = "button";
-  nusxa.addEventListener("click", async () => {
-    const ok = await nusxaOl(`“${iq.matn || ""}”\n${manbaMatni(iq, p && p.ism)}`);
-    nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
-    setTimeout(() => { nusxa.textContent = "Nusxa"; }, 1500);
-  });
-  if (iq.matn) amallar.appendChild(nusxa);
+  if (iq.matn) amallar.appendChild(nusxaAmali(() => `“${iq.matn || ""}”\n${manbaMatni(iq, ism)}`));
   if (ozimniki) {
-    const ochir = yarat("button", "amal", "O'chirish"); ochir.type = "button";
+    const ochir = postAmal(IKON.ochir, "", "O'chirish", "ochir");
     ochir.addEventListener("click", async () => {
       if (!confirm("Bu iqtibosni o'chirasizmi?")) return;
       await m.from("kitob_iqtiboslari").delete().eq("id", iq.id);
@@ -230,7 +238,7 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl) {
     });
     amallar.appendChild(ochir);
   }
-  k.appendChild(amallar);
+  tana.appendChild(amallar);
   return k;
 }
 

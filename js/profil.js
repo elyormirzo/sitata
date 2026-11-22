@@ -121,6 +121,7 @@ async function joriyFoydalanuvchi() {
 function profilniEsla(p) {
   mening = p;
   try { localStorage.setItem("kimAytganProfil", JSON.stringify(p)); } catch (e) {}
+  if (typeof yuqoriAvatarniYangila === "function") yuqoriAvatarniYangila();
 }
 
 function tasodifiyKod() {

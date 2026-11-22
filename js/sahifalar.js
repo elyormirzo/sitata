@@ -125,7 +125,20 @@ function profilTablariniChiz(tab) {
   });
 }
 
+// Yuqori chapdagi profil rasmi — bosilsa profilga o'tadi
+function yuqoriAvatarniYangila() {
+  const a = $("yuqoriAvatar");
+  if (!a) return;
+  const kalit = mening ? (mening.rasm || "") + "|" + mening.ism : "-";
+  if (a.dataset.kalit === kalit) return;
+  a.dataset.kalit = kalit; a.innerHTML = "";
+  if (mening && typeof avatarEl === "function") a.appendChild(avatarEl(mening, 36, "kichik"));
+  else a.appendChild(yarat("span", "avatar bosh-avatar", "👤"));
+  a.title = mening ? mening.ism + " — profilim" : "Profil ochish";
+}
+
 function sahifaniKor() {
+  yuqoriAvatarniYangila();
   let { nom, param } = joriyYol();
   if (nom === "daraja" || nom === "reyting") {          // eski manzillar → profil tablari
     param = nom; nom = "profilim";
@@ -217,7 +230,43 @@ function boshniChiz() {
 }
 
 // ---------- Iqtibos kartasi (lenta, muallif sahifasi, bosh sahifa) ----------
-function iqtibosKartasi(iq) {
+// Lenta postlari uchun belgilar (X uslubidagi amallar qatori)
+const IKON = {
+  yurak: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>',
+  yurakTola: '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>',
+  nusxa: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  karta: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>',
+  ulash: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',
+  ochir: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  tasdiq: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>',
+};
+// Post amali: belgi + (ixtiyoriy) son yoki matn
+function postAmal(ikon, yozuv, nom, sinf) {
+  const b = yarat("button", "post-amal" + (sinf ? " " + sinf : "")); b.type = "button";
+  b.innerHTML = ikon; if (yozuv != null && yozuv !== "") b.appendChild(yarat("span", "", String(yozuv)));
+  b.setAttribute("aria-label", nom); b.title = nom; return b;
+}
+// Nusxa olingach belgini bir lahza ✓ ga almashtiradi
+function nusxaAmali(matnOl) {
+  const b = postAmal(IKON.nusxa, "", "Nusxa olish");
+  b.addEventListener("click", async () => {
+    const ok = await nusxaOl(matnOl());
+    b.innerHTML = ok ? IKON.tasdiq : IKON.nusxa; b.classList.toggle("tanlangan", ok);
+    setTimeout(() => { b.innerHTML = IKON.nusxa; b.classList.remove("tanlangan"); }, 1500);
+  });
+  return b;
+}
+// X uslubidagi post: chapda rasm, o'ngda — sarlavha, matn, amallar
+function postQobigi(avatar, bosh) {
+  const k = yarat("article", "post");
+  const chap = yarat("div", "post-chap"); chap.appendChild(avatar);
+  const tana = yarat("div", "post-tana"); tana.appendChild(bosh);
+  k.append(chap, tana);
+  return { k, tana };
+}
+
+function iqtibosKartasi(iq, post) {
+  if (post) return iqtibosPosti(iq);
   const raqam = iqKalit(iq);
   const k = yarat("article", "iqtibos-karta");
   k.appendChild(yarat("blockquote", "", iq.matn));
@@ -263,6 +312,55 @@ function iqtibosKartasi(iq) {
   return k;
 }
 
+// Lentadagi umumiy to'plam iqtibosi — post ko'rinishida
+function iqtibosPosti(iq) {
+  const raqam = iqKalit(iq);
+  if (yashirinmi(iq)) {
+    const bosh = yarat("div", "post-bosh"); bosh.append(yarat("b", "post-ism", "Muallifi — bugungi o'yin siri"));
+    const { k, tana } = postQobigi(yarat("span", "mini-portret harfli post-rasm", "?"), bosh);
+    tana.append(yarat("blockquote", "post-matn", iq.matn), havola("#kim-aytgan", "post-havola", "Avval o'ynab ko'ring →"));
+    return k;
+  }
+  const bor = MUALLIFLAR[iq.muallif];
+  const portret = portretEl(iq.muallif, "post-rasm");
+  const avatar = bor ? havola("#muallif/" + muallifSlug(iq.muallif), "", "") : yarat("span", "");
+  avatar.appendChild(portret);
+  const bosh = yarat("div", "post-bosh");
+  bosh.appendChild(bor ? havola("#muallif/" + muallifSlug(iq.muallif), "post-ism", iq.muallif) : yarat("b", "post-ism", iq.muallif));
+  const qosh = [bor && bor.kasb, iq.asar].filter(Boolean).join(" · ");
+  if (qosh) bosh.appendChild(yarat("span", "post-meta", qosh));
+  const { k, tana } = postQobigi(avatar, bosh);
+  if (iq === bugungi) k.classList.add("bugungi");
+  tana.appendChild(yarat("blockquote", "post-matn", iq.matn));
+  if (iq.id) tana.appendChild(yarat("p", "post-izoh", "Taklif qildi: " + (iq.yuboruvchi || "o'quvchi")));
+
+  const amallar = yarat("div", "post-amallar");
+  const sevimlimi = () => sevimlilarOl().includes(raqam);
+  const yurak = postAmal(sevimlimi() ? IKON.yurakTola : IKON.yurak, "", "Sevimlilarga qo'shish", "yurak" + (sevimlimi() ? " tanlangan" : ""));
+  yurak.addEventListener("click", () => {
+    const r = sevimlilarOl(), bor2 = r.includes(raqam);
+    xotiragaYoz("sitataSevimli", bor2 ? r.filter((x) => x !== raqam) : [...r, raqam]);
+    yurak.classList.toggle("tanlangan", !bor2); yurak.innerHTML = bor2 ? IKON.yurak : IKON.yurakTola;
+  });
+  const karta = havola("#karta/" + raqam, "post-amal", ""); karta.innerHTML = IKON.karta; karta.title = "Karta yasash"; karta.setAttribute("aria-label", "Karta yasash");
+  amallar.append(yurak, nusxaAmali(() => `“${iq.matn}”\n— ${iq.muallif}${iq.asar ? ", " + iq.asar : ""}\n\n${SAYT_MANZILI}`), karta);
+  tana.appendChild(amallar);
+  return k;
+}
+
+// Pastki o'ngdagi «+» tugmasi: iqtibos joylash formasini ochadi
+let lentaFormaniOch = false;
+function lentaPlyus() {
+  const b = yarat("button", "lenta-plyus", "+"); b.type = "button";
+  b.setAttribute("aria-label", "Iqtibos joylash"); b.title = "Iqtibos joylash";
+  b.addEventListener("click", () => {
+    const forma = document.querySelector("#lentaSahifa .iqtibos-joylash");
+    if (forma) { forma.open = true; forma.scrollIntoView({ behavior: "smooth", block: "start" }); const t = forma.querySelector("textarea"); if (t) setTimeout(() => t.focus({ preventScroll: true }), 300); return; }
+    lentaFormaniOch = true; location.hash = "#lenta/kitobdoshlar";
+  });
+  return b;
+}
+
 // ---------- Iqtiboslar lentasi (asosiy sahifa) ----------
 const lentaKitobdoshlarmi = (param) => param === "kitobdoshlar" || (!param && !!mening && BAZA_YOQIQ);
 
@@ -283,18 +381,20 @@ const lentaFiltri = { soz: "", kasb: "", sevimli: false };
 function lentaniChiz(param) {
   const s = $("lentaSahifa");
   s.innerHTML = "";
-  s.appendChild(yarat("h2", "sahifa-sarlavha", "Iqtiboslar lentasi"));
+  s.appendChild(yarat("h2", "sahifa-sarlavha korinmas", "Iqtiboslar lentasi"));
   // Bo'limlar: hamma uchun to'plam va faqat kitobdoshlar ko'radigan iqtiboslar
   // Standart bo'lim — «Kitobdoshlar» (profili bor foydalanuvchiga); profili yo'q mehmonga — umumiy to'plam
   const kitobdosh = lentaKitobdoshlarmi(param);
-  s.appendChild(kunlikOyinQatori());
-  const tablar = yarat("nav", "manba-tablar profil-tablar lenta-tablar"); tablar.setAttribute("aria-label", "Lenta bo'limlari");
-  [["#lenta/kitobdoshlar", "👥 Kitobdoshlar", kitobdosh], ["#lenta/hammasi", "📚 Hammasi", !kitobdosh]].forEach(([h, nom, faol]) => {
-    const a = havola(h, "manba-tab" + (faol ? " faol" : ""), nom);
+  const tablar = yarat("nav", "lenta-tablar"); tablar.setAttribute("aria-label", "Lenta bo'limlari");
+  [["#lenta/kitobdoshlar", "Kitobdoshlar", kitobdosh], ["#lenta/hammasi", "Hammasi", !kitobdosh]].forEach(([h, nom, faol]) => {
+    const a = havola(h, "lenta-tab" + (faol ? " faol" : ""), "");
+    a.appendChild(yarat("span", "", nom));
     if (faol) a.setAttribute("aria-current", "page");
     tablar.appendChild(a);
   });
   s.appendChild(tablar);
+  s.appendChild(kunlikOyinQatori());
+  if (BAZA_YOQIQ) s.appendChild(lentaPlyus());
   if (kitobdosh) { kitobdoshIqtiboslariniChiz(s); return; }
 
   const qidiruv = yarat("input", "qidiruv-maydon");
@@ -316,7 +416,7 @@ function lentaniChiz(param) {
     });
   s.appendChild(filtrlar);
 
-  const royxat = yarat("div", "royxat");
+  const royxat = yarat("div", "postlar");
   s.appendChild(royxat);
   const royxatniChiz = () => {
     royxat.innerHTML = "";
@@ -336,7 +436,7 @@ function lentaniChiz(param) {
       return;
     }
     // Bugungi iqtibos tepada, keyin o'quvchilar takliflari va asosiy to'plam (yangilari birinchi)
-    [...topilgan.filter((iq) => iq.id), ...topilgan.filter((iq) => !iq.id).reverse()].sort((a, b) => (b === bugungi) - (a === bugungi)).sort((a, b) => (b === bugungi) - (a === bugungi)).forEach((iq) => royxat.appendChild(iqtibosKartasi(iq)));
+    [...topilgan.filter((iq) => iq.id), ...topilgan.filter((iq) => !iq.id).reverse()].sort((a, b) => (b === bugungi) - (a === bugungi)).sort((a, b) => (b === bugungi) - (a === bugungi)).forEach((iq) => royxat.appendChild(iqtibosKartasi(iq, true)));
   };
   qidiruv.addEventListener("input", () => { lentaFiltri.soz = qidiruv.value; royxatniChiz(); });
   royxatniChiz();

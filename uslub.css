@@ -770,8 +770,6 @@ body.oquvchi-ochiq { overflow: hidden; }
 .jarayon-ong > b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
 .jarayon-tugadi { color: var(--zaytun); font-weight: 600; }
 /* Kitobdoshlar iqtiboslari */
-.lenta-tablar { margin-top: 4px; }
-.iqtibos-joylash { margin-bottom: 14px; }
 .kitobdosh-iqtibos .jarayon-kim { margin-bottom: 8px; }
 .iqtibos-manba { margin: 6px 0 0; font: italic 14px Lora, Georgia, serif; color: var(--kulrang); overflow-wrap: anywhere; }
 .amal.yoqtirish.tanlangan { color: #B3261E; }
@@ -904,3 +902,65 @@ a.tarmoq:hover span { text-decoration: underline; }
 .profil-sozlamalar { margin: 0 20px; border-top: 1px dashed var(--chegara); padding-top: 4px; }
 .profil-sozlamalar > summary { cursor: pointer; padding: 10px 0; font: 600 15px Lora, Georgia, serif; color: var(--kulrang); }
 .profil-sozlamalar[open] { display: flex; flex-direction: column; gap: 8px; text-align: center; }
+
+/* ===== Yuqori panel: chapda profil rasmi ===== */
+.yuqori-avatar { flex: none; display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; margin-right: 10px; }
+.yuqori-avatar .avatar { box-shadow: 0 0 0 2px var(--fon), 0 0 0 3px var(--chegara); }
+.yuqori-avatar:focus-visible { outline: 3px solid var(--teri); outline-offset: 2px; }
+.bosh-avatar { width: 36px; height: 36px; font-size: 18px; }
+.yuqori .logo { flex: 1; min-width: 0; }
+.korinmas { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ===== Lenta: X uslubidagi postlar ===== */
+.lenta-tablar { position: sticky; top: 0; z-index: 5; display: flex; margin: -18px -16px 0; background: var(--fon); border-bottom: 1px solid var(--chegara); }
+.lenta-tab { flex: 1; display: flex; justify-content: center; padding: 14px 4px 0; text-decoration: none; color: var(--kulrang); font: 600 16px Lora, Georgia, serif; }
+.lenta-tab span { padding-bottom: 12px; border-bottom: 4px solid transparent; border-radius: 2px; }
+.lenta-tab.faol { color: var(--qora); }
+.lenta-tab.faol span { border-bottom-color: var(--teri); }
+.lenta-tab:hover { background: rgba(120,90,50,.06); }
+#lentaSahifa > .kunlik-qator { margin: 12px 0; }
+.postlar { display: flex; flex-direction: column; margin: 0 -16px; padding-bottom: 72px; border-top: 1px solid var(--chegara); }
+.postlar > .bosh-holat, .postlar > .vik-quti { margin: 16px; }
+.post { display: flex; gap: 12px; padding: 14px 16px 6px; border-bottom: 1px solid var(--chegara); }
+.post.bugungi { background: rgba(185,138,85,.08); }
+.post-chap { flex: none; }
+.post-chap a { display: block; border-radius: 50%; text-decoration: none; }
+.post-rasm, .post-chap .mini-portret { width: 44px !important; height: 44px !important; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.post-chap .mini-portret img { width: 100%; height: 100%; object-fit: cover; }
+.post-chap .mini-portret.harfli { font-size: 16px; }
+.post-tana { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.post-bosh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; line-height: 1.3; }
+.post-ism { font: 700 15px Lora, Georgia, serif; color: var(--qora); text-decoration: none; overflow-wrap: anywhere; }
+a.post-ism:hover { text-decoration: underline; }
+.post-meta { font-size: 14px; color: var(--kulrang); overflow-wrap: anywhere; }
+.post-matn { margin: 4px 0 6px; font: 400 17px/1.5 Lora, Georgia, serif; color: var(--qora); white-space: pre-line; overflow-wrap: anywhere; }
+.post-matn.rasm-izohi { font-size: 16px; }
+.post-izoh { margin: 0 0 4px; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); overflow-wrap: anywhere; }
+.post-havola { margin: 0 0 8px; color: var(--teri); font-size: 14px; }
+.post .iqtibos-rasm { margin: 6px 0 8px; border-radius: 14px; border: 1px solid var(--chegara); }
+.post-amallar { display: flex; justify-content: space-between; max-width: 320px; margin: 2px -8px 0; }
+.post-amal { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 8px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  color: var(--kulrang); font: 500 14px Inter, system-ui, sans-serif; text-decoration: none; }
+.post-amal:hover { color: var(--teri); background: rgba(160,85,46,.08); }
+.post-amal.yurak:hover, .post-amal.yurak.tanlangan { color: #B3261E; }
+.post-amal.yurak:hover { background: rgba(179,38,30,.08); }
+.post-amal.tanlangan { color: var(--zaytun); }
+.post-amal.yurak.tanlangan { color: #B3261E; }
+.post-amal:disabled { cursor: default; }
+.post-amal.yurak:disabled:hover { background: none; color: var(--kulrang); }
+.post-amal.ochir:hover { color: #B3261E; background: rgba(179,38,30,.08); }
+/* Iqtibos yozish qatori (yig'ilgan forma) */
+.iqtibos-joylash { scroll-margin-top: 56px; margin: 0 -16px; border: 0; border-bottom: 1px solid var(--chegara); border-radius: 0; background: transparent; padding: 0 16px; }
+.iqtibos-joylash[open] { padding-bottom: 14px; background: var(--qogoz); }
+.iqtibos-yozish { display: flex; align-items: center; gap: 12px; padding: 12px 0; cursor: pointer; list-style: none; }
+.iqtibos-yozish::-webkit-details-marker { display: none; }
+.iqtibos-yozish > span:not(.avatar) { flex: 1; min-width: 0; font: italic 16px Lora, Georgia, serif; color: var(--kulrang); }
+.iqtibos-yozish > b { flex: none; padding: 7px 16px; border-radius: 999px; background: var(--teri); color: #FBF5E6; font: 600 14px Lora, Georgia, serif; }
+.iqtibos-joylash[open] .iqtibos-yozish > b { display: none; }
+/* Pastki o'ngdagi «+» tugmasi */
+.lenta-plyus { position: fixed; z-index: 20; right: max(18px, calc(50% - 240px + 18px)); bottom: calc(22px + env(safe-area-inset-bottom));
+  width: 58px; height: 58px; border-radius: 50%; border: 0; cursor: pointer; background: var(--teri); color: #FBF5E6;
+  font: 300 34px/1 Inter, system-ui, sans-serif; box-shadow: 0 6px 18px rgba(80,40,20,.35); display: flex; align-items: center; justify-content: center; padding-bottom: 3px; }
+.lenta-plyus:hover { filter: brightness(1.08); }
+.lenta-plyus:active { transform: scale(.95); }
+#lentaSahifa.yashirin .lenta-plyus { display: none; }
