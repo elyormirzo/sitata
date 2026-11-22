@@ -102,6 +102,8 @@ async function kitobdoshlarniChiz() {
     });
   }
 
+  if (dostlar.length) await kitobdoshlarOqiyapti(m, s, dostlar.map(boshqa), profillar);
+
   const q = bolim(s, `Kitobdoshlarim (${dostlar.length})`);
   if (!dostlar.length) q.appendChild(yarat("p", "bosh-holat", "Hali kitobdoshlaringiz yo'q. Kodingizni do'stlaringizga yuboring yoki ularning kodini kiriting."));
   dostlar.forEach((r) => {
@@ -130,6 +132,39 @@ async function kitobdoshlarniChiz() {
       q2.appendChild(k);
     });
   }
+}
+
+// Kitobdoshlar nima o'qiyapti: hozir o'qiyotganlari va oxirgi 30 kunda tugatganlari (eng yangisi tepada)
+function jarayonMatni(k) {
+  return k.sahifalar && k.sahifa != null ? `${Math.min(k.sahifa, k.sahifalar)} / ${k.sahifalar} sahifa · ${k.foiz}%` : `${k.foiz}%`;
+}
+async function kitobdoshlarOqiyapti(m, s, idlar, profillar) {
+  const oyOldin = new Date(Date.now() - 30 * 86400000).toISOString();
+  const { data, error } = await m.from("kitob_javoni")
+    .select("id,profil_id,kitob,muallif,holat,foiz,sahifa,sahifalar,baho,muqova,yangilangan")
+    .in("profil_id", idlar).in("holat", ["oqiyapman", "oqidim"]).gt("yangilangan", oyOldin)
+    .order("yangilangan", { ascending: false }).limit(30);
+  if (error) return;
+  const q = bolim(s, "📖 Kitobdoshlar nima o'qiyapti");
+  if (!data.length) { q.appendChild(yarat("p", "bosh-holat", "Kitobdoshlaringiz hozircha hech narsa o'qimayapti. Birga o'qishni taklif qiling!")); return; }
+  data.forEach((k) => {
+    const p = profillar[k.profil_id];
+    const qator = yarat("div", "jarayon-qator");
+    qator.appendChild(muqovaEl(k.kitob, true, k.muqova));
+    const ong = yarat("div", "jarayon-ong");
+    const kim = yarat("div", "jarayon-kim");
+    kim.append(profilHavola(p), yarat("small", "", vaqtOldin(k.yangilangan)));
+    ong.append(kim, yarat("b", "", "«" + k.kitob + "»" + (k.muallif ? " — " + k.muallif : "")));
+    if (k.holat === "oqidim") {
+      const t = yarat("span", "kichik-matn jarayon-tugadi", "✓ o'qib tugatdi" + (k.sahifalar ? ` · ${k.sahifalar} sahifa` : ""));
+      ong.appendChild(t);
+      if (k.baho) ong.appendChild(yulduzlarEl(k.baho));
+    } else {
+      ong.append(foizChizigi(k.foiz), yarat("span", "kichik-matn", jarayonMatni(k)));
+    }
+    qator.appendChild(ong);
+    q.appendChild(qator);
+  });
 }
 
 // Kiritilgan matndan qidiruvni ajratish: "@mirzo", "mirzo", "sitata.uz/@mirzo", "#@mirzo", "?p=t2h2pm", "t2h2pm"
@@ -365,7 +400,7 @@ async function oqishChiz(id) {
   if (!m) return;
   const [{ data: o }, { data: azolar }] = await Promise.all([
     m.from("oqishlar").select("id,kitob,muallif,xabar,tugash,yaratuvchi,yaratilgan,fayl_kitob_id").eq("id", id).maybeSingle(),
-    m.from("oqish_azolari").select("profil_id,holat,foiz,izoh,yangilangan").eq("oqish_id", id),
+    m.from("oqish_azolari").select("profil_id,holat,foiz,sahifa,izoh,yangilangan").eq("oqish_id", id),
   ]);
   if (!o) { s.appendChild(yarat("p", "bosh-holat", "Bu birga o'qish topilmadi yoki siz unda qatnashmaysiz.")); return; }
   const profillar = await profillarniOl(m, (azolar || []).map((a) => a.profil_id).concat(o.yaratuvchi));
@@ -384,8 +419,10 @@ async function oqishChiz(id) {
   if (o.xabar) bosh.appendChild(yarat("blockquote", "oqish-xabar", o.xabar));
 
   // Ulashilgan kitob fayli: egasi — odatdagidek; qabul qilgan kitobdosh — faqat o'qish rejimida
+  let jamiSahifa = null;
   if (o.fayl_kitob_id) {
-    const { data: fk } = await m.from("kitob_javoni").select("id,kitob,muallif,fayl_yoli,fayl_nomi,profil_id,muqova").eq("id", o.fayl_kitob_id).maybeSingle();
+    const { data: fk } = await m.from("kitob_javoni").select("id,kitob,muallif,fayl_yoli,fayl_nomi,profil_id,muqova,sahifalar,sahifa,foiz,holat").eq("id", o.fayl_kitob_id).maybeSingle();
+    if (fk) jamiSahifa = fk.sahifalar || null;
     if (fk && fk.fayl_yoli) {
       const fq = yarat("div", "ulashilgan-fayl");
       fq.append(muqovaEl(fk.kitob, false, fk.muqova), yarat("div", ""));
@@ -394,7 +431,21 @@ async function oqishChiz(id) {
       const ozi = fk.profil_id === mening.id;
       if (ozi || (men && men.holat === "qabul")) {
         const b = yarat("button", "kichik", ozi ? "O'qish" : "🔒 O'qish"); b.type = "button";
-        b.addEventListener("click", () => oquvchiniOch(m, { ...fk, id: "birga-" + o.id }, { himoya: !ozi }));
+        // O'qiyotganda: ishtirokchi sifatidagi joyim avtomatik yoziladi (egasida — javondagi kitobi ham)
+        const javonYoz = ozi ? oqishJoyiniYozgich(m, fk) : null;
+        let kech = null;
+        const joy = (sahifa, foiz) => {
+          if (javonYoz) javonYoz(sahifa, foiz);
+          if (!men || men.holat !== "qabul" || foiz == null || (foiz === men.foiz && sahifa === men.sahifa)) return;
+          men.foiz = foiz; men.sahifa = sahifa;
+          clearTimeout(kech);
+          kech = setTimeout(() => {
+            m.from("oqish_azolari").update({ foiz, sahifa, yangilangan: new Date().toISOString() }).eq("oqish_id", id).eq("profil_id", mening.id).then(() => {});
+          }, 1200);
+        };
+        b.addEventListener("click", () => oquvchiniOch(m, { ...fk, id: "birga-" + o.id }, {
+          himoya: !ozi, joy, yopilganda: () => { if (location.hash === "#birga/" + id) oqishChiz(id); },
+        }));
         ich.appendChild(b);
       } else ich.appendChild(yarat("span", "kichik-matn", "Taklifni qabul qilsangiz, kitobni shu yerda o'qiy olasiz."));
       bosh.appendChild(fq);
@@ -424,6 +475,7 @@ async function oqishChiz(id) {
   if (men && men.holat === "qabul") {
     const q = yarat("div", "iqtibos-karta mening-holatim");
     q.appendChild(yarat("b", "", "Qayergacha o'qidingiz?"));
+    if (o.fayl_kitob_id) q.appendChild(yarat("small", "kichik-matn", "Kitobni shu yerda o'qisangiz, joyingiz o'zi yozib boriladi."));
     const foizMatn = yarat("span", "foiz-matn", men.foiz + "%");
     const surgich = yarat("input", "surgich"); surgich.type = "range"; surgich.min = 0; surgich.max = 100; surgich.step = 5; surgich.value = men.foiz;
     surgich.addEventListener("input", () => { foizMatn.textContent = surgich.value + "%"; });
@@ -432,7 +484,8 @@ async function oqishChiz(id) {
     const natija = yarat("span", "kichik-matn");
     saqla.addEventListener("click", async () => {
       saqla.disabled = true;
-      const { error } = await m.from("oqish_azolari").update({ foiz: Number(surgich.value), izoh: izoh.value.trim() || null, yangilangan: new Date().toISOString() })
+      const f = Number(surgich.value);
+      const { error } = await m.from("oqish_azolari").update({ foiz: f, sahifa: jamiSahifa ? Math.round((f / 100) * jamiSahifa) : null, izoh: izoh.value.trim() || null, yangilangan: new Date().toISOString() })
         .eq("oqish_id", id).eq("profil_id", mening.id);
       saqla.disabled = false;
       if (error) { natija.textContent = "Saqlanmadi."; return; }
@@ -451,9 +504,14 @@ async function oqishChiz(id) {
     const k = yarat("div", "ishtirokchi" + (a.profil_id === mening.id ? " meniki" : ""));
     const yuqori = yarat("div", "ishtirokchi-yuqori");
     yuqori.appendChild(profilHavola(profillar[a.profil_id]));
-    yuqori.appendChild(yarat("span", "kichik-matn", a.holat === "qabul" ? (a.foiz === 100 ? "tugatdi ✓" : a.foiz + "%") : a.holat === "taklif" ? "taklif kutilmoqda" : "rad etdi"));
+    yuqori.appendChild(yarat("span", "kichik-matn", a.holat === "qabul" ? (a.foiz === 100 ? "tugatdi ✓"
+      : jamiSahifa && a.sahifa != null ? `${Math.min(a.sahifa, jamiSahifa)} / ${jamiSahifa} sahifa · ${a.foiz}%` : a.foiz + "%")
+      : a.holat === "taklif" ? "taklif kutilmoqda" : "rad etdi"));
     k.appendChild(yuqori);
-    if (a.holat === "qabul") k.appendChild(foizChizigi(a.foiz));
+    if (a.holat === "qabul") {
+      k.appendChild(foizChizigi(a.foiz));
+      if (a.yangilangan && (a.foiz > 0 || a.izoh)) k.appendChild(yarat("small", "kichik-matn", "yangilandi: " + vaqtOldin(a.yangilangan)));
+    }
     if (a.izoh) k.appendChild(yarat("p", "ishtirokchi-izoh", "«" + a.izoh + "»"));
     royxat.appendChild(k);
   });

@@ -756,3 +756,10 @@ body.oquvchi-ochiq { overflow: hidden; }
 /* Sahifa ko'rsatkichi */
 .oquvchi-holat { flex: none; font-size: 13px; color: var(--kulrang); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .sahifa-tugma { font-size: 14px; }
+/* Kitobdoshlar nima o'qiyapti */
+.jarayon-qator { display: flex; gap: 12px; align-items: flex-start; padding: 12px; background: var(--qogoz); border: 1px solid var(--chegara); border-radius: 8px; }
+.jarayon-ong { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.jarayon-kim { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.jarayon-kim small { flex: none; color: var(--kulrang); font-size: 12px; }
+.jarayon-ong > b { font: 600 15px Lora, Georgia, serif; overflow-wrap: anywhere; }
+.jarayon-tugadi { color: var(--zaytun); font-weight: 600; }

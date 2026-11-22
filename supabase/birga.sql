@@ -150,3 +150,8 @@ revoke execute on function public.kitobdoshmi(uuid, uuid) from public, anon;
 revoke execute on function public.oqish_azosimi(bigint) from public, anon;
 grant execute on function public.kitobdoshmi(uuid, uuid) to authenticated;
 grant execute on function public.oqish_azosimi(bigint) to authenticated;
+
+-- «oqish_jarayoni_kitobdoshlarga» migratsiyasi:
+-- * kitob_javoni.yangilangan — foiz/sahifa/holat o'zgarganda trigger (kitob_javoni_yangilandi) yangilaydi;
+--   Kitobdoshlar sahifasidagi «Kitobdoshlar nima o'qiyapti» bo'limi shu bo'yicha tartiblanadi.
+-- * oqish_azolari.sahifa — birga o'qishda ishtirokchi qaysi sahifada (o'quvchi oynasidan avtomatik yoziladi).
