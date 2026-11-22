@@ -253,7 +253,7 @@ function manbaMatni(iq, ism, rasmUchun) {
       + (iq.sahifa != null && iq.sahifa !== "" ? (rasmUchun ? `, ${iq.sahifa}-bet` : ` · ${iq.sahifa}-sahifa`) : "");
   }
   if (tur === "kocha") return "📍 Ko'chadagi yozuv" + (iq.kitob ? " · " + iq.kitob : "");
-  if (tur === "ozim") return "✍ " + (ism ? ism + "ning" : "O'z") + " fikri";
+  if (tur === "ozim") return (rasmUchun ? "" : "— ") + (ism || "Muallif");   // o'z fikri — imzo kabi: «— Mirzo»
   return (iq.kitob || iq.muallif) ? "— " + [iq.muallif, iq.kitob].filter(Boolean).join(", ") : "";
 }
 
