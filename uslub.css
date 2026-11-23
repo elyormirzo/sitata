@@ -1187,3 +1187,5 @@ a.post-ism:hover { text-decoration: underline; }
 .google-eslatma > p:first-child { margin: 0; font-size: 14px; line-height: 1.45; }
 .vik-quti .google-tugma { width: 100%; }
 .google-eslatma p:empty { display: none; }
+.hisob-ochir { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 10px; border-top: 1px dashed var(--chegara); }
+.profil-sozlamalar > a.matn-tugma { align-self: center; }

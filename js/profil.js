@@ -556,6 +556,7 @@ async function profilSahifasiniKor(kod) {
     soz.appendChild(taxallusQutisi(profil));
     soz.appendChild(hisobQutisi());
     if (typeof eslatmaQutisi === "function") soz.appendChild(eslatmaQutisi());
+    soz.append(havola("maxfiylik.html", "matn-tugma", "Maxfiylik siyosati"), hisobniOchirishQutisi(profil));
     sahifa.appendChild(soz);
   }
 }
@@ -671,6 +672,48 @@ function hisobQutisi() {
       quti.append(p, chiq, xabar);
     }
   })();
+  return quti;
+}
+
+// ---------- Hisobni butunlay o'chirish ----------
+// Avval xotiradagi fayllar (kitoblar, rasmlar, guruh materiallari), keyin hisob (hisobni_ochir → barcha yozuvlar).
+async function papkaniTozala(m, bucket, papka) {
+  for (let urinish = 0; urinish < 20; urinish++) {
+    const { data } = await m.storage.from(bucket).list(papka, { limit: 100 });
+    const yollar = (data || []).filter((f) => f.id).map((f) => papka + "/" + f.name);
+    if (!yollar.length) return;
+    await m.storage.from(bucket).remove(yollar);
+  }
+}
+function hisobniOchirishQutisi(profil) {
+  const quti = yarat("div", "hisob-ochir");
+  const b = yarat("button", "matn-tugma xavfli", "Hisobni o'chirish"); b.type = "button";
+  const xabar = yarat("p", "kichik-matn");
+  b.addEventListener("click", async () => {
+    if (!confirm("Hisobingiz butunlay o'chiriladi: profil, natijalar, javon va kitob fayllari, iqtiboslar, kitobdoshlar, siz ochgan guruhlar. Buni qaytarib bo'lmaydi. Davom etasizmi?")) return;
+    const javob = prompt("Tasdiqlash uchun «O'CHIRISH» deb yozing:");
+    if (!javob || javob.trim().toUpperCase().replace(/[‘’ʻʼ`]/g, "'") !== "O'CHIRISH") { xabar.textContent = "Bekor qilindi."; return; }
+    b.disabled = true; xabar.textContent = "O'chirilmoqda…";
+    try {
+      const m = await mijozOl();
+      const uid = await kirish();
+      if (uid !== profil.id) throw new Error("boshqa");
+      const { data: guruhlar } = await m.rpc("guruhlarim");
+      for (const g of (guruhlar || []).filter((x) => x.egasi === uid)) await papkaniTozala(m, "guruh-fayllar", String(g.id));
+      for (const bucket of ["kitoblar", "iqtibos-rasmlar", "avatarlar"]) await papkaniTozala(m, bucket, uid);
+      const { error } = await m.rpc("hisobni_ochir");
+      if (error) throw error;
+      await m.auth.signOut().catch(() => {});
+      mening = null;
+      try { Object.keys(localStorage).filter((k) => /^(kimAytgan|sitata)/.test(k)).forEach((k) => localStorage.removeItem(k)); } catch (e) {}
+      alert("Hisobingiz o'chirildi.");
+      location.hash = "#lenta"; location.reload();
+    } catch (e) {
+      b.disabled = false;
+      xabar.textContent = "O'chirib bo'lmadi — internetni tekshirib, qayta urinib ko'ring.";
+    }
+  });
+  quti.append(b, xabar);
   return quti;
 }
 

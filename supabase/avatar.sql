@@ -20,3 +20,15 @@ grant insert (banner), update (banner) on public.profillar to authenticated;
 
 -- Profil manzili endi sitata.uz/taxallus — saytning o'z sahifalari nomlari taxallus bo'la olmaydi
 -- (migratsiya: taxallus_band_sozlar_kengaytirildi; ro'yxat js/profil.js dagi BAND_TAXALLUSLAR bilan bir xil)
+
+-- Hisobni o'chirish (SQL Editor orqali qo'shildi): hisobni_ochir() — auth.users dan o'zini o'chiradi,
+-- profillar va unga bog'liq barcha jadvallar on delete cascade bilan tozalanadi. Fayllarni sayt oldindan Storage API bilan o'chiradi.
+create or replace function public.hisobni_ochir()
+returns void language plpgsql security definer set search_path to ''
+as $$
+begin
+  if auth.uid() is null then raise exception 'kirilmagan'; end if;
+  delete from auth.users where id = auth.uid();
+end $$;
+revoke all on function public.hisobni_ochir() from public, anon;
+grant execute on function public.hisobni_ochir() to authenticated;
