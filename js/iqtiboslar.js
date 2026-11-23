@@ -233,10 +233,15 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl, q = {}) {
 
   if (iq.matn) tana.appendChild(yarat("blockquote", "post-matn" + (iq.rasm_yoli ? " rasm-izohi" : ""), iq.matn));
   if (iq.rasm_yoli) {
+    // Bir xil o'lchamdagi ramka (4:5): rasm to'liq ko'rinadi, bo'sh joyda — o'zining xira foni; bosilsa — to'liq hajmda
+    const ramka = yarat("button", "iqtibos-rasm-ramka"); ramka.type = "button";
+    const fon = yarat("img", "iqtibos-rasm-fon"); fon.alt = ""; fon.loading = "lazy"; fon.setAttribute("aria-hidden", "true");
     const img = yarat("img", "iqtibos-rasm"); img.alt = "Iqtibos rasmi: " + manbaMatni(iq, ism); img.loading = "lazy";
-    if (rasmUrl) img.src = rasmUrl;
-    img.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
-    tana.appendChild(img);
+    if (rasmUrl) img.src = fon.src = rasmUrl;
+    ramka.setAttribute("aria-label", "Rasmni kattalashtirish");
+    ramka.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
+    ramka.append(fon, img);
+    tana.appendChild(ramka);
   }
   tana.appendChild(yarat("p", "post-izoh", manbaMatni(iq, ism)));
 

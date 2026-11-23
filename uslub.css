@@ -1237,3 +1237,8 @@ a.post-ism:hover { text-decoration: underline; }
   body.yon-menyuli .yuqori { justify-content: flex-end; }
   body.yon-menyuli .yuqori-avatar { margin-right: auto; }
 }
+/* Lentadagi iqtibos rasmi: hamma postda bir xil ramka */
+.iqtibos-rasm-ramka { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; max-height: 520px; margin: 6px 0 8px; padding: 0; overflow: hidden;
+  border: 1px solid var(--chegara); border-radius: 14px; background: #EFE6D2; cursor: zoom-in; }
+.iqtibos-rasm-fon { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px) saturate(1.1); opacity: .55; }
+.post .iqtibos-rasm-ramka .iqtibos-rasm { position: relative; width: 100%; height: 100%; max-height: none; min-height: 0; margin: 0; border: 0; border-radius: 0; object-fit: contain; background: none; }

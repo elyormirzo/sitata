@@ -1,6 +1,6 @@
 // sitata.uz xizmat ishchisi (service worker): oflayn ishlash va push-eslatmalar.
 // Sayt fayllari o'zgarganda VERSIYA ni oshiring — eski kesh tozalanadi.
-const VERSIYA = "sitata-v51";
+const VERSIYA = "sitata-v52";
 const ASOSIY = [
   "./", "index.html", "uslub.css", "manifest.webmanifest",
   "js/malumotlar.js", "js/oyin.js", "js/profil.js", "js/yonmenyu.js", "js/sahifalar.js", "js/birga.js", "js/daraja.js", "js/kitobcha.js", "js/liga.js", "js/javon.js", "js/fayllar.js", "js/rasm-tahrir.js", "js/avatar.js", "js/iqtiboslar.js", "js/guruhlar.js", "js/tayyorgarlik.js", "js/nishonlar.js", "js/adabiyot.js", "js/duel.js", "js/xulosa.js", "js/pwa.js", "js/boshlash.js",
