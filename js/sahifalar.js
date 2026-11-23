@@ -169,7 +169,7 @@ function sahifaniKor() {
 
   clearInterval(viktorinaTaymeri);
   document.querySelectorAll(".sahifa").forEach((s) => s.classList.toggle("yashirin", !korinadigan.includes(s.dataset.sahifa)));
-  menyu.querySelectorAll("a").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom || a.dataset.yol === bolim));
+  document.querySelectorAll("#menyu a, .yon-menyu a[data-yol]").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom || a.dataset.yol === bolim));
   menyuniYop();
   document.title = SARLAVHALAR[bolim];
   if (profilTab !== null) profilTablariniChiz(profilTab);

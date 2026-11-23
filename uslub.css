@@ -1213,3 +1213,27 @@ a.post-ism:hover { text-decoration: underline; }
 @media (min-width: 1600px) {
   .ilova { zoom: 1.45; }
 }
+
+/* ===== Chap menyu (kompyuterda) ===== */
+.yon-menyu { display: none; }
+@media (min-width: 1100px) {
+  body.yon-menyuli { padding-left: 250px; }
+  .yon-menyu { position: fixed; z-index: 25; top: 0; bottom: 0; left: 0; width: 250px; display: flex; flex-direction: column; gap: 2px;
+    padding: 22px 14px 18px; overflow-y: auto; border-right: 1px solid var(--chegara); background: rgba(251,245,230,.55); backdrop-filter: blur(6px); }
+  .yon-logo { margin: 0 10px 18px; font: 600 28px Lora, Georgia, serif; color: var(--qora); text-decoration: none; }
+  .yon-logo span:first-child { color: var(--teri); margin-right: 2px; }
+  .yon-logo .logo-uz { color: var(--kulrang); font-size: 18px; }
+  .yon-band { display: flex; align-items: center; gap: 16px; padding: 11px 12px; border-radius: 12px; text-decoration: none; color: var(--qora);
+    font: 500 17px Lora, Georgia, serif; transition: background .15s; }
+  .yon-band:hover { background: rgba(140,74,47,.08); }
+  .yon-band svg { flex: none; }
+  .yon-band.faol { font-weight: 700; color: var(--teri); }
+  .yon-band.faol svg { stroke-width: 2.4; }
+  .yon-pastki { margin-top: auto; padding: 14px 12px 0; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--chegara); }
+  .yon-pastki a { font: italic 14px Lora, Georgia, serif; color: var(--kulrang); text-decoration: none; }
+  .yon-pastki a:hover { color: var(--teri); }
+  /* Yuqori panelda takrorlanadiganlar yashiriladi (logo, menyu tugmasi) */
+  body.yon-menyuli .yuqori .logo, body.yon-menyuli .menyu-tugma { display: none; }
+  body.yon-menyuli .yuqori { justify-content: flex-end; }
+  body.yon-menyuli .yuqori-avatar { margin-right: auto; }
+}
