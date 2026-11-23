@@ -8,8 +8,8 @@ async function profilniTekshir(s) {
   if (!BAZA_YOQIQ) { s.appendChild(yarat("p", "bosh-holat", "Bu bo'lim hali sozlanmagan.")); return null; }
   if (!mening) {
     const q = yarat("div", "vik-quti markaz");
-    q.append(yarat("p", "", "Bu bo'limdan foydalanish uchun avval profil oching — bir daqiqa, ro'yxatdan o'tish shart emas."),
-      havola("#profilim", "asosiy", "Profil ochish"));
+    q.append(yarat("p", "", "Bu bo'limdan foydalanish uchun Google bilan kiring — bir bosishda profilingiz ochiladi."),
+      googleKirishTugmasi(location.hash || "#profilim", "Google bilan kirish"));
     s.appendChild(q);
     return null;
   }

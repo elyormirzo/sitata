@@ -216,39 +216,8 @@ function profilQutiniChiz() {
     return;
   }
   const p = document.createElement("p");
-  p.textContent = "Profil oching — ulashganingizda havolasi ham qo'shiladi, do'stlaringiz kirib natijalaringizni ko'radi.";
-  const qator = document.createElement("div");
-  qator.className = "qator";
-  const kirit = document.createElement("input");
-  kirit.placeholder = "Ismingiz";
-  kirit.maxLength = 30;
-  kirit.autocomplete = "nickname";
-  const tx = taxallusMaydoni("");
-  kirit.addEventListener("input", () => tx.ismdanTaklif(kirit.value));
-  const tugma = document.createElement("button");
-  tugma.type = "button";
-  tugma.className = "kichik";
-  tugma.textContent = "Profil ochish";
-  const xato = document.createElement("p");
-  tugma.addEventListener("click", async () => {
-    const ism = kirit.value.trim();
-    if (!ism) { xato.textContent = "Ismingizni yozing."; kirit.focus(); return; }
-    if (await tx.tekshir()) { xato.textContent = "Taxallusni tuzating."; tx.kirit.focus(); return; }
-    tugma.disabled = true; tugma.textContent = "Ochilmoqda…"; xato.textContent = "";
-    try {
-      await profilYarat(ism, tx.qiymat());
-      await natijaniYoz();
-      natijaFayli = null; natijaFaylObj = null;       // rasmga profil havolasini qo'shamiz
-      await natijaRasminiTayyorla();
-      profilQutiniChiz();
-    } catch (e) {
-      tugma.disabled = false; tugma.textContent = "Profil ochish";
-      xato.textContent = e.message === "band" ? "Bu taxallus band — boshqasini tanlang." : "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring.";
-    }
-  });
-  kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
-  qator.append(kirit);
-  quti.append(p, qator, tx.el, tugma, xato);
+  p.textContent = "Natijangiz saqlanishi, reytingga kirish va do'stlaringizga ulashish uchun Google bilan profil oching — bir bosishda:";
+  quti.append(p, googleKirishTugmasi("#kim-aytgan", "Google bilan profil ochish"));
 }
 
 // Ketma-ket yutilgan kunlar
@@ -612,6 +581,41 @@ async function googledanProfilOch(user) {
   const taxallus = await boshTaxallus(toliq || ism);
   try { await profilYarat(ism, taxallus); }
   catch (e) { try { await profilYarat(ism, null); } catch (e2) { kirishXatosi = "Profil ochilmadi — qayta urinib ko'ring."; } }
+}
+
+// Umumiy «Google bilan kirish» tugmasi: yangi odamga profil ochiladi, eskisiga — o'z profili
+function googleKirishTugmasi(keyin, matn = "Google bilan kirish") {
+  const q = document.createElement("div"); q.className = "google-kirish";
+  const b = document.createElement("button"); b.type = "button"; b.className = "google-tugma";
+  b.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> ';
+  b.appendChild(document.createTextNode(matn));
+  const x = document.createElement("p"); x.className = "kichik-matn"; x.textContent = kirishXatosi || ""; kirishXatosi = null;
+  b.addEventListener("click", () => { b.disabled = true; googleBilanKir(x, keyin || location.hash || "#profilim").finally(() => { b.disabled = false; }); });
+  q.append(b, x);
+  return q;
+}
+
+// Ism bilan ochilgan (Google'ga bog'lanmagan) profil — Google bilan bog'lashni so'raymiz.
+// Har tashrifda bir marta; «Keyinroq» desa, shu tashrif davomida qayta chiqmaydi.
+async function anonimProfilniTekshir() {
+  if (!BAZA_YOQIQ || !mening) return;
+  try { if (sessionStorage.getItem("sitataBoglashKeyin")) return; } catch (e) {}
+  const user = await sessiyaOl().catch(() => null);
+  if (!user || !user.is_anonymous || user.id !== mening.id) return;
+  const oyna = document.createElement("div"); oyna.className = "boglash-oyna"; oyna.setAttribute("role", "dialog"); oyna.setAttribute("aria-modal", "true");
+  const quti = document.createElement("div"); quti.className = "boglash-quti";
+  const sar = document.createElement("h3"); sar.textContent = "Profilingizni Google'ga bog'lang";
+  const t = document.createElement("p");
+  t.textContent = `${mening.ism}, endi profillar Google hisobi orqali ishlaydi. Bog'lasangiz, barcha natijalaringiz, javoningiz va guruhlaringiz saqlanib qoladi hamda istalgan telefon yoki kompyuterdan kira olasiz.`;
+  const x = document.createElement("p"); x.className = "kichik-matn";
+  const b = document.createElement("button"); b.type = "button"; b.className = "google-tugma";
+  b.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan bog\'lash';
+  b.addEventListener("click", () => { b.disabled = true; googleBilanBogla(x, location.hash || "#profilim").finally(() => { b.disabled = false; }); });
+  const keyin = document.createElement("button"); keyin.type = "button"; keyin.className = "matn-tugma"; keyin.textContent = "Keyinroq";
+  keyin.addEventListener("click", () => { try { sessionStorage.setItem("sitataBoglashKeyin", "1"); } catch (e) {} oyna.remove(); });
+  quti.append(sar, t, b, x, keyin);
+  oyna.appendChild(quti);
+  document.body.appendChild(oyna);
 }
 
 // Google'dan qaytishni sahifa yuklanganda qayta ishlash (?code=... yoki ?error_description=...)

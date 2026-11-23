@@ -974,37 +974,9 @@ function profilimniChiz() {
   s.innerHTML = "";
   s.append(yarat("h2", "", "Profilim"));
   if (!BAZA_YOQIQ) { s.appendChild(yarat("p", "kichik-matn", "Profillar hali sozlanmagan.")); return; }
-  s.appendChild(yarat("p", "kichik-matn", "Profil oching — natijalaringiz saqlanadi, reytingga kirasiz va kitobdoshlar orttirasiz. Ro'yxatdan o'tish shart emas."));
-  const qator = yarat("div", "qator profil-forma");
-  const kirit = yarat("input"); kirit.placeholder = "Ismingiz"; kirit.maxLength = 30; kirit.autocomplete = "nickname";
-  const tx = taxallusMaydoni("");
-  kirit.addEventListener("input", () => tx.ismdanTaklif(kirit.value));
-  const tugma = yarat("button", "asosiy", "Profil ochish"); tugma.type = "button";
-  const xato = yarat("p", "kichik-matn");
-  tugma.addEventListener("click", async () => {
-    const ism = kirit.value.trim();
-    if (!ism) { xato.textContent = "Ismingizni yozing."; kirit.focus(); return; }
-    if (await tx.tekshir()) { xato.textContent = "Taxallusni tuzating."; tx.kirit.focus(); return; }
-    tugma.disabled = true; tugma.textContent = "Ochilmoqda…";
-    try { await profilYarat(ism, tx.qiymat()); await natijaniYoz(); profilSahifasiniKor(mening.taxallus ? "@" + mening.taxallus : mening.kod); }
-    catch (e) {
-      tugma.disabled = false; tugma.textContent = "Profil ochish";
-      xato.textContent = e.message === "band" ? "Bu taxallus band — boshqasini tanlang." : "Profil ochilmadi — internetni tekshirib, qayta urinib ko'ring.";
-    }
-  });
-  kirit.addEventListener("keydown", (e) => { if (e.key === "Enter") tugma.click(); });
-  qator.append(kirit);
-  s.append(qator, yarat("p", "sozlama-nom", "Taxallus — boshqalar sizni shu nom bilan topadi"), tx.el, tugma, xato);
-
-  // Avval profil ochgan bo'lsa — Google orqali kirish
-  const ajrat = yarat("p", "ajratgich", "yoki");
-  const eski = yarat("p", "kichik-matn", "Google bilan kirsangiz, profil Google'dagi ismingiz bilan ochiladi va istalgan telefon yoki kompyuterdan kira olasiz. Avval Google'ga bog'langan profilingiz bo'lsa — o'sha ochiladi.");
-  const g = yarat("button", "google-tugma"); g.type = "button";
-  g.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan kirish';
-  const gXabar = yarat("p", "kichik-matn", kirishXatosi || "");
-  kirishXatosi = null;
-  g.addEventListener("click", () => { g.disabled = true; googleBilanKir(gXabar).finally(() => { g.disabled = false; }); });
-  s.append(ajrat, eski, g, gXabar);
+  s.appendChild(yarat("p", "kichik-matn", "Profil oching — natijalaringiz saqlanadi, reytingga kirasiz, kitobdoshlar orttirasiz va guruhlarga qo'shilasiz."));
+  s.appendChild(googleKirishTugmasi("#profilim", "Google bilan kirish"));
+  s.appendChild(yarat("p", "kichik-matn", "Profil Google'dagi ismingiz bilan ochiladi; ism va taxallusni keyin o'zgartirishingiz mumkin. Email boshqalarga ko'rinmaydi. Avval Google bilan kirgan bo'lsangiz — o'sha profilingiz ochiladi."));
 }
 
 // ---------- Admin: takliflarni ko'rib chiqish (#admin, menyuda yo'q) ----------

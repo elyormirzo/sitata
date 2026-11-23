@@ -32,3 +32,7 @@ begin
 end $$;
 revoke all on function public.hisobni_ochir() from public, anon;
 grant execute on function public.hisobni_ochir() to authenticated;
+
+-- Yangi profil faqat Google bilan (migratsiya: profil_faqat_google_bilan): anonim sessiya profil ocha olmaydi.
+alter policy "o'zi yaratadi" on public.profillar
+  with check (id = (select auth.uid()) and coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false);

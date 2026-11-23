@@ -135,7 +135,7 @@ async function qoshilishniChiz(kod) {
     return;
   }
 
-  // Profil yo'q: Google bilan (istalgan qurilmadan kiriladi) yoki ism bilan
+  // Profil yo'q: Google bilan kirib, darhol qo'shiladi
   const gTugma = yarat("button", "google-tugma"); gTugma.type = "button";
   gTugma.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan kirib qo\'shilish';
   gTugma.addEventListener("click", () => {
@@ -143,21 +143,7 @@ async function qoshilishniChiz(kod) {
     try { sessionStorage.setItem("sitataQoshil", kod); } catch (e) {}
     googleBilanKir(x, "#qoshil/" + kod).finally(() => { gTugma.disabled = false; });
   });
-  const izoh = yarat("p", "kichik-matn", "Tavsiya etiladi: natijalaringiz saqlanadi va istalgan telefon yoki kompyuterdan kira olasiz.");
-  const ajrat = yarat("p", "ajratgich", "yoki");
-  const ism = yarat("input", "matn-maydon bir-qator"); ism.placeholder = "Ismingiz (masalan, Dilnoza Karimova)"; ism.maxLength = 30; ism.autocomplete = "name";
-  const ismTugma = yarat("button", "ikkilamchi", "Ism bilan qo'shilish"); ismTugma.type = "button";
-  ismTugma.addEventListener("click", async () => {
-    const i = ism.value.trim();
-    if (i.length < 2) { x.textContent = "Ismingizni yozing."; ism.focus(); return; }
-    ismTugma.disabled = true; ismTugma.textContent = "Qo'shilmoqda…";
-    try {
-      try { await profilYarat(i, await boshTaxallus(i)); } catch (e) { if (e.message !== "band") throw e; await profilYarat(i, null); }
-      if (!(await qoshil())) { ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
-    } catch (e) { x.textContent = "Profil ochilmadi — qayta urinib ko'ring."; ismTugma.disabled = false; ismTugma.textContent = "Ism bilan qo'shilish"; }
-  });
-  ism.addEventListener("keydown", (e) => { if (e.key === "Enter") ismTugma.click(); });
-  q.append(gTugma, izoh, ajrat, ism, ismTugma, x);
+  q.append(gTugma, yarat("p", "kichik-matn", "Profil Google'dagi ismingiz bilan ochiladi va siz darhol guruhga qo'shilasiz. Natijalaringiz saqlanadi, istalgan qurilmadan kira olasiz."), x);
   s.appendChild(q);
 }
 

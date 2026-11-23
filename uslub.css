@@ -1189,3 +1189,15 @@ a.post-ism:hover { text-decoration: underline; }
 .google-eslatma p:empty { display: none; }
 .hisob-ochir { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 10px; border-top: 1px dashed var(--chegara); }
 .profil-sozlamalar > a.matn-tugma { align-self: center; }
+
+/* Ism bilan ochilgan profilni Google'ga bog'lash oynasi */
+.boglash-oyna { position: fixed; inset: 0; z-index: 90; display: flex; align-items: flex-end; justify-content: center; background: rgba(30,20,10,.55); }
+@media (min-width: 600px) { .boglash-oyna { align-items: center; } }
+.boglash-quti { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; padding: 22px 20px calc(18px + env(safe-area-inset-bottom));
+  background: var(--qogoz); border-radius: 18px 18px 0 0; box-shadow: 0 -8px 28px rgba(0,0,0,.25); text-align: center; }
+@media (min-width: 600px) { .boglash-quti { border-radius: 18px; } }
+.boglash-quti h3 { margin: 0; font: 600 20px Lora, Georgia, serif; }
+.boglash-quti p { margin: 0; line-height: 1.5; }
+.boglash-quti .matn-tugma { align-self: center; color: var(--kulrang); }
+.google-kirish { display: flex; flex-direction: column; gap: 6px; }
+.google-kirish p:empty { display: none; }
