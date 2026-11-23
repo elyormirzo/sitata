@@ -524,6 +524,7 @@ async function profilSahifasiniKor(kod) {
     soz.appendChild(el("summary", "", "⚙ Sozlamalar"));
     soz.appendChild(taxallusQutisi(profil));
     soz.appendChild(hisobQutisi());
+    if (typeof telegramQutisi === "function") soz.appendChild(telegramQutisi());
     if (typeof eslatmaQutisi === "function") soz.appendChild(eslatmaQutisi());
     soz.append(havola("maxfiylik.html", "matn-tugma", "Maxfiylik siyosati"), hisobniOchirishQutisi(profil));
     sahifa.appendChild(soz);

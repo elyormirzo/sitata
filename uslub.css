@@ -1242,3 +1242,8 @@ a.post-ism:hover { text-decoration: underline; }
   border: 1px solid var(--chegara); border-radius: 14px; background: #EFE6D2; cursor: zoom-in; }
 .iqtibos-rasm-fon { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px) saturate(1.1); opacity: .55; }
 .post .iqtibos-rasm-ramka .iqtibos-rasm { position: relative; width: 100%; height: 100%; max-height: none; min-height: 0; margin: 0; border: 0; border-radius: 0; object-fit: contain; background: none; }
+/* Telegram ulash tugmasi */
+.telegram-tugma { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border: 0; border-radius: 10px; cursor: pointer;
+  background: #2AABEE; color: #fff; font: 600 15px Inter, system-ui, sans-serif; }
+.telegram-tugma:hover { background: #229ED9; }
+.telegram-tugma:disabled { opacity: .6; cursor: default; }

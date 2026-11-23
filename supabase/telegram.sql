@@ -1,0 +1,8 @@
+-- ===== TELEGRAM BOT (SQL Editor orqali qo'shildi) =====
+-- telegram_ulanishlar(profil_id, chat_id, tg_username, xabarlar, eslatma_kuni) — yozish faqat «telegram» server funksiyasi orqali;
+--   foydalanuvchi o'zinikini ko'radi, xabarlar belgisini o'zgartiradi, uzadi.
+-- telegram_kodlar(kod, profil_id, muddat 15 daqiqa) — telegram_kodi_ol() bilan yaratiladi, /start <kod> bilan ishlatiladi.
+-- telegram_chaqir(jsonb) — server funksiyasini maxfiy kalit (vault: sitata_push_kalit) bilan chaqiradi.
+-- bildirishnoma_telegram — har bir yangi bildirishnoma ulangan foydalanuvchiga Telegram'ga ham yuboriladi.
+-- cron «sitata-telegram-kechki» — har kuni 20:05 (Toshkent): o'qish seriyasi / bugungi o'yin eslatmasi.
+-- Bot tokeni: Edge Function secret TELEGRAM_BOT_TOKEN. Webhook: select public.telegram_chaqir('{"turi":"sozla"}');
