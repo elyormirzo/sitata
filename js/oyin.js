@@ -17,7 +17,12 @@ const parametrlar = new URLSearchParams(location.search);
 const SINOV = parametrlar.has("sinov");
 const KUN_SURISH = SINOV ? (parseInt(parametrlar.get("kun"), 10) || 0) : 0;
 const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000) + KUN_SURISH; // Toshkent vaqti (UTC+5)
-const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
+// Iqtiboslar to'plami kengaytirilganda o'yin kun o'rtasida o'zgarib qolmasligi uchun: yangi to'plam ertasidan kuchga kiradi.
+// (Yangi iqtiboslar doim ro'yxat oxiriga qo'shiladi; to'plamni yana kengaytirsangiz — shu ikki sonni yangilang.)
+const TOPLAM_ALMASHDI = 20782, ESKI_TOPLAM = 11;
+const bugungi = bugungiKun < TOPLAM_ALMASHDI
+  ? IQTIBOSLAR[bugungiKun % ESKI_TOPLAM]
+  : IQTIBOSLAR[(bugungiKun - TOPLAM_ALMASHDI) % IQTIBOSLAR.length];
 const muallif = MUALLIFLAR[bugungi.muallif];
 const MUALLIF_ISMI = muallifNomi(bugungi.muallif);   // tanlangan tildagi ism
 const ISM = MUALLIF_ISMI.toUpperCase();
@@ -101,7 +106,7 @@ function portretniQur() {
   p.innerHTML = "";
   const boshHarf = document.createElement("div");
   boshHarf.className = "bosh-harf";
-  boshHarf.textContent = MUALLIF_ISMI.split(" ").map((s) => s[0]).join("");
+  boshHarf.textContent = MUALLIF_ISMI.split(/[\s-]+/).filter((s) => /^\p{Lu}/u.test(s)).map((s) => s[0]).join("").slice(0, 3);
   p.appendChild(boshHarf);
   if (muallif.rasm) {
     const img = document.createElement("img");
@@ -435,7 +440,7 @@ async function natijaRasminiChiz() {
     g.addColorStop(0, "#8C4A2F"); g.addColorStop(1, "#4A2A18");
     ctx.fillStyle = g; ctx.fillRect(px, py, pw, ph);
     ctx.fillStyle = "#FBF5E6"; ctx.font = `600 150px ${serif}`;
-    ctx.fillText(MUALLIF_ISMI.split(" ").map((s) => s[0]).join(""), W / 2, py + ph / 2 + 55);
+    ctx.fillText(MUALLIF_ISMI.split(/[\s-]+/).filter((s) => /^\p{Lu}/u.test(s)).map((s) => s[0]).join("").slice(0, 3), W / 2, py + ph / 2 + 55);
   }
   y = py + ph + 86;
 

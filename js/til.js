@@ -95,6 +95,7 @@ const TARJIMA = {
     "Kim aytgan? — sitata.uz": "Кто сказал? — sitata.uz", "Viktorina — sitata.uz": "Викторина — sitata.uz", "Mualliflar — sitata.uz": "Авторы — sitata.uz",
     "Iqtiboslar lentasi — sitata.uz": "Лента цитат — sitata.uz",
     "Buyuk siymolar": "Великие люди", "Navoiy, Shekspir, Tolstoy…": "Навои, Шекспир, Толстой…",
+    "Davlat arbobi": "Государственный деятель", "Jamoat arbobi": "Общественный деятель", "Qadimgi Rim": "Древний Рим", "Italiya": "Италия", "Ispaniya": "Испания", "AQSh": "США", "Irlandiya": "Ирландия", "Chexiya": "Чехия", "Argentina": "Аргентина", "Janubiy Afrika": "Южная Африка",
     "Til": "Язык",
   },
   en: {
@@ -162,6 +163,7 @@ const TARJIMA = {
     "Kim aytgan? — sitata.uz": "Who said it? — sitata.uz", "Viktorina — sitata.uz": "Quiz — sitata.uz", "Mualliflar — sitata.uz": "Authors — sitata.uz",
     "Iqtiboslar lentasi — sitata.uz": "Quote feed — sitata.uz",
     "Buyuk siymolar": "Great minds", "Navoiy, Shekspir, Tolstoy…": "Navoi, Shakespeare, Tolstoy…",
+    "Davlat arbobi": "Statesman", "Jamoat arbobi": "Civil rights leader", "Qadimgi Rim": "Ancient Rome", "Italiya": "Italy", "Ispaniya": "Spain", "AQSh": "USA", "Irlandiya": "Ireland", "Chexiya": "Czechia", "Argentina": "Argentina", "Janubiy Afrika": "South Africa",
     "Til": "Language",
   },
 };
