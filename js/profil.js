@@ -532,6 +532,10 @@ async function profilSahifasiniKor(kod) {
     if (typeof eslatmaQutisi === "function") soz.appendChild(eslatmaQutisi());
     soz.append(havola("maxfiylik.html", "matn-tugma", "Maxfiylik siyosati"), hisobniOchirishQutisi(profil));
     sahifa.appendChild(soz);
+    if (/\/sozlamalar$/.test(location.hash)) {          // #profilim/sozlamalar yoki #telegram — ochiq va ko'rinadigan
+      soz.open = true;
+      setTimeout(() => (soz.querySelector(".telegram-quti") || soz).scrollIntoView({ block: "center", behavior: "smooth" }), 400);
+    }
   }
 }
 
