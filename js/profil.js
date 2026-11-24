@@ -219,8 +219,8 @@ function profilQutiniChiz() {
     return;
   }
   const p = document.createElement("p");
-  p.textContent = "Natijangiz saqlanishi, reytingga kirish va do'stlaringizga ulashish uchun Google bilan profil oching — bir bosishda:";
-  quti.append(p, googleKirishTugmasi("#kim-aytgan", "Google bilan profil ochish"));
+  p.textContent = t("Natijangiz saqlanishi, reytingga kirish va do'stlaringizga ulashish uchun Google bilan profil oching — bir bosishda:");
+  quti.append(p, googleKirishTugmasi("#kim-aytgan", t("Google bilan profil ochish")));
 }
 
 // Ketma-ket yutilgan kunlar

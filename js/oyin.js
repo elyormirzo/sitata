@@ -1,7 +1,8 @@
 const CHALGITUVCHI_SONI = 3; // harflar orasida ismda yo'q nechta begona harf bo'ladi
 const MAX_XATO = 5;           // shuncha xato qo'yishdan keyin o'yin tugaydi
-// O'zbek lotin alifbosidagi harflar (C va W yo'q)
-const ALIFBO = "ABDEFGHIJKLMNOPQRSTUVXYZ".split("");
+// O'yin alifbosi tanlangan tilga qarab: o'zbek lotin (C va W yo'q), rus kirill, ingliz lotin
+const ALIFBO = (TIL === "ru" ? "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ" : TIL === "en" ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "ABDEFGHIJKLMNOPQRSTUVXYZ").split("");
+const HARFMI = (h) => /[A-ZА-ЯЁ]/.test(h);
 // Surat ustidagi bo'laklar ranglari
 // (eski kitob muqovalari: teri, jigarrang, to'q yashil, bordo)
 const BOLAK_RANGLARI = ["#8C4A2F", "#6B3E26", "#7A5230", "#4F5B3A", "#7B2E2E", "#9A6235"];
@@ -18,11 +19,12 @@ const KUN_SURISH = SINOV ? (parseInt(parametrlar.get("kun"), 10) || 0) : 0;
 const bugungiKun = Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000) + KUN_SURISH; // Toshkent vaqti (UTC+5)
 const bugungi = IQTIBOSLAR[bugungiKun % IQTIBOSLAR.length];
 const muallif = MUALLIFLAR[bugungi.muallif];
-const ISM = bugungi.muallif.toUpperCase();
+const MUALLIF_ISMI = muallifNomi(bugungi.muallif);   // tanlangan tildagi ism
+const ISM = MUALLIF_ISMI.toUpperCase();
 
 // Ismdagi harflar o'rni (bo'sh joy va tutuq belgisi hisobga olinmaydi)
 const harfOrinlari = [];
-for (let i = 0; i < ISM.length; i++) if (/[A-Z]/.test(ISM[i])) harfOrinlari.push(i);
+for (let i = 0; i < ISM.length; i++) if (HARFMI(ISM[i])) harfOrinlari.push(i);
 const BOLAKLAR_SONI = harfOrinlari.length; // ismda nechta harf bo'lsa, surat shuncha bo'lakka bo'linadi
 
 // Kun raqamiga bog'liq tasodif: bo'laklar har kuni boshqacha joylashadi, lekin hammada bir xil.
@@ -51,19 +53,21 @@ const harfBolagi = aralashtir([...Array(BOLAKLAR_SONI).keys()], kunTasodifi);
 const ismHarflari = [...new Set(harfOrinlari.map((i) => ISM[i]))];
 const chalgituvchilar = aralashtir(ALIFBO.filter((h) => !ismHarflari.includes(h)), kunTasodifi)
   .slice(0, CHALGITUVCHI_SONI);
-const HARFLAR = [...harfOrinlari.map((i) => ISM[i]), ...chalgituvchilar].sort();
+const HARFLAR = [...harfOrinlari.map((i) => ISM[i]), ...chalgituvchilar].sort((a, b) => a.localeCompare(b, TIL === "uz" ? "en" : TIL));
+
+const OYIN_KALITI = TIL === "uz" ? "kimAytganJoy" : "kimAytganJoy_" + TIL;
 
 // ===== 4. O'YIN HOLATI (brauzer xotirasida saqlanadi) =====
 // joylangan — to'g'ri to'ldirilgan kataklar raqami; urinishlar — har bir qo'yish to'g'ri (true) yoki xato (false)
 let holat = { kun: bugungiKun, joylangan: [], urinishlar: [], tugadi: false, yutdi: false };
 try {
-  const saqlangan = SINOV ? null : JSON.parse(localStorage.getItem("kimAytganJoy"));
+  const saqlangan = SINOV ? null : JSON.parse(localStorage.getItem(OYIN_KALITI));
   if (saqlangan && saqlangan.kun === bugungiKun) holat = saqlangan;
 } catch (e) { /* xotira ishlamasa, oddiy davom etamiz */ }
 
 function saqlash() {
   if (SINOV) return;
-  try { localStorage.setItem("kimAytganJoy", JSON.stringify(holat)); } catch (e) {}
+  try { localStorage.setItem(OYIN_KALITI, JSON.stringify(holat)); } catch (e) {}
 }
 
 const xatolarSoni = () => holat.urinishlar.filter((t) => !t).length;
@@ -97,7 +101,7 @@ function portretniQur() {
   p.innerHTML = "";
   const boshHarf = document.createElement("div");
   boshHarf.className = "bosh-harf";
-  boshHarf.textContent = bugungi.muallif.split(" ").map((s) => s[0]).join("");
+  boshHarf.textContent = MUALLIF_ISMI.split(" ").map((s) => s[0]).join("");
   p.appendChild(boshHarf);
   if (muallif.rasm) {
     const img = document.createElement("img");
@@ -123,11 +127,13 @@ function portretniQur() {
 // ===== 6. EKRANGA CHIQARISH =====
 function davrMatni(asr) {
   const rim = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+  if (TIL === "ru") return asr < 0 ? rim[-asr] + " в. до н. э." : rim[asr] + " век";
+  if (TIL === "en") { const n = Math.abs(asr), q = n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[n % 10] || "th"; return `${n}${q} century${asr < 0 ? " BC" : ""}`; }
   return asr < 0 ? "Mil. av. " + rim[-asr] + " asr" : rim[asr] + " asr";
 }
 
 function chiz() {
-  $("iqtibosMatni").textContent = bugungi.matn;
+  $("iqtibosMatni").textContent = iqtibosMatni(bugungi);
 
   // Surat bo'laklari: to'g'ri to'ldirilgan katakning bo'lagi ochiladi, o'yin tugasa hammasi
   for (let k = 0; k < BOLAKLAR_SONI; k++) {
@@ -143,18 +149,18 @@ function chiz() {
     if (i < xato) s.className = "ishlatildi";
     $("xatolar").appendChild(s);
   }
-  $("xatoMatn").textContent = `Xatolar: ${xato} / ${MAX_XATO}`;
+  $("xatoMatn").textContent = t("Xatolar: {x} / {n}", { x: xato, n: MAX_XATO });
 
   // Ism kataklari (har bir so'z alohida guruh). Bo'sh kataklarga harf qo'yiladi.
   $("ism").innerHTML = "";
   let k = 0;
-  bugungi.muallif.toUpperCase().split(" ").forEach((soz) => {
+  ISM.split(" ").forEach((soz) => {
     const guruh = document.createElement("div");
     guruh.className = "soz";
     [...soz].forEach((h) => {
       const katak = document.createElement("div");
       katak.className = "harf-katak";
-      if (!/[A-Z]/.test(h)) { katak.classList.add("belgi"); katak.textContent = h; }
+      if (!HARFMI(h)) { katak.classList.add("belgi"); katak.textContent = h; }
       else {
         const raqam = k++;
         katak.dataset.k = raqam;
@@ -175,9 +181,9 @@ function chiz() {
 
   // Ishoralar: har bir xatodan keyin bittadan
   const ishoralar = [
-    "Faoliyat: " + muallif.kasb,
-    "Davr: " + davrMatni(muallif.davr),
-    "Hudud: " + muallif.yurt,
+    t("Faoliyat: {v}", { v: t(muallif.kasb) }),
+    t("Davr: {v}", { v: davrMatni(muallif.davr) }),
+    t("Hudud: {v}", { v: t(muallif.yurt) }),
   ];
   $("ishoralar").innerHTML = "";
   ishoralar.slice(0, holat.tugadi ? 0 : xato).forEach((matn) => {
@@ -207,8 +213,8 @@ function chiz() {
   if (holat.tugadi) {
     $("oyin").classList.add("yashirin");
     $("natija").classList.remove("yashirin");
-    $("natijaSarlavha").textContent = holat.yutdi ? "Barakalla!" : "Bu safar topilmadi";
-    $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
+    $("natijaSarlavha").textContent = holat.yutdi ? t("Barakalla!") : t("Bu safar topilmadi");
+    $("natijaMatn").textContent = t("Muallif: {v}", { v: MUALLIF_ISMI });
     natijaRasminiTayyorla();
     profilQutiniChiz();
     if (typeof natijaJonliQismi === "function") natijaJonliQismi();
@@ -332,10 +338,10 @@ function ulashMatni() {
   const qatorlar = [];
   for (let i = 0; i < kv.length; i += 10) qatorlar.push(kv.slice(i, i + 10).join(""));
   const hisob = holat.yutdi
-    ? (xatolarSoni() === 0 ? "xatosiz topdim! 🎯" : `topdim — ${xatolarSoni()} ta xato bilan`)
-    : "bugun topa olmadim 😔";
-  const seriya = oyinSeriyasi > 1 ? `\n🔥 ${oyinSeriyasi} kun ketma-ket` : "";
-  return `Kim aytgan? #${oyinRaqami()} 📚\n${qatorlar.join("\n")}\n${hisob}${seriya}\n\nSiz topa olasizmi? 👉 sitata.uz`;
+    ? (xatolarSoni() === 0 ? t("xatosiz topdim! 🎯") : t("topdim — {x} ta xato bilan", { x: xatolarSoni() }))
+    : t("bugun topa olmadim 😔");
+  const seriya = oyinSeriyasi > 1 ? "\n" + t("🔥 {n} kun ketma-ket", { n: oyinSeriyasi }) : "";
+  return `${t("Kim aytgan?")} #${oyinRaqami()} 📚\n${qatorlar.join("\n")}\n${hisob}${seriya}\n\n${t("Siz topa olasizmi? 👉 sitata.uz")}`;
 }
 
 function rasmYukla(src) {
@@ -394,13 +400,13 @@ async function natijaRasminiChiz() {
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   let y = Y + 90;
   ctx.fillStyle = "#8C5A2B"; ctx.font = `italic 500 32px ${serif}`;
-  ctx.fillText("— Kim aytgan? —", W / 2, y);
+  ctx.fillText(t("— Kim aytgan? —"), W / 2, y);
 
   // Iqtibos: sig'guncha shrift kichrayadi
   let olcham = 50, qatorlar;
   do {
     ctx.font = `500 ${olcham}px ${serif}`;
-    qatorlar = qatorlargaBol(ctx, "“" + bugungi.matn + "”", PW - 160);
+    qatorlar = qatorlargaBol(ctx, "“" + iqtibosMatni(bugungi) + "”", PW - 160);
     olcham -= 2;
   } while (qatorlar.length * olcham * 1.4 > 300 && olcham > 28);
   olcham += 2;
@@ -429,16 +435,16 @@ async function natijaRasminiChiz() {
     g.addColorStop(0, "#8C4A2F"); g.addColorStop(1, "#4A2A18");
     ctx.fillStyle = g; ctx.fillRect(px, py, pw, ph);
     ctx.fillStyle = "#FBF5E6"; ctx.font = `600 150px ${serif}`;
-    ctx.fillText(bugungi.muallif.split(" ").map((s) => s[0]).join(""), W / 2, py + ph / 2 + 55);
+    ctx.fillText(MUALLIF_ISMI.split(" ").map((s) => s[0]).join(""), W / 2, py + ph / 2 + 55);
   }
   y = py + ph + 86;
 
   // Muallif va ma'lumot
   ctx.fillStyle = "#3B2A1A"; ctx.font = `600 54px ${serif}`;
-  ctx.fillText(bugungi.muallif, W / 2, y);
+  ctx.fillText(MUALLIF_ISMI, W / 2, y);
   y += 48;
   ctx.fillStyle = "#7A6448"; ctx.font = `italic 500 30px ${serif}`;
-  ctx.fillText(`${muallif.kasb} · ${davrMatni(muallif.davr)} · ${muallif.yurt}`, W / 2, y);
+  ctx.fillText(`${t(muallif.kasb)} · ${davrMatni(muallif.davr)} · ${t(muallif.yurt)}`, W / 2, y);
 
   // Natija: kvadratchalar va matn
   y += 50;
@@ -450,11 +456,11 @@ async function natijaRasminiChiz() {
   });
   y += kv + 46;
   ctx.fillStyle = holat.yutdi ? "#4F5B3A" : "#8C4A2F"; ctx.font = `600 34px ${serif}`;
-  ctx.fillText(holat.yutdi ? `Topdim — ${xatolarSoni()} ta xato bilan` : "Bu safar topa olmadim", W / 2, y);
+  ctx.fillText(holat.yutdi ? t("Topdim — {x} ta xato bilan", { x: xatolarSoni() }) : t("Bu safar topa olmadim"), W / 2, y);
 
   // Pastki qism: sayt manzili
   ctx.fillStyle = "#9A8466"; ctx.font = `italic 500 26px ${serif}`;
-  ctx.fillText((mening ? "Profilim: " : "") + ulashHavolasi().replace(/^https?:\/\//, "").replace(/\/$/, ""), W / 2, Y + PH - 36);
+  ctx.fillText((mening ? t("Profilim: ") : "") + ulashHavolasi().replace(/^https?:\/\//, "").replace(/\/$/, ""), W / 2, Y + PH - 36);
 
   return new Promise((ok) => c.toBlob(ok, "image/png"));
 }
@@ -503,7 +509,7 @@ function matnniKorsat(matn) {
   quti.value = matn;
   quti.classList.remove("yashirin");
   quti.focus(); quti.select();
-  $("ulashXabar").textContent = "Matnni belgilab, o'zingiz nusxa oling:";
+  $("ulashXabar").textContent = t("Matnni belgilab, o'zingiz nusxa oling:");
 }
 
 // Telegram, Instagram, Facebook ichidagi brauzerlar ulashish va yuklab olishga ko'pincha ruxsat bermaydi
@@ -516,12 +522,12 @@ function qolbolaYol(sabab) {
   const rasm = $("natijaRasm");
   if (natijaFayli && !rasm.classList.contains("yashirin")) {
     xabar.textContent = (sabab ? sabab + " " : "") +
-      (TELEFON ? "Rasmni barmoq bilan bosib turing va «Rasmni saqlash»ni tanlang, keyin Instagram, Telegram yoki Facebook'ga joylang."
-               : "Rasm ustida sichqonchaning o'ng tugmasini bosib, «Rasmni saqlash» yoki «Rasmdan nusxa olish»ni tanlang.");
+      (TELEFON ? t("Rasmni barmoq bilan bosib turing va «Rasmni saqlash»ni tanlang, keyin Instagram, Telegram yoki Facebook'ga joylang.")
+               : t("Rasm ustida sichqonchaning o'ng tugmasini bosib, «Rasmni saqlash» yoki «Rasmdan nusxa olish»ni tanlang."));
     rasm.scrollIntoView({ behavior: "smooth", block: "center" });
   } else {
     const matn = ulashMatni();
-    nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = "Natija matni nusxalandi."; else matnniKorsat(matn); });
+    nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = t("Natija matni nusxalandi."); else matnniKorsat(matn); });
   }
 }
 
@@ -530,10 +536,10 @@ $("ulashMatnTugma").addEventListener("click", () => {
   const matn = ulashMatni(), xabar = $("ulashXabar");
   xabar.textContent = "";
   if (TELEFON && navigator.share && !ILOVA_ICHIDA) {
-    navigator.share({ text: matn }).catch((e) => { if (e.name !== "AbortError") nusxaOl(matn).then((ok) => { xabar.textContent = ok ? "Natija nusxalandi — Telegram'ga joylang." : ""; if (!ok) matnniKorsat(matn); }); });
+    navigator.share({ text: matn }).catch((e) => { if (e.name !== "AbortError") nusxaOl(matn).then((ok) => { xabar.textContent = ok ? t("Natija nusxalandi — Telegram'ga joylang.") : ""; if (!ok) matnniKorsat(matn); }); });
     return;
   }
-  nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = "Natija nusxalandi — Telegram yoki istalgan chatga joylang (Ctrl+V)."; else matnniKorsat(matn); });
+  nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = t("Natija nusxalandi — Telegram yoki istalgan chatga joylang (Ctrl+V)."); else matnniKorsat(matn); });
 });
 
 // Asosiy tugma: telefonda rasm bilan ulashish oynasi (Instagram, Telegram, Facebook...),
@@ -544,16 +550,16 @@ $("ulashish").addEventListener("click", () => {
   xabar.textContent = "";
 
   if (!natijaFayli) {                       // rasm hali tayyor emas
-    xabar.textContent = "Rasm tayyorlanmoqda…";
+    xabar.textContent = t("Rasm tayyorlanmoqda…");
     natijaRasminiTayyorla().then((b) => {
-      xabar.textContent = b ? "Rasm tayyor — «Natijani ulashish»ni yana bir bor bosing." : "";
+      xabar.textContent = b ? t("Rasm tayyor — «Natijani ulashish»ni yana bir bor bosing.") : "";
       if (!b) qolbolaYol();
     });
     return;
   }
 
   if (ILOVA_ICHIDA) {
-    qolbolaYol("Ilova ichidagi brauzer ulashishga ruxsat bermaydi — saytni Chrome yoki Safari'da oching, yoki:");
+    qolbolaYol(t("Ilova ichidagi brauzer ulashishga ruxsat bermaydi — saytni Chrome yoki Safari'da oching, yoki:"));
     return;
   }
 
@@ -562,24 +568,24 @@ $("ulashish").addEventListener("click", () => {
     // Profil havolasini ham nusxalab qo'yamiz — postga yoki izohga joylash uchun
     if (mening && navigator.clipboard) {
       navigator.clipboard.writeText(ulashMatni())
-        .then(() => { xabar.textContent = "Profil havolasi ham nusxalandi — postga yoki izohga joylang."; })
+        .then(() => { xabar.textContent = t("Profil havolasi ham nusxalandi — postga yoki izohga joylang."); })
         .catch(() => {});
     }
     navigator.share({ files: [fayl] })     // faqat rasm: matn qo'shilsa, Instagram ba'zan ulashmaydi
-      .catch((e) => { if (e.name !== "AbortError") qolbolaYol("Ulashish oynasi ochilmadi."); });
+      .catch((e) => { if (e.name !== "AbortError") qolbolaYol(t("Ulashish oynasi ochilmadi.")); });
     return;
   }
 
   if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
     navigator.clipboard.write([new ClipboardItem({ "image/png": natijaFayli })])
-      .then(() => { xabar.textContent = "Rasm nusxalandi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtiring."; })
+      .then(() => { xabar.textContent = t("Rasm nusxalandi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtiring."); })
       .catch(() => {
-        try { rasmniYuklabOl(natijaFayli); xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."; }
+        try { rasmniYuklabOl(natijaFayli); xabar.textContent = t("Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."); }
         catch (e) { qolbolaYol(); }
       });
     return;
   }
-  try { rasmniYuklabOl(natijaFayli); xabar.textContent = "Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."; }
+  try { rasmniYuklabOl(natijaFayli); xabar.textContent = t("Rasm yuklab olindi — uni Instagram, Telegram yoki Facebook'ga joylang."); }
   catch (e) { qolbolaYol(); }
 });
 

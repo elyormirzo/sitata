@@ -1271,3 +1271,14 @@ a.post-ism:hover { text-decoration: underline; }
 .jonli-karta { text-align: left; }
 #natijaSolishtir { margin: 8px 0 4px; }
 #natijaSolishtir:empty { display: none; }
+
+/* ===== Til tanlagich ===== */
+.til-tanlagich { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.til-tanlagich button { padding: 4px 10px; border: 1px solid var(--chegara); border-radius: 999px; background: transparent; cursor: pointer;
+  font: 500 13px Inter, system-ui, sans-serif; color: var(--kulrang); }
+.til-tanlagich button:hover { border-color: var(--teri); color: var(--teri); }
+.til-tanlagich button.faol { background: var(--qora); border-color: var(--qora); color: #FBF5E6; }
+.til-tanlagich.menyuda { padding: 4px 14px 10px; justify-content: flex-start; border-bottom: 1px solid var(--chegara); margin-bottom: 4px; }
+.til-tanlagich.pastkida { margin-bottom: 10px; }
+.til-tanlagich.yonda { justify-content: flex-start; margin-top: 8px; }
+.til-tanlagich.yonda button { font-size: 12px; padding: 3px 8px; }

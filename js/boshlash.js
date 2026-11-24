@@ -1,4 +1,8 @@
 // ===== ISHGA TUSHIRISH (barcha skriptlar yuklangandan keyin) =====
+// Til: statik matnlar tarjimasi va til tanlagichlari
+sahifaniTarjimaQil(document.body);
+[["menyuTil", "menyuda"], ["pastkiTil", "pastkida"]].forEach(([id, sinf]) => { const el = document.getElementById(id); if (el) el.appendChild(tilTanlagich(sinf)); });
+
 (async () => {
   await kirishQaytishiniTugat();   // Google'dan qaytgan bo'lsa — sessiya va profilni tiklaymiz
   portretniQur();

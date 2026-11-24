@@ -33,10 +33,10 @@ async function oyinJonliQatori() {
   const st = await kunlikStatistikaOl();
   if (st && st.oynaganlar >= 5) {
     const foiz = Math.round((st.topganlar / st.oynaganlar) * 100);
-    q.append(yarat("span", "jonli-ayir", "·"), yarat("span", "", `👥 Bugun ${sonniYoz(st.oynaganlar)} kishi o'ynadi`),
-      yarat("span", "jonli-ayir", "·"), yarat("span", "", `🎯 ${foiz}% topdi`));
+    q.append(yarat("span", "jonli-ayir", "·"), yarat("span", "", t("👥 Bugun {n} kishi o'ynadi", { n: sonniYoz(st.oynaganlar) })),
+      yarat("span", "jonli-ayir", "·"), yarat("span", "", t("🎯 {n}% topdi", { n: foiz })));
   } else {
-    q.append(yarat("span", "jonli-ayir", "·"), yarat("span", "", "Har kuni yangi iqtibos — bugungisi sizni kutmoqda"));
+    q.append(yarat("span", "jonli-ayir", "·"), yarat("span", "", t("Har kuni yangi iqtibos — bugungisi sizni kutmoqda")));
   }
 }
 
@@ -52,15 +52,15 @@ async function natijaJonliQismi() {
   if (st && st.oynaganlar >= 5) {
     const xato = xatolarSoni();
     let matn;
-    if (!holat.yutdi) matn = `Bugun ${Math.round((st.topganlar / st.oynaganlar) * 100)}% o'yinchi topdi — ertaga albatta topasiz!`;
+    if (!holat.yutdi) matn = t("Bugun {n}% o'yinchi topdi — ertaga albatta topasiz!", { n: Math.round((st.topganlar / st.oynaganlar) * 100) });
     else {
       // Kamroq xato bilan topganlar soni → «X% dan yaxshi»
       const xatolar = st.xatolar || {};
       const yaxshiroq = Object.entries(xatolar).filter(([k]) => Number(k) < xato).reduce((s, [, v]) => s + v, 0);
       const yomonroq = st.oynaganlar - yaxshiroq - (xatolar[xato] || 0);
       const foiz = Math.round((yomonroq / st.oynaganlar) * 100);
-      matn = xato === 0 ? `🎯 Xatosiz! Bugun faqat ${Math.max(1, Math.round((st.xatosiz / st.oynaganlar) * 100))}% o'yinchi bunga erishdi.`
-        : foiz > 0 ? `📊 Siz bugungi o'yinchilarning ${foiz} foizidan yaxshiroq natija ko'rsatdingiz!` : `📊 Bugun ${sonniYoz(st.oynaganlar)} kishi o'ynadi.`;
+      matn = xato === 0 ? t("🎯 Xatosiz! Bugun faqat {n}% o'yinchi bunga erishdi.", { n: Math.max(1, Math.round((st.xatosiz / st.oynaganlar) * 100)) })
+        : foiz > 0 ? t("📊 Siz bugungi o'yinchilarning {n} foizidan yaxshiroq natija ko'rsatdingiz!", { n: foiz }) : t("📊 Bugun {n} kishi o'ynadi.", { n: sonniYoz(st.oynaganlar) });
     }
     const joy = $("natijaSolishtir") || q;
     joy.innerHTML = ""; joy.appendChild(yarat("p", "jonli-solishtir", matn));
@@ -68,7 +68,7 @@ async function natijaJonliQismi() {
   // Keyingi iqtibosgacha sanoq
   const sanoq = yarat("div", "jonli-sanoq");
   const vaqt = yarat("b", "", keyingiIqtibosgacha());
-  sanoq.append(yarat("span", "", "⏳ Keyingi iqtibos"), vaqt);
+  sanoq.append(yarat("span", "", t("⏳ Keyingi iqtibos")), vaqt);
   q.appendChild(sanoq);
   clearInterval(sanoqTaymeri);
   sanoqTaymeri = setInterval(() => {
@@ -82,8 +82,8 @@ async function natijaJonliQismi() {
    ["#lenta/hammasi", "❝", "Iqtiboslar", "Buyuk adiblarning hikmatlari"],
    ["#mualliflar", "🪶", "Mualliflar", "Hayoti va asarlari"]].forEach(([h, belgi, nom, izoh]) => {
     const a = havola(h, "jonli-karta", "");
-    a.append(yarat("span", "", belgi), yarat("b", "", nom), yarat("small", "", izoh));
+    a.append(yarat("span", "", belgi), yarat("b", "", t(nom)), yarat("small", "", t(izoh)));
     kartalar.appendChild(a);
   });
-  q.append(yarat("p", "jonli-sarlavha", "Kutish zerikarli bo'lmasin:"), kartalar);
+  q.append(yarat("p", "jonli-sarlavha", t("Kutish zerikarli bo'lmasin:")), kartalar);
 }

@@ -20,7 +20,7 @@ const YON_MENYU = [
 function yonMenyuniQur() {
   if (document.querySelector(".yon-menyu")) return;
   const nav = document.createElement("nav");
-  nav.className = "yon-menyu"; nav.setAttribute("aria-label", "Bo'limlar");
+  nav.className = "yon-menyu"; nav.setAttribute("aria-label", t("Bo'limlar"));
   const logo = document.createElement("a"); logo.className = "yon-logo"; logo.href = "#lenta";
   logo.innerHTML = '<span aria-hidden="true">“</span>sitata<span class="logo-uz">.uz</span>';
   nav.appendChild(logo);
@@ -28,13 +28,14 @@ function yonMenyuniQur() {
     const a = document.createElement("a");
     a.href = "#" + yol; a.dataset.yol = yol; a.className = "yon-band";
     a.innerHTML = YON_BELGI(d);
-    const s = document.createElement("span"); s.textContent = nom; a.appendChild(s);
+    const s = document.createElement("span"); s.textContent = t(nom); a.appendChild(s);
     nav.appendChild(a);
   });
   const pastki = document.createElement("div"); pastki.className = "yon-pastki";
-  [["#qoidalar", "Qanday o'ynash"], ["#haqida", "Loyiha haqida"], ["maxfiylik.html", "Maxfiylik"]].forEach(([h, t]) => {
-    const a = document.createElement("a"); a.href = h; a.textContent = t; pastki.appendChild(a);
+  [["#qoidalar", "Qanday o'ynash"], ["#haqida", "Loyiha haqida"], ["maxfiylik.html", "Maxfiylik"]].forEach(([h, matn]) => {
+    const a = document.createElement("a"); a.href = h; a.textContent = t(matn); pastki.appendChild(a);
   });
+  pastki.appendChild(tilTanlagich("yonda"));
   nav.appendChild(pastki);
   document.body.appendChild(nav);
   document.body.classList.add("yon-menyuli");

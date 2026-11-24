@@ -219,7 +219,7 @@ function boshniChiz() {
     : (holat.urinishlar.length ? "Davom ettiring — o'yin tugamagan" : "Bugungi iqtibos sizni kutmoqda");
   const oyinMatn = yarat("div", "oyin-karta-matn");
   oyinMatn.append(yarat("small", "", "Kunlik o'yin"), yarat("h2", "", "Kim aytgan?"),
-    yarat("blockquote", "", "“" + bugungi.matn.split("\n")[0] + (bugungi.matn.includes("\n") ? "…" : "") + "”"),
+    yarat("blockquote", "", "“" + iqtibosMatni(bugungi).split("\n")[0] + (iqtibosMatni(bugungi).includes("\n") ? "…" : "") + "”"),
     yarat("p", "holat", holatMatni), yarat("span", "tugmacha", holat.tugadi ? "Natijani ko'rish" : "O'ynash →"));
   oyin.appendChild(oyinMatn);
   s.appendChild(oyin);
