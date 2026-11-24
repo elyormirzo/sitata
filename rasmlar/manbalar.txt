@@ -57,3 +57,4 @@ chizma/xeminguey.jpg: https://commons.wikimedia.org/wiki/File:ErnestHemingway.jp
 chizma/dante.jpg: https://commons.wikimedia.org/wiki/File:Portrait_de_Dante.jpg — jamoat mulki (public domain)
 chizma/navoiy.jpg: Alisher Navoiyning moyli bo'yoqdagi portreti (sayt egasi taqdim etgan surat) asosida gravyura uslubida qayta ishlangan
 chizma/laoszi.jpg: Laozining zamonaviy raqamli illyustratsiyasi (internetdan, «Fearless Soul» sayti) asosida gravyura uslubida qayta ishlangan
+chizma/martin.jpg: Jorj R. R. Martinning matbuot fotosurati (internetdan, RBK) asosida gravyura uslubida qayta ishlangan

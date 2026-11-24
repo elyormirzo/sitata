@@ -324,7 +324,7 @@ const MUALLIFLAR = {
   },
   "Jorj Martin": {
     ism_ru: "Джордж Мартин", ism_en: "George R. R. Martin",
-    davr: 20, kasb: "Yozuvchi", yurt: "AQSh", yillar: "1948-yilda tug'ilgan", rasm: "rasmlar/chizma/martin.svg",
+    davr: 20, kasb: "Yozuvchi", yurt: "AQSh", yillar: "1948-yilda tug'ilgan", rasm: "rasmlar/chizma/martin.jpg",
     bio: "Amerikalik yozuvchi. «Muz va olov qo'shig'i» turkumi muallifi.",
     bio_ru: "Американский писатель, автор цикла «Песнь льда и огня».",
     bio_en: "American writer, author of the «A Song of Ice and Fire» series.",
