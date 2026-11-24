@@ -9,7 +9,7 @@
 const MUALLIFLAR = {
   "Alisher Navoiy": {
     ism_ru: "Алишер Навои", ism_en: "Alisher Navoi",
-    davr: 15, kasb: "Shoir", yurt: "O'rta Osiyo", yillar: "1441–1501", rasm: "rasmlar/chizma/navoiy.svg",
+    davr: 15, kasb: "Shoir", yurt: "O'rta Osiyo", yillar: "1441–1501", rasm: "rasmlar/chizma/navoiy.jpg",
     bio: "Hirotda tug'ilgan shoir, mutafakkir va davlat arbobi. Turkiy (eski o'zbek) adabiy tilining eng buyuk namoyandasi; «Xamsa», «Xazoyin ul-maoniy», «Muhokamat ul-lug'atayn» kabi asarlar muallifi.",
     bio_ru: "Поэт, мыслитель и государственный деятель, родился в Герате. Величайший представитель тюркского (староузбекского) литературного языка; автор «Хамсы», «Сокровищницы мыслей» и трактата «Суждение о двух языках».",
     bio_en: "Poet, thinker and statesman born in Herat. The greatest master of the Turkic (Old Uzbek) literary language; author of the «Khamsa», «Treasury of Thoughts» and «The Judgement of Two Languages».",

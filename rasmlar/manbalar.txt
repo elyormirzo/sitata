@@ -55,3 +55,4 @@ chizma/chexov.jpg: https://commons.wikimedia.org/wiki/File:Anton_Chekhov_1889.jp
 chizma/ostin.jpg: https://commons.wikimedia.org/wiki/File:CassandraAusten-JaneAusten%28c.1810%29_hires.jpg — jamoat mulki (public domain)
 chizma/xeminguey.jpg: https://commons.wikimedia.org/wiki/File:ErnestHemingway.jpg — jamoat mulki (public domain)
 chizma/dante.jpg: https://commons.wikimedia.org/wiki/File:Portrait_de_Dante.jpg — jamoat mulki (public domain)
+chizma/navoiy.jpg: Alisher Navoiyning moyli bo'yoqdagi portreti (sayt egasi taqdim etgan surat) asosida gravyura uslubida qayta ishlangan
