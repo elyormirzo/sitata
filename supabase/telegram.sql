@@ -6,3 +6,8 @@
 -- bildirishnoma_telegram — har bir yangi bildirishnoma ulangan foydalanuvchiga Telegram'ga ham yuboriladi.
 -- cron «sitata-telegram-kechki» — har kuni 20:05 (Toshkent): o'qish seriyasi / bugungi o'yin eslatmasi.
 -- Bot tokeni: Edge Function secret TELEGRAM_BOT_TOKEN. Webhook: select public.telegram_chaqir('{"turi":"sozla"}');
+
+-- Server funksiyasi (service_role) uchun huquqlar — ularsiz bot kodni o'qiy olmaydi va «havola eskirgan» deydi
+grant select, delete on public.telegram_kodlar to service_role;
+grant select, insert, update, delete on public.telegram_ulanishlar to service_role;
+grant select (id, ism, til) on public.profillar to service_role;
