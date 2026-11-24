@@ -142,7 +142,7 @@ const MUALLIFLAR = {
   },
   "Lao-szi": {
     ism_ru: "Лао-цзы", ism_en: "Laozi",
-    davr: -6, kasb: "Faylasuf", yurt: "Xitoy", yillar: "mil. av. VI asr", rasm: "rasmlar/chizma/laoszi.svg",
+    davr: -6, kasb: "Faylasuf", yurt: "Xitoy", yillar: "mil. av. VI asr", rasm: "rasmlar/chizma/laoszi.jpg",
     bio: "Qadimgi Xitoy faylasufi, daosizm ta'limotining asoschisi. «Dao de szin» kitobining muallifi hisoblanadi.",
     bio_ru: "Древнекитайский философ, основатель даосизма. Считается автором книги «Дао дэ цзин».",
     bio_en: "Ancient Chinese philosopher and founder of Taoism, traditionally regarded as the author of the «Tao Te Ching».",
