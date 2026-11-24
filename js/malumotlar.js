@@ -184,7 +184,7 @@ const MUALLIFLAR = {
   },
   "Dante Aligyeri": {
     ism_ru: "Данте Алигьери", ism_en: "Dante Alighieri",
-    davr: 14, kasb: "Shoir", yurt: "Italiya", yillar: "1265–1321", rasm: "rasmlar/chizma/dante.svg",
+    davr: 14, kasb: "Shoir", yurt: "Italiya", yillar: "1265–1321", rasm: "rasmlar/chizma/dante.jpg",
     bio: "Florensiyalik shoir, italyan adabiy tilining asoschisi. «Ilohiy komediya» dostoni muallifi.",
     bio_ru: "Флорентийский поэт, создатель итальянского литературного языка, автор «Божественной комедии».",
     bio_en: "Florentine poet, the father of the Italian literary language and author of the «Divine Comedy».",
