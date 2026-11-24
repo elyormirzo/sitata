@@ -185,6 +185,7 @@ function sahifaniKor() {
     guruhlar: guruhlarniChiz, guruh: () => guruhniChiz(param), qoshil: () => qoshilishniChiz(param), daraja: darajaChiz, liga: ligaChiz, javon: javonChiz,
   };
   if (chizuvchilar[nom]) chizuvchilar[nom]();
+  if (nom === "kim-aytgan" && typeof oyinJonliQatori === "function") oyinJonliQatori();
   window.scrollTo(0, 0);
   // O'quvchilar iqtiboslari birinchi marta yuklanganda sahifani yangilaymiz
   if (["bosh", "lenta", "muallif", "karta"].includes(nom) && !jamoaYuklanishi) {

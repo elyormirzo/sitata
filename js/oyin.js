@@ -211,6 +211,7 @@ function chiz() {
     $("natijaMatn").textContent = "Muallif: " + bugungi.muallif;
     natijaRasminiTayyorla();
     profilQutiniChiz();
+    if (typeof natijaJonliQismi === "function") natijaJonliQismi();
   }
 }
 
