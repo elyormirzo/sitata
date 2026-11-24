@@ -113,6 +113,8 @@ function joriyYol() {
   if (tx && tx.toLowerCase() !== "index") return { nom: "profil", param: "@" + tx.toLowerCase() };
   if (parametrlar.has("p")) return { nom: "profil", param: parametrlar.get("p") };
   if (SINOV) return { nom: "kim-aytgan" };
+  // Profili yo'q mehmon birinchi bo'lib bugungi o'yinni ko'radi (30 soniyada qiziqtiradi); o'ynab bo'lgach — lenta
+  if (!mening && !holat.tugadi) return { nom: "kim-aytgan", param: "" };
   // Asosiy sahifa — lenta
   return { nom: "lenta", param: "" };
 }

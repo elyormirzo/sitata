@@ -4,6 +4,7 @@
   portretniQur();
   chiz();
   natijaniYoz();      // oldingi safar internet bo'lmagan bo'lsa
+  oyinSeriyasiniOl();  // ulashish matnidagi «🔥 N kun ketma-ket» uchun
   sahifaniKor();
   anonimProfilniTekshir();   // ism bilan ochilgan eski profil — Google'ga bog'lashni so'raymiz
   bildirishnomalarniBoshla();

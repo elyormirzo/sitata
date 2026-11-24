@@ -313,11 +313,28 @@ const SAYT_MANZILI = location.protocol.startsWith("http")
 // Ulashiladigan havola: profil bo'lsa — profil sahifasi, bo'lmasa — sayt
 const ulashHavolasi = () => (mening && mening.kod ? profilManzili(mening) : SAYT_MANZILI);
 
+// O'yin raqami: 2026-yil 1-yanvardan boshlab (Wordle'dagi «#214» kabi)
+const oyinRaqami = () => bugungiKun - 20454 + 1;
+let oyinSeriyasi = null;   // kunlik seriya (profil bo'lsa, bazadan oldindan olinadi)
+async function oyinSeriyasiniOl() {
+  if (!BAZA_YOQIQ || !mening || oyinSeriyasi !== null) return;
+  try {
+    const m = await mijozOl();
+    const { data } = await m.rpc("kunlik_seriya", { p: mening.id });
+    oyinSeriyasi = data && data[0] ? data[0].joriy : 0;
+  } catch (e) { /* jim */ }
+}
+
+// Wordle uslubidagi natija: javobni oshkor qilmaydi, lekin ko'rgan odamni o'ynashga undaydi
 function ulashMatni() {
-  const qator = holat.urinishlar.map((t) => (t ? "🟩" : "🟥")).join("");
-  const hisob = holat.yutdi ? `topdim, ${xatolarSoni()} ta xato bilan` : "topa olmadim";
-  const profil = mening ? `\nProfilim: ${ulashHavolasi()}` : `\n${SAYT_MANZILI}`;
-  return `Kim aytgan? — ${hisob}\n${qator}${profil}`;
+  const kv = holat.urinishlar.map((t) => (t ? "🟩" : "🟥"));
+  const qatorlar = [];
+  for (let i = 0; i < kv.length; i += 10) qatorlar.push(kv.slice(i, i + 10).join(""));
+  const hisob = holat.yutdi
+    ? (xatolarSoni() === 0 ? "xatosiz topdim! 🎯" : `topdim — ${xatolarSoni()} ta xato bilan`)
+    : "bugun topa olmadim 😔";
+  const seriya = oyinSeriyasi > 1 ? `\n🔥 ${oyinSeriyasi} kun ketma-ket` : "";
+  return `Kim aytgan? #${oyinRaqami()} 📚\n${qatorlar.join("\n")}\n${hisob}${seriya}\n\nSiz topa olasizmi? 👉 sitata.uz`;
 }
 
 function rasmYukla(src) {
@@ -506,6 +523,17 @@ function qolbolaYol(sabab) {
     nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = "Natija matni nusxalandi."; else matnniKorsat(matn); });
   }
 }
+
+// Matn bilan ulashish (Telegram guruhlari uchun eng qulay): telefonda ulashish oynasi, kompyuterda nusxa
+$("ulashMatnTugma").addEventListener("click", () => {
+  const matn = ulashMatni(), xabar = $("ulashXabar");
+  xabar.textContent = "";
+  if (TELEFON && navigator.share && !ILOVA_ICHIDA) {
+    navigator.share({ text: matn }).catch((e) => { if (e.name !== "AbortError") nusxaOl(matn).then((ok) => { xabar.textContent = ok ? "Natija nusxalandi — Telegram'ga joylang." : ""; if (!ok) matnniKorsat(matn); }); });
+    return;
+  }
+  nusxaOl(matn).then((ok) => { if (ok) xabar.textContent = "Natija nusxalandi — Telegram yoki istalgan chatga joylang (Ctrl+V)."; else matnniKorsat(matn); });
+});
 
 // Asosiy tugma: telefonda rasm bilan ulashish oynasi (Instagram, Telegram, Facebook...),
 // kompyuterda rasm nusxalanadi — Telegram yoki Facebook'ga Ctrl+V bilan joylashtirasiz.

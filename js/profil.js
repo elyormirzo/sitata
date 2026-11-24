@@ -185,7 +185,10 @@ async function natijaniYoz() {
     const { error } = await m.from("oyinlar").insert({
       profil_id: mening.id, kun: holat.kun, yutdi: holat.yutdi, xatolar: xatolarSoni(),
     });
-    if (!error || error.code === "23505") { holat.yuborildi = true; saqlash(); }
+    if (!error || error.code === "23505") {
+      holat.yuborildi = true; saqlash();
+      if (typeof oyinSeriyasiniOl === "function") { oyinSeriyasi = null; oyinSeriyasiniOl(); }   // bugungi o'yin seriyaga qo'shildi
+    }
   } catch (e) { /* internet yo'q — keyingi safar qayta urinamiz */ }
 }
 
