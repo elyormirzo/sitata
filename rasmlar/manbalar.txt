@@ -21,3 +21,6 @@ Jadidlar (rasmlar/jadidlar/, profil rasmi uchun kvadratga qirqilgan; barchasi ja
 qodiriy.jpg: https://commons.wikimedia.org/wiki/File:Stamps_of_Uzbekistan,_2004-07.jpg
 gaspirali.jpg: https://commons.wikimedia.org/wiki/File:Ismail_Gaspirali.jpg
 hamza.jpg: https://commons.wikimedia.org/wiki/File:Hamza_Niyazi.jpg
+
+Chizma portretlar (rasmlar/chizma/*.svg): sitata.uz uchun maxsus chizilgan stillashtirilgan illyustratsiyalar
+(fotosurat yoki boshqa asar nusxasi emas). Muallif: sitata.uz loyihasi.
