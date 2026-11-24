@@ -49,3 +49,8 @@ chizma/temur.jpg: https://commons.wikimedia.org/wiki/File:Timur_reconstruction03
 chizma/tven.jpg: https://commons.wikimedia.org/wiki/File:Mark_Twain_by_AF_Bradley_%28cropped_2%29.jpg — jamoat mulki (public domain)
 chizma/uayld.jpg: https://commons.wikimedia.org/wiki/File:Oscar_Wilde_by_Napoleon_Sarony._Three-quarter-length_photograph%2C_seated_%28cropped%29.jpg — jamoat mulki (public domain)
 chizma/volter.jpg: https://commons.wikimedia.org/wiki/File:Nicolas_de_Largilli%C3%A8re_-_Portrait_de_Voltaire_%281694-1778%29_en_1718_-_P208_-_mus%C3%A9e_Carnavalet_-_5_%28cropped%29.jpg — CC0
+chizma/aflotun.jpg: https://commons.wikimedia.org/wiki/File:Plato_Silanion_Musei_Capitolini_MC1377.png — CC BY 2.5 (foto muallifi — havoladagi sahifada)
+chizma/borxes.jpg: https://commons.wikimedia.org/wiki/File:Jorge_Luis_Borges_1951%2C_by_Grete_Stern_%28full%29.jpg — jamoat mulki (public domain, Argentina)
+chizma/chexov.jpg: https://commons.wikimedia.org/wiki/File:Anton_Chekhov_1889.jpg — jamoat mulki (public domain)
+chizma/ostin.jpg: https://commons.wikimedia.org/wiki/File:CassandraAusten-JaneAusten%28c.1810%29_hires.jpg — jamoat mulki (public domain)
+chizma/xeminguey.jpg: https://commons.wikimedia.org/wiki/File:ErnestHemingway.jpg — jamoat mulki (public domain)

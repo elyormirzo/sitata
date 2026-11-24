@@ -156,7 +156,7 @@ const MUALLIFLAR = {
   },
   "Aflotun": {
     ism_ru: "Платон", ism_en: "Plato",
-    davr: -4, kasb: "Faylasuf", yurt: "Yunoniston", yillar: "mil. av. 428–348", rasm: "rasmlar/chizma/aflotun.svg",
+    davr: -4, kasb: "Faylasuf", yurt: "Yunoniston", yillar: "mil. av. 428–348", rasm: "rasmlar/chizma/aflotun.jpg",
     bio: "Afinalik faylasuf, Suqrotning shogirdi va Arastuning ustozi. Akademiyaga asos solgan; «Davlat» asari muallifi.",
     bio_ru: "Афинский философ, ученик Сократа и учитель Аристотеля. Основал Академию; автор диалога «Государство».",
     bio_en: "Athenian philosopher, student of Socrates and teacher of Aristotle. Founder of the Academy and author of «The Republic».",
@@ -233,7 +233,7 @@ const MUALLIFLAR = {
   },
   "Jeyn Ostin": {
     ism_ru: "Джейн Остин", ism_en: "Jane Austen",
-    davr: 19, kasb: "Yozuvchi", yurt: "Angliya", yillar: "1775–1817", rasm: "rasmlar/chizma/ostin.svg",
+    davr: 19, kasb: "Yozuvchi", yurt: "Angliya", yillar: "1775–1817", rasm: "rasmlar/chizma/ostin.jpg",
     bio: "Ingliz yozuvchisi. «G'urur va g'araz» romani ingliz adabiyotining eng sevimli asarlaridan.",
     bio_ru: "Английская писательница, автор романа «Гордость и предубеждение».",
     bio_en: "English novelist, author of «Pride and Prejudice».",
@@ -268,7 +268,7 @@ const MUALLIFLAR = {
   },
   "Anton Chexov": {
     ism_ru: "Антон Чехов", ism_en: "Anton Chekhov",
-    davr: 19, kasb: "Yozuvchi", yurt: "Rossiya", yillar: "1860–1904", rasm: "rasmlar/chizma/chexov.svg",
+    davr: 19, kasb: "Yozuvchi", yurt: "Rossiya", yillar: "1860–1904", rasm: "rasmlar/chizma/chexov.jpg",
     bio: "Rus yozuvchisi va dramaturgi, qisqa hikoya ustasi. «Olchazor» va «Vanya tog'a» pyesalari muallifi.",
     bio_ru: "Русский писатель и драматург, мастер короткого рассказа, автор пьес «Вишнёвый сад» и «Дядя Ваня».",
     bio_en: "Russian writer and playwright, master of the short story, author of «The Cherry Orchard» and «Uncle Vanya».",
@@ -289,7 +289,7 @@ const MUALLIFLAR = {
   },
   "Ernest Xeminguey": {
     ism_ru: "Эрнест Хемингуэй", ism_en: "Ernest Hemingway",
-    davr: 20, kasb: "Yozuvchi", yurt: "AQSh", yillar: "1899–1961", rasm: "rasmlar/chizma/xeminguey.svg",
+    davr: 20, kasb: "Yozuvchi", yurt: "AQSh", yillar: "1899–1961", rasm: "rasmlar/chizma/xeminguey.jpg",
     bio: "Amerikalik yozuvchi, Nobel mukofoti sovrindori. «Chol va dengiz» qissasi muallifi.",
     bio_ru: "Американский писатель, лауреат Нобелевской премии, автор повести «Старик и море».",
     bio_en: "American writer and Nobel laureate, author of «The Old Man and the Sea».",
@@ -303,7 +303,7 @@ const MUALLIFLAR = {
   },
   "Xorxe Luis Borxes": {
     ism_ru: "Хорхе Луис Борхес", ism_en: "Jorge Luis Borges",
-    davr: 20, kasb: "Yozuvchi", yurt: "Argentina", yillar: "1899–1986", rasm: "rasmlar/chizma/borxes.svg",
+    davr: 20, kasb: "Yozuvchi", yurt: "Argentina", yillar: "1899–1986", rasm: "rasmlar/chizma/borxes.jpg",
     bio: "Argentinalik yozuvchi va shoir, Buenos-Ayres milliy kutubxonasining direktori bo'lgan. «Fiksiyalar» to'plami muallifi.",
     bio_ru: "Аргентинский писатель и поэт, директор Национальной библиотеки в Буэнос-Айресе, автор сборника «Вымышленные истории».",
     bio_en: "Argentine writer and poet who directed the National Library in Buenos Aires; author of «Ficciones».",
