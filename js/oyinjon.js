@@ -78,7 +78,7 @@ async function natijaJonliQismi() {
   // Yana nima qilish mumkin
   const kartalar = yarat("div", "jonli-kartalar");
   [["#viktorina", "❓", "Viktorina", "10 ta iqtibos — 10 ta muallif"],
-   ["#viktorina", "📚", "Maktab testlari", "O'tkan kunlar, Alpomish, Navoiy…"],
+   ...(TIL === "uz" ? [["#viktorina", "📚", "Maktab testlari", "O'tkan kunlar, Alpomish, Navoiy…"]] : [["#mualliflar", "🏛", "Buyuk siymolar", "Navoiy, Shekspir, Tolstoy…"]]),
    ["#lenta/hammasi", "❝", "Iqtiboslar", "Buyuk adiblarning hikmatlari"],
    ["#mualliflar", "🪶", "Mualliflar", "Hayoti va asarlari"]].forEach(([h, belgi, nom, izoh]) => {
     const a = havola(h, "jonli-karta", "");

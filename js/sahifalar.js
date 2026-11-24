@@ -13,7 +13,9 @@ function havola(href, sinf, matn) { const a = yarat("a", sinf, matn); a.href = h
 
 // Bugungi o'yin iqtibosi o'yin tugaguncha boshqa bo'limlarda muallifi bilan ko'rinmasin (javobni oshkor qilmaslik uchun)
 const yashirinmi = (iq) => iq === bugungi && !holat.tugadi;
-const ochiqIqtiboslar = () => IQTIBOSLAR.filter((iq) => !yashirinmi(iq));
+// Boshqa tillarda — faqat tarjimasi bor iqtiboslar (o'quvchilar takliflari o'zbekcha)
+const tildagiIqtiboslar = () => (TIL === "uz" ? IQTIBOSLAR : IQTIBOSLAR.filter((iq) => iq[TIL]));
+const ochiqIqtiboslar = () => tildagiIqtiboslar().filter((iq) => !yashirinmi(iq));
 // Foydalanuvchilar taklif qilib, admin tasdiqlagan iqtiboslar (bazadan yuklanadi, kunlik o'yinga kirmaydi)
 let jamoaIqtiboslari = [];
 let jamoaYuklanishi = null;
@@ -31,7 +33,7 @@ function jamoaniYukla() {
   })();
   return jamoaYuklanishi;
 }
-const barchaIqtiboslar = () => [...IQTIBOSLAR, ...jamoaIqtiboslari];
+const barchaIqtiboslar = () => (TIL === "uz" ? [...IQTIBOSLAR, ...jamoaIqtiboslari] : tildagiIqtiboslar());
 const ochiqHammasi = () => barchaIqtiboslar().filter((iq) => !yashirinmi(iq));
 const iqKalit = (iq) => (iq.id ? "t" + iq.id : String(IQTIBOSLAR.indexOf(iq)));
 const iqKalitdan = (k) => barchaIqtiboslar().find((iq) => iqKalit(iq) === String(k));
@@ -173,7 +175,7 @@ function sahifaniKor() {
   document.querySelectorAll(".sahifa").forEach((s) => s.classList.toggle("yashirin", !korinadigan.includes(s.dataset.sahifa)));
   document.querySelectorAll("#menyu a, .yon-menyu a[data-yol]").forEach((a) => a.classList.toggle("faol", a.dataset.yol === nom || a.dataset.yol === bolim));
   menyuniYop();
-  document.title = SARLAVHALAR[bolim];
+  document.title = t(SARLAVHALAR[bolim]);
   if (profilTab !== null) profilTablariniChiz(profilTab);
 
   const chizuvchilar = {
@@ -294,12 +296,12 @@ function iqtibosKartasi(iq, post) {
   if (post) return iqtibosPosti(iq);
   const raqam = iqKalit(iq);
   const k = yarat("article", "iqtibos-karta");
-  k.appendChild(yarat("blockquote", "", iq.matn));
+  k.appendChild(yarat("blockquote", "", iqtibosMatni(iq)));
   const meta = yarat("div", "iqtibos-meta");
   if (yashirinmi(iq)) {
     meta.append(yarat("span", "mini-portret harfli", "?"));
     const m = yarat("div");
-    m.append(yarat("b", "", "Muallifi — bugungi o'yin siri"), havola("#kim-aytgan", "", "Avval o'ynab ko'ring →"));
+    m.append(yarat("b", "", t("Muallifi — bugungi o'yin siri")), havola("#kim-aytgan", "", t("Avval o'ynab ko'ring →")));
     meta.appendChild(m);
     k.appendChild(meta);
     return k;
@@ -307,32 +309,32 @@ function iqtibosKartasi(iq, post) {
   meta.appendChild(portretEl(iq.muallif));
   const m = yarat("div");
   m.appendChild(MUALLIFLAR[iq.muallif]
-    ? havola("#muallif/" + muallifSlug(iq.muallif), "muallif-havola", iq.muallif)
+    ? havola("#muallif/" + muallifSlug(iq.muallif), "muallif-havola", muallifNomi(iq.muallif))
     : yarat("b", "muallif-havola", iq.muallif));
-  if (iq.asar) m.appendChild(yarat("span", "asar", iq.asar));
+  if (iq.asar) m.appendChild(yarat("span", "asar", asarNomi(iq)));
   if (iq.id) m.appendChild(yarat("span", "asar", "Taklif qildi: " + (iq.yuboruvchi || "o'quvchi")));
   meta.appendChild(m);
   k.appendChild(meta);
 
   const amallar = yarat("div", "amallar");
   const sevimlilar = sevimlilarOl();
-  const yurak = yarat("button", "amal" + (sevimlilar.includes(raqam) ? " tanlangan" : ""), sevimlilar.includes(raqam) ? "♥ Sevimli" : "♡ Sevimli");
+  const yurak = yarat("button", "amal" + (sevimlilar.includes(raqam) ? " tanlangan" : ""), (sevimlilar.includes(raqam) ? "♥ " : "♡ ") + t("Sevimli"));
   yurak.type = "button";
   yurak.addEventListener("click", () => {
     const r = sevimlilarOl();
     const bor = r.includes(raqam);
     xotiragaYoz("sitataSevimli", bor ? r.filter((x) => x !== raqam) : [...r, raqam]);
     yurak.classList.toggle("tanlangan", !bor);
-    yurak.textContent = bor ? "♡ Sevimli" : "♥ Sevimli";
+    yurak.textContent = (bor ? "♡ " : "♥ ") + t("Sevimli");
   });
-  const nusxa = yarat("button", "amal", "Nusxa");
+  const nusxa = yarat("button", "amal", t("Nusxa"));
   nusxa.type = "button";
   nusxa.addEventListener("click", async () => {
-    const ok = await nusxaOl(`“${iq.matn}”\n— ${iq.muallif}${iq.asar ? ", " + iq.asar : ""}\n\n${SAYT_MANZILI}`);
-    nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
-    setTimeout(() => { nusxa.textContent = "Nusxa"; }, 1500);
+    const ok = await nusxaOl(`“${iqtibosMatni(iq)}”\n— ${muallifNomi(iq.muallif)}${iq.asar ? ", " + asarNomi(iq) : ""}\n\n${SAYT_MANZILI}`);
+    nusxa.textContent = ok ? t("Nusxalandi ✓") : t("Nusxa olinmadi");
+    setTimeout(() => { nusxa.textContent = t("Nusxa"); }, 1500);
   });
-  amallar.append(yurak, nusxa, havola("#karta/" + raqam, "amal", "Karta yasash"));
+  amallar.append(yurak, nusxa, havola("#karta/" + raqam, "amal", t("Karta yasash")));
   k.appendChild(amallar);
   return k;
 }
@@ -341,9 +343,9 @@ function iqtibosKartasi(iq, post) {
 function iqtibosPosti(iq) {
   const raqam = iqKalit(iq);
   if (yashirinmi(iq)) {
-    const bosh = yarat("div", "post-bosh"); bosh.append(yarat("b", "post-ism", "Muallifi — bugungi o'yin siri"));
+    const bosh = yarat("div", "post-bosh"); bosh.append(yarat("b", "post-ism", t("Muallifi — bugungi o'yin siri")));
     const { k, tana } = postQobigi(yarat("span", "mini-portret harfli post-rasm", "?"), bosh);
-    tana.append(yarat("blockquote", "post-matn", iq.matn), havola("#kim-aytgan", "post-havola", "Avval o'ynab ko'ring →"));
+    tana.append(yarat("blockquote", "post-matn", iqtibosMatni(iq)), havola("#kim-aytgan", "post-havola", t("Avval o'ynab ko'ring →")));
     return k;
   }
   const bor = MUALLIFLAR[iq.muallif];
@@ -351,24 +353,24 @@ function iqtibosPosti(iq) {
   const avatar = bor ? havola("#muallif/" + muallifSlug(iq.muallif), "", "") : yarat("span", "");
   avatar.appendChild(portret);
   const bosh = yarat("div", "post-bosh");
-  bosh.appendChild(bor ? havola("#muallif/" + muallifSlug(iq.muallif), "post-ism", iq.muallif) : yarat("b", "post-ism", iq.muallif));
-  const qosh = [bor && bor.kasb, iq.asar].filter(Boolean).join(" · ");
+  bosh.appendChild(bor ? havola("#muallif/" + muallifSlug(iq.muallif), "post-ism", muallifNomi(iq.muallif)) : yarat("b", "post-ism", iq.muallif));
+  const qosh = [bor && t(bor.kasb), asarNomi(iq)].filter(Boolean).join(" · ");
   if (qosh) bosh.appendChild(yarat("span", "post-meta", qosh));
   const { k, tana } = postQobigi(avatar, bosh);
   if (iq === bugungi) k.classList.add("bugungi");
-  tana.appendChild(yarat("blockquote", "post-matn", iq.matn));
+  tana.appendChild(yarat("blockquote", "post-matn", iqtibosMatni(iq)));
   if (iq.id) tana.appendChild(yarat("p", "post-izoh", "Taklif qildi: " + (iq.yuboruvchi || "o'quvchi")));
 
   const amallar = yarat("div", "post-amallar");
   const sevimlimi = () => sevimlilarOl().includes(raqam);
-  const yurak = postAmal(sevimlimi() ? IKON.yurakTola : IKON.yurak, "", "Sevimlilarga qo'shish", "yurak" + (sevimlimi() ? " tanlangan" : ""));
+  const yurak = postAmal(sevimlimi() ? IKON.yurakTola : IKON.yurak, "", t("Sevimlilarga qo'shish"), "yurak" + (sevimlimi() ? " tanlangan" : ""));
   yurak.addEventListener("click", () => {
     const r = sevimlilarOl(), bor2 = r.includes(raqam);
     xotiragaYoz("sitataSevimli", bor2 ? r.filter((x) => x !== raqam) : [...r, raqam]);
     yurak.classList.toggle("tanlangan", !bor2); yurak.innerHTML = bor2 ? IKON.yurak : IKON.yurakTola;
   });
-  const karta = havola("#karta/" + raqam, "post-amal", ""); karta.innerHTML = IKON.karta; karta.title = "Karta yasash"; karta.setAttribute("aria-label", "Karta yasash");
-  amallar.append(yurak, nusxaAmali(() => `“${iq.matn}”\n— ${iq.muallif}${iq.asar ? ", " + iq.asar : ""}\n\n${SAYT_MANZILI}`), karta);
+  const karta = havola("#karta/" + raqam, "post-amal", ""); karta.innerHTML = IKON.karta; karta.title = t("Karta yasash"); karta.setAttribute("aria-label", t("Karta yasash"));
+  amallar.append(yurak, nusxaAmali(() => `“${iqtibosMatni(iq)}”\n— ${muallifNomi(iq.muallif)}${iq.asar ? ", " + asarNomi(iq) : ""}\n\n${SAYT_MANZILI}`), karta);
   tana.appendChild(amallar);
   return k;
 }
@@ -471,16 +473,16 @@ function lentaniChiz(param) {
 function mualliflarniChiz() {
   const s = $("mualliflarSahifa");
   s.innerHTML = "";
-  s.appendChild(yarat("h2", "sahifa-sarlavha", "Mualliflar"));
-  s.appendChild(yarat("p", "kichik-matn markaz", "Shoirlar, yozuvchilar, faylasuflar va olimlar — davrlar bo'yicha"));
+  s.appendChild(yarat("h2", "sahifa-sarlavha", t("Mualliflar")));
+  s.appendChild(yarat("p", "kichik-matn markaz", t("Shoirlar, yozuvchilar, faylasuflar va olimlar — davrlar bo'yicha")));
   const panjara = yarat("div", "mualliflar-panjara");
   Object.keys(MUALLIFLAR).sort((a, b) => MUALLIFLAR[a].davr - MUALLIFLAR[b].davr || a.localeCompare(b)).forEach((ism) => {
     const m = MUALLIFLAR[ism];
     const a = havola("#muallif/" + muallifSlug(ism), "muallif-karta");
     a.appendChild(portretEl(ism, "katta"));
     const n = muallifIqtiboslari(ism).length;
-    a.append(yarat("b", "", ism), yarat("span", "", `${m.kasb} · ${davrMatni(m.davr)}`),
-      yarat("span", "son", n ? `${n} ta iqtibos` : "iqtiboslar tez orada"));
+    a.append(yarat("b", "", muallifNomi(ism)), yarat("span", "", `${t(m.kasb)} · ${davrMatni(m.davr)}`),
+      yarat("span", "son", n ? t("{n} ta iqtibos", { n }) : t("iqtiboslar tez orada")));
     panjara.appendChild(a);
   });
   s.appendChild(panjara);
@@ -489,25 +491,26 @@ function mualliflarniChiz() {
 function muallifniChiz(slug) {
   const s = $("muallifSahifa");
   s.innerHTML = "";
-  s.appendChild(havola("#mualliflar", "orqaga", "← Mualliflar"));
+  s.appendChild(havola("#mualliflar", "orqaga", "← " + t("Mualliflar")));
   const ism = ismniSlugdan(slug);
-  if (!ism) { s.appendChild(yarat("p", "bosh-holat", "Bunday muallif topilmadi.")); return; }
+  if (!ism) { s.appendChild(yarat("p", "bosh-holat", t("Bunday muallif topilmadi."))); return; }
   const m = MUALLIFLAR[ism];
-  document.title = ism + " — sitata.uz";
+  document.title = muallifNomi(ism) + " — sitata.uz";
 
   const bosh = yarat("div", "muallif-bosh");
   bosh.appendChild(portretEl(ism, "eng-katta"));
-  bosh.append(yarat("h2", "", ism), yarat("p", "meta", `${m.kasb} · ${m.yillar || davrMatni(m.davr)} · ${m.yurt}`));
+  bosh.append(yarat("h2", "", muallifNomi(ism)), yarat("p", "meta", `${t(m.kasb)} · ${m.yillar || davrMatni(m.davr)} · ${t(m.yurt)}`));
   s.appendChild(bosh);
-  if (m.bio) s.appendChild(yarat("p", "bio", m.bio));
+  const bio = (TIL !== "uz" && m["bio_" + TIL]) || m.bio;
+  if (bio) s.appendChild(yarat("p", "bio", bio));
 
-  s.appendChild(yarat("h3", "bolim-sarlavha", "Iqtiboslari"));
+  s.appendChild(yarat("h3", "bolim-sarlavha", t("Iqtiboslari")));
   const iqlar = muallifIqtiboslari(ism);
-  if (!iqlar.length) s.appendChild(yarat("p", "bosh-holat", "Bu muallifning iqtiboslari tez orada qo'shiladi."));
+  if (!iqlar.length) s.appendChild(yarat("p", "bosh-holat", t("Bu muallifning iqtiboslari tez orada qo'shiladi.")));
   iqlar.forEach((iq) => {
     if (yashirinmi(iq)) {
       const k = yarat("article", "iqtibos-karta yashirin-iqtibos");
-      k.append(yarat("p", "", "Bu muallifning bitta iqtibosi bugungi o'yinda — avval o'ynab ko'ring."), havola("#kim-aytgan", "", "Bugungi o'yin →"));
+      k.append(yarat("p", "", t("Bu muallifning bitta iqtibosi bugungi o'yinda — avval o'ynab ko'ring.")), havola("#kim-aytgan", "", t("Bugungi o'yin →")));
       s.appendChild(k);
     } else s.appendChild(iqtibosKartasi(iq));
   });
@@ -531,20 +534,20 @@ function oxshashMualliflar(ism, soni) {
 function viktorinaBoshi() {
   const s = $("viktorinaSahifa");
   s.innerHTML = "";
-  s.appendChild(yarat("h2", "sahifa-sarlavha", "Viktorina"));
+  s.appendChild(yarat("h2", "sahifa-sarlavha", t("Viktorina")));
   const quti = yarat("div", "vik-quti markaz");
   const savollar = Math.min(VIKTORINA_SAVOLLARI, ochiqIqtiboslar().length);
   quti.append(yarat("p", "katta-belgi", "?"),
-    yarat("p", "", `${savollar} ta savol. Iqtibos chiqadi — 4 ta variantdan muallifini tanlang. Har bir savolga ${VIKTORINA_SONIYA} soniya.`),
-    yarat("p", "kichik-matn", "To'g'ri javob — 10 ball, ortib qolgan har bir soniya — yana 1 ball."));
+    yarat("p", "", t("{n} ta savol. Iqtibos chiqadi — 4 ta variantdan muallifini tanlang. Har bir savolga {s} soniya.", { n: savollar, s: VIKTORINA_SONIYA })),
+    yarat("p", "kichik-matn", t("To'g'ri javob — 10 ball, ortib qolgan har bir soniya — yana 1 ball.")));
   const enYaxshi = xotiradanOl("sitataViktorina", 0);
-  if (enYaxshi) quti.appendChild(yarat("p", "eng-yaxshi", `Eng yaxshi natijangiz: ${enYaxshi} ball`));
-  const b = yarat("button", "asosiy", "Boshlash"); b.type = "button";
+  if (enYaxshi) quti.appendChild(yarat("p", "eng-yaxshi", t("Eng yaxshi natijangiz: {n} ball", { n: enYaxshi })));
+  const b = yarat("button", "asosiy", t("Boshlash")); b.type = "button";
   b.addEventListener("click", viktorinaniBoshla);
   quti.appendChild(b);
   s.appendChild(quti);
-  if (BAZA_YOQIQ) s.appendChild(havola("#duellar", "duel-havola", "⚔️ Do'stingiz bilan duel — kim ko'p topadi?"));
-  if (typeof adabiyotBolimi === "function") s.appendChild(adabiyotBolimi());
+  if (BAZA_YOQIQ && TIL === "uz") s.appendChild(havola("#duellar", "duel-havola", "⚔️ Do'stingiz bilan duel — kim ko'p topadi?"));
+  if (typeof adabiyotBolimi === "function" && TIL === "uz") s.appendChild(adabiyotBolimi());   // maktab dasturi — o'zbek adabiyoti
 }
 
 function viktorinaniBoshla() {
@@ -561,14 +564,14 @@ function savolniKorsat() {
   const savol = vik.savollar[vik.i];
   s.innerHTML = "";
   const yuqori = yarat("div", "vik-yuqori");
-  yuqori.append(yarat("span", "", `Savol ${vik.i + 1} / ${vik.savollar.length}`), yarat("span", "", `${vik.ball} ball`));
+  yuqori.append(yarat("span", "", t("Savol {i} / {n}", { i: vik.i + 1, n: vik.savollar.length })), yarat("span", "", t("{n} ball", { n: vik.ball })));
   s.appendChild(yuqori);
   const chiziq = yarat("div", "vik-vaqt"); const tolgan = yarat("span"); chiziq.appendChild(tolgan);
   s.appendChild(chiziq);
   const k = yarat("article", "iqtibos-karta vik-iqtibos");
-  k.appendChild(yarat("blockquote", "", savol.iq.matn));
+  k.appendChild(yarat("blockquote", "", iqtibosMatni(savol.iq)));
   s.appendChild(k);
-  s.appendChild(yarat("p", "kichik-matn markaz", "Kim aytgan?"));
+  s.appendChild(yarat("p", "kichik-matn markaz", t("Kim aytgan?")));
 
   const variantlar = yarat("div", "vik-variantlar");
   let javobBerildi = false, qolgan = VIKTORINA_SONIYA;
@@ -585,13 +588,13 @@ function savolniKorsat() {
       if (b.dataset.ism === savol.iq.muallif) b.classList.add("togri");
       else if (b.dataset.ism === tanlangan) b.classList.add("xato");
     });
-    yuqori.lastChild.textContent = `${vik.ball} ball`;
+    yuqori.lastChild.textContent = t("{n} ball", { n: vik.ball });
     setTimeout(() => { vik.i++; if (vik.i < vik.savollar.length) savolniKorsat(); else viktorinaYakuni(); }, 1300);
   };
 
   savol.variantlar.forEach((ism) => {
     const b = yarat("button", "vik-variant"); b.type = "button"; b.dataset.ism = ism;
-    b.append(portretEl(ism), yarat("span", "", ism));
+    b.append(portretEl(ism), yarat("span", "", muallifNomi(ism)));
     b.addEventListener("click", () => javob(ism));
     variantlar.appendChild(b);
   });
@@ -609,25 +612,25 @@ function savolniKorsat() {
 function viktorinaYakuni() {
   const s = $("viktorinaSahifa");
   s.innerHTML = "";
-  s.appendChild(yarat("h2", "sahifa-sarlavha", "Viktorina tugadi"));
+  s.appendChild(yarat("h2", "sahifa-sarlavha", t("Viktorina tugadi")));
   const avvalgi = xotiradanOl("sitataViktorina", 0);
   const rekord = vik.ball > avvalgi;
   if (rekord) xotiragaYoz("sitataViktorina", vik.ball);
   const quti = yarat("div", "vik-quti markaz");
-  quti.append(yarat("p", "katta-son", String(vik.ball)), yarat("p", "", "ball"),
-    yarat("p", "", `${vik.savollar.length} tadan ${vik.togri} ta to'g'ri javob`),
-    yarat("p", "eng-yaxshi", rekord ? "Yangi rekord! ★" : `Eng yaxshi natijangiz: ${avvalgi} ball`));
+  quti.append(yarat("p", "katta-son", String(vik.ball)), yarat("p", "", t("ball")),
+    yarat("p", "", t("{n} tadan {x} ta to'g'ri javob", { n: vik.savollar.length, x: vik.togri })),
+    yarat("p", "eng-yaxshi", rekord ? t("Yangi rekord! ★") : t("Eng yaxshi natijangiz: {n} ball", { n: avvalgi })));
   const ballXabari = yarat("p", "kichik-matn");
   quti.appendChild(ballXabari);
   viktorinaNatijasiniYoz(vik.ball, ballXabari);
-  const qayta = yarat("button", "asosiy", "Qayta o'ynash"); qayta.type = "button";
+  const qayta = yarat("button", "asosiy", t("Qayta o'ynash")); qayta.type = "button";
   qayta.addEventListener("click", viktorinaniBoshla);
-  const nusxa = yarat("button", "ikkilamchi", "Natijani nusxalash"); nusxa.type = "button";
+  const nusxa = yarat("button", "ikkilamchi", t("Natijani nusxalash")); nusxa.type = "button";
   nusxa.addEventListener("click", async () => {
-    const ok = await nusxaOl(`sitata.uz viktorinasi: ${vik.ball} ball, ${vik.savollar.length} tadan ${vik.togri} ta to'g'ri.\nSiz ham sinab ko'ring: ${SAYT_MANZILI}#viktorina`);
-    nusxa.textContent = ok ? "Nusxalandi ✓" : "Nusxa olinmadi";
+    const ok = await nusxaOl(t("sitata.uz viktorinasi: {b} ball, {n} tadan {x} ta to'g'ri.\nSiz ham sinab ko'ring: {u}", { b: vik.ball, n: vik.savollar.length, x: vik.togri, u: SAYT_MANZILI + "#viktorina" }));
+    nusxa.textContent = ok ? t("Nusxalandi ✓") : t("Nusxa olinmadi");
   });
-  quti.append(qayta, nusxa, havola("#lenta", "barchasi", "Lentaga qaytish"));
+  quti.append(qayta, nusxa, havola("#lenta", "barchasi", t("Lentaga qaytish")));
   s.appendChild(quti);
 }
 
