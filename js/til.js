@@ -219,3 +219,107 @@ function tilTanlagich(sinf) {
   });
   return q;
 }
+
+// ── Avtomatik tarjima qatlami ─────────────────────────────────────────────
+// Sahifaga qo'shilgan har bir matn tuguni, atribut va alert/confirm/prompt xabari
+// lug'atdagi kalitga aniq (yoki {0} naqshli kalitga) mos kelsa — tarjima qilinadi.
+// Foydalanuvchi matnlari (iqtibos, izoh, kiritish maydonlari) tegilmaydi.
+const TARJIMA_ISTISNO = "blockquote, textarea, input, script, style, [contenteditable], [translate=no], .post-matn, .iqtibos-matn, .bio";
+const TARJIMA_ATRIBUTLAR = ["aria-label", "placeholder", "title", "alt"];
+let tarjimaNaqshlari = null;
+function naqshlarniTuz() {
+  const lug = TARJIMA[TIL] || {};
+  const RAQAM = "([\\d\\s.,/%+−-]+)";
+  tarjimaNaqshlari = Object.keys(lug).filter((k) => /\{\d\}/.test(k)).map((k) => {
+    const harflar = k.replace(/\{\d\}/g, "").replace(/[^\p{L}]/gu, "").length;
+    const erkin = harflar >= 8 || /\{0\} (yutdi|·)/.test(k);
+    const tartib = [];
+    const re = k.split(/(\{\d\})/).map((q) => {
+      const m = /^\{(\d)\}$/.exec(q);
+      if (!m) return q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      tartib.push(+m[1]);
+      return erkin ? "(.+?)" : RAQAM;
+    }).join("");
+    return { re: new RegExp("^" + re + "$", "s"), tartib, tarjima: lug[k], uzun: harflar };
+  }).sort((a, b) => b.uzun - a.uzun);
+}
+function tarjimaTop(s, chuqur = 0) {
+  if (TIL === "uz" || !s || chuqur > 3) return null;
+  const lug = TARJIMA[TIL];
+  if (Object.prototype.hasOwnProperty.call(lug, s)) return lug[s];
+  if (!tarjimaNaqshlari) naqshlarniTuz();
+  for (const n of tarjimaNaqshlari) {
+    const m = n.re.exec(s);
+    if (!m) continue;
+    const q = {};
+    n.tartib.forEach((idx, i) => { const v = m[i + 1]; const r = tarjimaTop(v.trim(), chuqur + 1); q[idx] = r == null ? v : v.replace(v.trim(), r); });
+    return n.tarjima.replace(/\{(\d)\}/g, (x, k) => (q[k] !== undefined ? q[k] : x));
+  }
+  // «Matn (3)» — oxiridagi son
+  const qavs = /^(.+?) \((\d+)\)$/.exec(s);
+  if (qavs) { const r = tarjimaTop(qavs[1], chuqur + 1); if (r != null) return r + " (" + qavs[2] + ")"; }
+  // «A · B · C» va «A, B» — bo'laklar alohida (kamida bittasi tarjima bo'lsa)
+  for (const ayir of [" · ", ", "]) {
+    if (!s.includes(ayir) || (ayir === ", " && chuqur === 0)) continue;
+    let bor = false;
+    const b = s.split(ayir).map((x) => { const r = tarjimaTop(x.trim(), chuqur + 1); if (r != null) { bor = true; return x.replace(x.trim(), r); } return x; });
+    if (bor) return b.join(ayir);
+  }
+  return null;
+}
+function matnniTarjimaQil(v) {
+  if (!v || !/\p{L}/u.test(v)) return null;
+  const s = v.trim().replace(/\s+/g, " ");
+  const r = tarjimaTop(s);
+  if (r == null || r === s) return null;
+  const m = /^(\s*)[\s\S]*?(\s*)$/.exec(v);
+  return m[1] + r + m[2];
+}
+function tugunniTarjimaQil(n) {
+  if (n.nodeType === 3) {
+    const ota = n.parentElement;
+    if (!ota || ota.closest(TARJIMA_ISTISNO)) return;
+    const r = matnniTarjimaQil(n.nodeValue);
+    if (r != null) n.nodeValue = r;
+    return;
+  }
+  if (n.nodeType !== 1) return;
+  if (n.matches("textarea, input")) {
+    TARJIMA_ATRIBUTLAR.forEach((a) => { const r = matnniTarjimaQil(n.getAttribute(a)); if (r != null) n.setAttribute(a, r); });
+    if (n.type === "button" || n.type === "submit") { const r = matnniTarjimaQil(n.value); if (r != null) n.value = r; }
+    return;
+  }
+  if (n.closest(TARJIMA_ISTISNO)) return;
+  const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (x) => (x.nodeType === 1 && x.tagName !== "INPUT" && x.tagName !== "TEXTAREA" && x.matches(TARJIMA_ISTISNO) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  const royxat = [n];
+  while (w.nextNode()) royxat.push(w.currentNode);
+  royxat.forEach((x) => {
+    if (x.nodeType === 3) { const r = matnniTarjimaQil(x.nodeValue); if (r != null) x.nodeValue = r; return; }
+    if (x !== n && (x.tagName === "INPUT" || x.tagName === "TEXTAREA")) tugunniTarjimaQil(x);
+    else TARJIMA_ATRIBUTLAR.forEach((a) => { if (!x.hasAttribute(a)) return; const r = matnniTarjimaQil(x.getAttribute(a)); if (r != null) x.setAttribute(a, r); });
+  });
+}
+if (TIL !== "uz") {
+  ["alert", "confirm", "prompt"].forEach((f) => {
+    const asl = window[f];
+    window[f] = function (xabar, ...q) { const r = typeof xabar === "string" ? tarjimaTop(xabar.trim()) : null; return asl.call(window, r == null ? xabar : r, ...q); };
+  });
+  // Canvas (story kartalari, yillik xulosa) ustidagi tayyor matnlar ham
+  if (window.CanvasRenderingContext2D) {
+    const asl = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (m, ...q) { const r = typeof m === "string" ? matnniTarjimaQil(m) : null; return asl.call(this, r == null ? m : r, ...q); };
+  }
+  const kuzat = () => {
+    tugunniTarjimaQil(document.body);
+    new MutationObserver((ozgarishlar) => {
+      for (const o of ozgarishlar) {
+        if (o.type === "childList") o.addedNodes.forEach(tugunniTarjimaQil);
+        else if (o.type === "characterData") tugunniTarjimaQil(o.target);
+        else if (o.type === "attributes") { const r = matnniTarjimaQil(o.target.getAttribute(o.attributeName)); if (r != null) o.target.setAttribute(o.attributeName, r); }
+      }
+    }).observe(document.body, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: TARJIMA_ATRIBUTLAR });
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", kuzat); else setTimeout(kuzat, 0);
+}
