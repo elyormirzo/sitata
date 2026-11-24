@@ -22,5 +22,30 @@ qodiriy.jpg: https://commons.wikimedia.org/wiki/File:Stamps_of_Uzbekistan,_2004-
 gaspirali.jpg: https://commons.wikimedia.org/wiki/File:Ismail_Gaspirali.jpg
 hamza.jpg: https://commons.wikimedia.org/wiki/File:Hamza_Niyazi.jpg
 
-Chizma portretlar (rasmlar/chizma/*.svg): sitata.uz uchun maxsus chizilgan stillashtirilgan illyustratsiyalar
+Chizma portretlar (rasmlar/chizma/*.svg — hali gravyura nusxasi bo'lmaganlari): sitata.uz uchun maxsus chizilgan stillashtirilgan illyustratsiyalar
 (fotosurat yoki boshqa asar nusxasi emas). Muallif: sitata.uz loyihasi.
+
+Kitob gravyurasi uslubidagi portretlar (rasmlar/chizma/*.jpg): quyidagi asl rasmlardan sitata.uz tomonidan
+qayta ishlangan (qirqilgan, gravyura uslubiga o'tkazilgan). CC BY-SA asosidagi rasmlarning qayta ishlangan nusxalari ham
+o'sha litsenziya (CC BY-SA) ostida tarqatiladi. Muallif va to'liq litsenziya — har bir havoladagi sahifada.
+chizma/arximed.jpg: https://commons.wikimedia.org/wiki/File:Domenico-Fetti_Archimedes_1620.jpg — jamoat mulki (public domain)
+chizma/avloniy.jpg: https://commons.wikimedia.org/wiki/File:Abdulla_Avloniy_2026_stamp_of_Uzbekistan.jpg — jamoat mulki (public domain)
+chizma/avreliy.jpg: https://commons.wikimedia.org/wiki/File:MSR-ra-61-b-1-DM.jpg — CC BY-SA 4.0
+chizma/dikkens.jpg: https://commons.wikimedia.org/wiki/File:Dickens_Gurney_head.jpg — jamoat mulki (public domain)
+chizma/ekzyuperi.jpg: https://commons.wikimedia.org/wiki/File:Antoine_de_Saint-Euxpery_%281920%29.jpg — jamoat mulki (public domain)
+chizma/geraklit.jpg: https://commons.wikimedia.org/wiki/File:Heraclitus_b_4_compressed.jpg — CC BY-SA 4.0
+chizma/gyote.jpg: https://commons.wikimedia.org/wiki/File:Goethe_%28Stieler_1828%29.jpg — jamoat mulki (public domain)
+chizma/kafka.jpg: https://commons.wikimedia.org/wiki/File:Franz_Kafka%2C_1923.jpg — jamoat mulki (public domain)
+chizma/kant.jpg: https://commons.wikimedia.org/wiki/File:Immanuel_Kant_-_Gemaelde_1.jpg — jamoat mulki (public domain)
+chizma/king.jpg: https://commons.wikimedia.org/wiki/File:Martin_Luther_King%2C_Jr._and_Lyndon_Johnson_%28cropped%29.jpg — jamoat mulki (public domain)
+chizma/mandela.jpg: https://commons.wikimedia.org/wiki/File:Nelson_Mandela_1994.jpg — CC BY-SA 2.0
+chizma/nitsshe.jpg: https://commons.wikimedia.org/wiki/File:Nietzsche187a.jpg — jamoat mulki (public domain)
+chizma/oruell.jpg: https://commons.wikimedia.org/wiki/File:George_Orwell_press_photo.jpg — jamoat mulki (public domain)
+chizma/paskal.jpg: https://commons.wikimedia.org/wiki/File:Blaise_Pascal_Versailles%2C_circa_1690.JPG — jamoat mulki (public domain)
+chizma/russo.jpg: https://commons.wikimedia.org/wiki/File:Maurice_Quentin_de_La_Tour_-_Portrait_of_Jean-Jacques_Rousseau_-_adjusted.jpg — jamoat mulki (public domain)
+chizma/seneka.jpg: https://commons.wikimedia.org/wiki/File:Duble_herma_of_Socrates_and_Seneca_Antikensammlung_Berlin_07.jpg — CC BY-SA 3.0
+chizma/servantes.jpg: https://commons.wikimedia.org/wiki/File:Cervantes_J%C3%A1uregui.jpg — jamoat mulki (public domain)
+chizma/temur.jpg: https://commons.wikimedia.org/wiki/File:Timur_reconstruction03.jpg — CC BY-SA 3.0
+chizma/tven.jpg: https://commons.wikimedia.org/wiki/File:Mark_Twain_by_AF_Bradley_%28cropped_2%29.jpg — jamoat mulki (public domain)
+chizma/uayld.jpg: https://commons.wikimedia.org/wiki/File:Oscar_Wilde_by_Napoleon_Sarony._Three-quarter-length_photograph%2C_seated_%28cropped%29.jpg — jamoat mulki (public domain)
+chizma/volter.jpg: https://commons.wikimedia.org/wiki/File:Nicolas_de_Largilli%C3%A8re_-_Portrait_de_Voltaire_%281694-1778%29_en_1718_-_P208_-_mus%C3%A9e_Carnavalet_-_5_%28cropped%29.jpg — CC0
