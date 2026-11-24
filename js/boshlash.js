@@ -10,6 +10,7 @@ sahifaniTarjimaQil(document.body);
   natijaniYoz();      // oldingi safar internet bo'lmagan bo'lsa
   oyinSeriyasiniOl();  // ulashish matnidagi «🔥 N kun ketma-ket» uchun
   sahifaniKor();
+  profilTiliniYoz();         // Telegram va push xabarlari tili
   anonimProfilniTekshir();   // ism bilan ochilgan eski profil — Google'ga bog'lashni so'raymiz
   bildirishnomalarniBoshla();
   kitobchaBelgisiniYangila();

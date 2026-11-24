@@ -5,6 +5,7 @@
 // VAPID kalitlari birinchi chaqiruvda yaratilib, push_sozlama jadvalida saqlanadi (faqat service_role o'qiydi).
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
+import { bildirishnomaMatni, m, type Til, tilmi } from "./til.ts";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
@@ -31,15 +32,15 @@ type Obuna = { endpoint: string; p256dh: string; auth: string; profil_id: string
 type Xabar = { title: string; body: string; url: string; tag?: string; icon?: string };
 
 // Kitobcha kayfiyati: oxirgi o'yindan beri o'tgan kunlarga qarab (js/kitobcha.js bilan bir xil)
-function kechkiXabar(kunlar: number | null): Xabar {
+function kechkiXabar(kunlar: number | null, til: Til): Xabar {
   const k = kunlar ?? 1;
   const ikonka = (n: string) => "/ikonkalar/kitobcha-" + n + ".png";
   const umumiy = { url: "/#kim-aytgan", tag: "kechki" };
-  if (k <= 1) return { ...umumiy, title: "📖 Bugungi iqtibos sizni kutmoqda", body: "Kitobcha kutyapti — bir daqiqa vaqt ajrating.", icon: ikonka("kutmoqda") };
-  if (k <= 3) return { ...umumiy, title: "😢 Kitobcha xafa", body: `${k} kundan beri ko'rinmaysiz… Bugungi iqtibosni topib, uni xursand qiling.`, icon: ikonka("xafa") };
-  if (k <= 6) return { ...umumiy, title: "😤 Kitobchaning jahli chiqdi!", body: `${k} kun! Seriyangiz kuyib ketyapti — hoziroq qayting.`, icon: ikonka("jahldor") };
-  if (k <= 13) return { ...umumiy, title: "🕸 Kitobchani chang bosdi", body: `${k} kundan beri varaqlanmadi. Bir o'yin — va chang ketadi.`, icon: ikonka("chang") };
-  return { ...umumiy, title: "💀 Kitobcha skeletga aylandi", body: `${k} kun… Bitta o'yin bilan uni qayta jonlantiring!`, icon: ikonka("skelet") };
+  if (k <= 1) return { ...umumiy, title: m(til, "📖 Bugungi iqtibos sizni kutmoqda"), body: m(til, "Kitobcha kutyapti — bir daqiqa vaqt ajrating."), icon: ikonka("kutmoqda") };
+  if (k <= 3) return { ...umumiy, title: m(til, "😢 Kitobcha xafa"), body: m(til, "{0} kundan beri ko'rinmaysiz… Bugungi iqtibosni topib, uni xursand qiling.", k), icon: ikonka("xafa") };
+  if (k <= 6) return { ...umumiy, title: m(til, "😤 Kitobchaning jahli chiqdi!"), body: m(til, "{0} kun! Seriyangiz kuyib ketyapti — hoziroq qayting.", k), icon: ikonka("jahldor") };
+  if (k <= 13) return { ...umumiy, title: m(til, "🕸 Kitobchani chang bosdi"), body: m(til, "{0} kundan beri varaqlanmadi. Bir o'yin — va chang ketadi.", k), icon: ikonka("chang") };
+  return { ...umumiy, title: m(til, "💀 Kitobcha skeletga aylandi"), body: m(til, "{0} kun… Bitta o'yin bilan uni qayta jonlantiring!", k), icon: ikonka("skelet") };
 }
 
 async function yubor(obunalar: Obuna[], xabar: Xabar) {
@@ -63,6 +64,35 @@ async function yubor(obunalar: Obuna[], xabar: Xabar) {
 }
 
 const ustunlar = "endpoint,p256dh,auth,profil_id";
+
+// Profillarning tanlagan tili (sayt tilini o'zgartirganda profillar.til yoziladi)
+async function tillar(idlar: string[]) {
+  const x = new Map<string, Til>();
+  const u = [...new Set(idlar)];
+  for (let i = 0; i < u.length; i += 500) {
+    const { data } = await db.from("profillar").select("id,til").in("id", u.slice(i, i + 500));
+    (data || []).forEach((p) => x.set(p.id, tilmi(p.til)));
+  }
+  return x;
+}
+// Obunalarni til bo'yicha guruhlab, har biriga o'z tilidagi xabarni yuboramiz
+async function tillabYubor(obunalar: Obuna[], xabar: (til: Til, o: Obuna) => Xabar | null) {
+  const t = await tillar(obunalar.map((o) => o.profil_id));
+  const guruhlar = new Map<string, { xabar: Xabar; obunalar: Obuna[] }>();
+  for (const o of obunalar) {
+    const x = xabar(t.get(o.profil_id) ?? "uz", o);
+    if (!x) continue;
+    const kalit = x.title + "|" + x.body;
+    const g = guruhlar.get(kalit) ?? { xabar: x, obunalar: [] };
+    g.obunalar.push(o); guruhlar.set(kalit, g);
+  }
+  let jami = { yuborildi: 0, ochirildi: 0 };
+  for (const g of guruhlar.values()) {
+    const r = await yubor(g.obunalar, g.xabar);
+    jami = { yuborildi: jami.yuborildi + r.yuborildi, ochirildi: jami.ochirildi + r.ochirildi };
+  }
+  return jami;
+}
 const bugungiKun = () => Math.floor((Date.now() + 5 * 3600 * 1000) / 86400000);
 
 Deno.serve(async (req) => {
@@ -79,9 +109,9 @@ Deno.serve(async (req) => {
       const { data: u } = await db.auth.getUser(token);
       if (!u?.user) return javob({ xato: "kirish kerak" }, 401);
       const { data: obunalar } = await db.from("push_obunalar").select(ustunlar).eq("profil_id", u.user.id);
-      return javob(await yubor(obunalar || [], {
-        title: "Eslatmalar ishlayapti ✓", body: "Endi sitata.uz yangiliklarini o'tkazib yubormaysiz.", url: "/#daraja", tag: "sinov",
-      }));
+      return javob(await tillabYubor(obunalar || [], (til) => ({
+        title: m(til, "Eslatmalar ishlayapti ✓"), body: m(til, "Endi sitata.uz yangiliklarini o'tkazib yubormaysiz."), url: "/#daraja", tag: "sinov",
+      })));
     }
 
     // Qolganlari — faqat ichki (cron, trigger) chaqiruvlar
@@ -90,11 +120,11 @@ Deno.serve(async (req) => {
 
     if (tana.turi === "kunlik") {
       const { data } = await db.from("push_obunalar").select(ustunlar).eq("kunlik", true);
-      return javob(await yubor(data || [], {
-        title: "Bugungi iqtibos tayyor 📖",
-        body: "«Kim aytgan?» — muallifni toping va seriyangizni davom ettiring.",
+      return javob(await tillabYubor(data || [], (til) => ({
+        title: m(til, "Bugungi iqtibos tayyor 📖"),
+        body: m(til, "«Kim aytgan?» — muallifni toping va seriyangizni davom ettiring."),
         url: "/#kim-aytgan", tag: "kunlik",
-      }));
+      })));
     }
     if (tana.turi === "kechki") {
       const { data } = await db.from("push_obunalar").select(ustunlar).eq("kechki", true);
@@ -105,27 +135,18 @@ Deno.serve(async (req) => {
         (oyinlar || []).forEach((o) => oxirgi.set(o.profil_id, Math.max(oxirgi.get(o.profil_id) ?? 0, o.kun)));
       }
       const bugun = bugungiKun();
-      // Bugun o'ynaganlarga yubormaymiz; qolganlarga — Kitobcha kayfiyatiga mos xabar
-      const guruhlar = new Map<string, { xabar: Xabar; obunalar: Obuna[] }>();
-      for (const o of data || []) {
+      // Bugun o'ynaganlarga yubormaymiz; qolganlarga — Kitobcha kayfiyatiga mos xabar, o'z tilida
+      return javob(await tillabYubor(data || [], (til, o) => {
         const kun = oxirgi.get(o.profil_id);
-        if (kun === bugun) continue;
-        const xabar = kechkiXabar(kun == null ? null : bugun - kun);
-        const g = guruhlar.get(xabar.title) ?? { xabar, obunalar: [] };
-        g.obunalar.push(o); guruhlar.set(xabar.title, g);
-      }
-      let jami = { yuborildi: 0, ochirildi: 0 };
-      for (const g of guruhlar.values()) {
-        const r = await yubor(g.obunalar, g.xabar);
-        jami = { yuborildi: jami.yuborildi + r.yuborildi, ochirildi: jami.ochirildi + r.ochirildi };
-      }
-      return javob(jami);
+        return kun === bugun ? null : kechkiXabar(kun == null ? null : bugun - kun, til);
+      }));
     }
     if (tana.turi === "bildirishnoma") {
       const { data: b } = await db.from("bildirishnomalar").select("kimga,matn,havola").eq("id", tana.id).maybeSingle();
       if (!b) return javob({ yuborildi: 0 });
       const { data } = await db.from("push_obunalar").select(ustunlar).eq("profil_id", b.kimga).eq("ijtimoiy", true);
-      return javob(await yubor(data || [], { title: "sitata.uz", body: b.matn, url: "/" + (b.havola || ""), tag: "b" + tana.id }));
+      const { data: p } = await db.from("profillar").select("til").eq("id", b.kimga).maybeSingle();
+      return javob(await yubor(data || [], { title: "sitata.uz", body: bildirishnomaMatni(b.matn, tilmi(p?.til)), url: "/" + (b.havola || ""), tag: "b" + tana.id }));
     }
     return javob({ xato: "noma'lum turi" }, 400);
   } catch (e) {

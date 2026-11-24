@@ -144,6 +144,7 @@ function profilniEsla(p) {
   mening = p;
   try { localStorage.setItem("kimAytganProfil", JSON.stringify(p)); } catch (e) {}
   if (typeof yuqoriAvatarniYangila === "function") yuqoriAvatarniYangila();
+  setTimeout(() => { if (typeof profilTiliniYoz === "function") profilTiliniYoz(); }, 0);
 }
 
 function tasodifiyKod() {
@@ -754,4 +755,17 @@ function taxallusQutisi(profil) {
     quti.appendChild(havola);
   }
   return quti;
+}
+
+// Tanlangan tilni profilga yozamiz — Telegram va push xabarlari shu tilda keladi
+async function profilTiliniYoz() {
+  if (!mening || !mening.id) return;
+  const belgi = mening.id + ":" + TIL;
+  try { if (localStorage.getItem("sitataTilYozildi") === belgi) return; } catch (e) {}
+  try {
+    const m = await mijozOl();
+    if (!m) return;
+    const { error } = await m.from("profillar").update({ til: TIL }).eq("id", mening.id);
+    if (!error) try { localStorage.setItem("sitataTilYozildi", belgi); } catch (e) {}
+  } catch (e) {}
 }
