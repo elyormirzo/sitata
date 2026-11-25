@@ -1237,11 +1237,12 @@ a.post-ism:hover { text-decoration: underline; }
   body.yon-menyuli .yuqori { justify-content: flex-end; }
   body.yon-menyuli .yuqori-avatar { margin-right: auto; }
 }
-/* Lentadagi iqtibos rasmi: hamma postda bir xil ramka */
-.iqtibos-rasm-ramka { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; max-height: 520px; margin: 6px 0 8px; padding: 0; overflow: hidden;
-  border: 1px solid var(--chegara); border-radius: 14px; background: #EFE6D2; cursor: zoom-in; }
-.iqtibos-rasm-fon { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px) saturate(1.1); opacity: .55; }
-.post .iqtibos-rasm-ramka .iqtibos-rasm { position: relative; width: 100%; height: 100%; max-height: none; min-height: 0; margin: 0; border: 0; border-radius: 0; object-fit: contain; background: none; }
+/* Lentadagi iqtibos rasmi — X uslubida: rasm o'z nisbatida (16:9 dan 1:1 gacha), balandligi cheklangan, ortig'i markazdan qirqiladi; bosilsa — to'liq */
+.iqtibos-rasm-ramka { position: relative; display: block; width: 100%; aspect-ratio: var(--nisbat, 4 / 3); max-height: min(360px, 55vh); margin: 8px 0 8px; padding: 0; overflow: hidden;
+  border: 1px solid var(--chegara); border-radius: 16px; background: #EFE6D2; cursor: zoom-in; }
+.iqtibos-rasm-fon { display: none; }
+.post .iqtibos-rasm-ramka .iqtibos-rasm { position: relative; width: 100%; height: 100%; max-height: none; min-height: 0; margin: 0; border: 0; border-radius: 0; object-fit: cover; object-position: center 30%; background: none; }
+.iqtibos-rasm-ramka:hover .iqtibos-rasm { filter: brightness(.96); }
 /* Telegram ulash tugmasi */
 .telegram-tugma { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border: 0; border-radius: 10px; cursor: pointer;
   background: #2AABEE; color: #fff; font: 600 15px Inter, system-ui, sans-serif; }

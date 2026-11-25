@@ -237,6 +237,10 @@ function kitobdoshIqtibosKartasi(m, iq, p, yoqtirdimmi, rasmUrl, q = {}) {
     const ramka = yarat("button", "iqtibos-rasm-ramka"); ramka.type = "button";
     const fon = yarat("img", "iqtibos-rasm-fon"); fon.alt = ""; fon.loading = "lazy"; fon.setAttribute("aria-hidden", "true");
     const img = yarat("img", "iqtibos-rasm"); img.alt = "Iqtibos rasmi: " + manbaMatni(iq, ism); img.loading = "lazy";
+    // Ramka rasmning o'z nisbatini oladi (X kabi): juda tik — kvadrat, juda yotiq — 16:9 bilan cheklanadi
+    img.addEventListener("load", () => {
+      if (img.naturalWidth && img.naturalHeight) ramka.style.setProperty("--nisbat", String(Math.min(1.78, Math.max(1, img.naturalWidth / img.naturalHeight))));
+    });
     if (rasmUrl) img.src = fon.src = rasmUrl;
     ramka.setAttribute("aria-label", "Rasmni kattalashtirish");
     ramka.addEventListener("click", () => rasmniKattaKor(img.src, img.alt));
