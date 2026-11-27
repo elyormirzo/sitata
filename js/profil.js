@@ -532,9 +532,11 @@ async function profilSahifasiniKor(kod) {
     if (typeof eslatmaQutisi === "function") soz.appendChild(eslatmaQutisi());
     soz.append(havola("maxfiylik.html", "matn-tugma", "Maxfiylik siyosati"), hisobniOchirishQutisi(profil));
     sahifa.appendChild(soz);
-    if (/\/sozlamalar$/.test(location.hash)) {          // #profilim/sozlamalar yoki #telegram — ochiq va ko'rinadigan
+    const sozYoli = (location.hash.match(/\/(sozlamalar|hisob)$/) || [])[1];   // #profilim/sozlamalar (#telegram) yoki #profilim/hisob («Kirish»)
+    if (sozYoli) {
       soz.open = true;
-      setTimeout(() => (soz.querySelector(".telegram-quti") || soz).scrollIntoView({ block: "center", behavior: "smooth" }), 400);
+      const nishon = sozYoli === "hisob" ? ".hisob-quti" : ".telegram-quti";
+      setTimeout(() => (soz.querySelector(nishon) || soz).scrollIntoView({ block: "center", behavior: "smooth" }), 400);
     }
   }
 }

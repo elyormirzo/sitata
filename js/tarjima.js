@@ -883,7 +883,23 @@ Object.assign(TARJIMA.ru, Object.assign({
   "Yillik xulosa": "Итоги года",
   "Qanday o'ynash": "Как играть",
   "Loyiha haqida": "О проекте",
-  "Telegram'ni ulash": "Подключить Telegram"
+  "Telegram'ni ulash": "Подключить Telegram",
+  "Ochiq osmon": "Ясно",
+  "Qisman bulutli": "Переменная облачность",
+  "Bulutli": "Облачно",
+  "Tuman": "Туман",
+  "Mayda yomg'ir": "Морось",
+  "Yomg'ir": "Дождь",
+  "Qor": "Снег",
+  "Momaqaldiroq": "Гроза",
+  "Ob-havo": "Погода",
+  "Ob-havo hozir yuklanmadi": "Погода сейчас недоступна",
+  "Shaharni tanlang": "Выберите город",
+  "Til": "Язык",
+  "Kunduzgi rejim": "Светлая тема",
+  "Tungi rejim": "Тёмная тема",
+  "Kirish": "Войти",
+  "Google bilan kirish": "Войти через Google"
 }, TARJIMA.ru));
 Object.assign(TARJIMA.en, Object.assign({
   "Ulashish oynasi ochilmadi — rasmni bosib turib saqlang.": "Couldn't open the share sheet — press and hold the image to save it.",
@@ -1764,5 +1780,21 @@ Object.assign(TARJIMA.en, Object.assign({
   "Yillik xulosa": "Year in review",
   "Qanday o'ynash": "How to play",
   "Loyiha haqida": "About",
-  "Telegram'ni ulash": "Connect Telegram"
+  "Telegram'ni ulash": "Connect Telegram",
+  "Ochiq osmon": "Clear sky",
+  "Qisman bulutli": "Partly cloudy",
+  "Bulutli": "Cloudy",
+  "Tuman": "Fog",
+  "Mayda yomg'ir": "Drizzle",
+  "Yomg'ir": "Rain",
+  "Qor": "Snow",
+  "Momaqaldiroq": "Thunderstorm",
+  "Ob-havo": "Weather",
+  "Ob-havo hozir yuklanmadi": "Weather is unavailable right now",
+  "Shaharni tanlang": "Choose a city",
+  "Til": "Language",
+  "Kunduzgi rejim": "Light mode",
+  "Tungi rejim": "Dark mode",
+  "Kirish": "Sign in",
+  "Google bilan kirish": "Sign in with Google"
 }, TARJIMA.en));
