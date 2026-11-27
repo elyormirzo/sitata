@@ -1042,6 +1042,24 @@ async function adminniChiz() {
   chiq.addEventListener("click", async () => { await m.auth.signOut(); adminniChiz(); });
   yuqori.appendChild(chiq);
   s.appendChild(yuqori);
+  // Yon paneldagi 💬 fikrlar va 👍/👎 baholar (oxirgilari)
+  const fikrQuti = yarat("details", "admin-fikrlar"); s.appendChild(fikrQuti);
+  (async () => {
+    const [{ data: fikrlar }, { data: baholar }] = await Promise.all([
+      m.from("fikrlar").select("yol,matn,vaqt").order("vaqt", { ascending: false }).limit(50),
+      m.from("sahifa_baholari").select("yol,baho").limit(2000),
+    ]);
+    const jami = {};
+    (baholar || []).forEach((b) => { const j = (jami[b.yol] = jami[b.yol] || [0, 0]); j[b.baho === 1 ? 0 : 1]++; });
+    fikrQuti.appendChild(yarat("summary", "", `💬 Fikrlar (${(fikrlar || []).length}) · 👍/👎 baholar`));
+    const bq = Object.entries(jami).sort((a, b) => b[1][0] + b[1][1] - a[1][0] - a[1][1]).slice(0, 15);
+    if (bq.length) fikrQuti.appendChild(yarat("p", "kichik-matn", bq.map(([y, [h, y2]]) => `${y}: 👍${h} 👎${y2}`).join(" · ")));
+    (fikrlar || []).forEach((f) => {
+      const k = yarat("div", "admin-fikr");
+      k.append(yarat("b", "", f.yol), document.createTextNode(" · " + new Date(f.vaqt).toLocaleString()), yarat("p", "", f.matn));
+      fikrQuti.appendChild(k);
+    });
+  })().catch(() => {});
 
   const { data, error } = await m.from("takliflar").select("id,matn,muallif,asar,yuboruvchi_ism,yaratilgan")
     .eq("holat", "kutilmoqda").order("yaratilgan", { ascending: true }).limit(100);
