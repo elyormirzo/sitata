@@ -1567,6 +1567,12 @@ body.jang-rejim.panel-tor .yuqori { margin-left: -16px; padding-left: 16px; }
 .jang-qidiruv .jang-pastki, .jang-qidiruv .jang-ikkinchi, .jang-qidiruv .jang-katta-tugma { align-self: stretch; }
 .jang-qidiruv .jang-pastki { margin-top: auto; }
 
+.jang-qidiruv-onlayn { align-self: stretch; text-align: left; }
+.jang-onlayn-sarlavha { margin: 4px 0 0; font: 700 15px Inter, system-ui, sans-serif; color: var(--qora); }
+.jang-qidiruvchi { display: block; padding: 12px 16px; border-radius: 16px; background: rgba(88,181,35,.14); border: 1.5px solid rgba(88,181,35,.5);
+  color: var(--tm-2f7a12, #2F7A12); font: 700 15px Inter, system-ui, sans-serif; text-decoration: none; text-align: center; animation: jang-pul 1.2s ease-in-out infinite alternate; }
+.jang-chaqir.qidiryapti { background: #F0A22E; text-decoration: none; }
+
 /* ===== TUN REJIMI (avto: asboblar/tun-rejimi.py) ===== */
 html[data-mavzu="tun"] {
   color-scheme: dark;

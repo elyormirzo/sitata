@@ -994,7 +994,14 @@ Object.assign(TARJIMA.ru, Object.assign({
   "Juda ko'p chaqiruv — biroz kuting.": "Слишком много вызовов — подождите немного.",
   "Chaqirib bo'lmadi.": "Не удалось вызвать.",
   "duellar": "дуэлей",
-  "ball": "очков"
+  "ball": "очков",
+  "Hozir saytda boshqa o'yinchi yo'q. Kimdir kirib «Raqib qidirish»ni bossa, duel o'zi boshlanadi. Do'stingizni taklif qiling:": "Сейчас на сайте нет других игроков. Как только кто-то нажмёт «Найти соперника», дуэль начнётся сама. Пригласите друга:",
+  "✈ Telegram'da do'stni taklif qilish": "✈ Пригласить друга в Telegram",
+  "Men bilan sitata.uz'da onlayn duel o'yna! ⚔": "Сыграй со мной онлайн-дуэль на sitata.uz! ⚔",
+  "Saytda hozir onlayn — chaqiring:": "Сейчас на сайте — вызовите:",
+  "🔍 {n} kishi hozir raqib qidiryapti — bosing va darhol bellashing!": "🔍 {n} чел. ищут соперника — нажмите и сразитесь!",
+  "🔍 Bellashish": "🔍 Сразиться",
+  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Пока больше никого нет. Нажмите «Найти соперника» — дуэль начнётся, как только кто-то тоже начнёт поиск."
 }, TARJIMA.ru));
 Object.assign(TARJIMA.en, Object.assign({
   "Ulashish oynasi ochilmadi — rasmni bosib turib saqlang.": "Couldn't open the share sheet — press and hold the image to save it.",
@@ -1982,5 +1989,12 @@ Object.assign(TARJIMA.en, Object.assign({
   "Juda ko'p chaqiruv — biroz kuting.": "Too many challenges — wait a bit.",
   "Chaqirib bo'lmadi.": "Couldn't send the challenge.",
   "duellar": "duels",
-  "ball": "points"
+  "ball": "points",
+  "Hozir saytda boshqa o'yinchi yo'q. Kimdir kirib «Raqib qidirish»ni bossa, duel o'zi boshlanadi. Do'stingizni taklif qiling:": "No other players on the site right now. As soon as someone taps «Find an opponent», the duel starts. Invite a friend:",
+  "✈ Telegram'da do'stni taklif qilish": "✈ Invite a friend on Telegram",
+  "Men bilan sitata.uz'da onlayn duel o'yna! ⚔": "Play an online duel with me on sitata.uz! ⚔",
+  "Saytda hozir onlayn — chaqiring:": "Online now — challenge someone:",
+  "🔍 {n} kishi hozir raqib qidiryapti — bosing va darhol bellashing!": "🔍 {n} people are looking for an opponent — tap to play now!",
+  "🔍 Bellashish": "🔍 Play",
+  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Nobody else is here yet. Tap «Find an opponent» — the duel starts as soon as someone else searches too."
 }, TARJIMA.en));

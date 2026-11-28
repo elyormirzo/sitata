@@ -3,7 +3,7 @@
 -- Hamma yozish faqat quyidagi funksiyalar orqali (security definer, auth.uid() tekshiriladi).
 -- Bellashuv: 10 ta savol, har biriga 15 soniya; ikkala o'yinchi bir vaqtda, har kim o'z tezligida.
 -- G'olib — ko'p to'g'ri javob; teng bo'lsa — to'g'ri javoblarga kam vaqt sarflagan. Reyting: g'alaba +3, mag'lubiyat −1, durang +1;
--- bot bilan: g'alaba +1, mag'lubiyat 0.
+-- Faqat saytda onlayn turgan haqiqiy o'yinchilar bilan (bot yo'q).
 
 -- 1. Reyting
 create table if not exists public.jang_reyting (
@@ -17,7 +17,6 @@ create table if not exists public.jang_reyting (
 );
 create index if not exists jang_reyting_ball on public.jang_reyting (ball desc);
 alter table public.jang_reyting enable row level security;
-drop policy if exists "hamma ko'radi" on public.jang_reyting;
 create policy "hamma ko'radi" on public.jang_reyting for select using (true);
 grant select on public.jang_reyting to anon, authenticated;
 
@@ -47,7 +46,6 @@ create index if not exists janglar_a on public.janglar (a, yaratildi desc);
 create index if not exists janglar_b on public.janglar (b, yaratildi desc);
 create index if not exists janglar_kutish on public.janglar (holat, faol) where holat = 'kutish';
 alter table public.janglar enable row level security;
-drop policy if exists "ishtirokchilar ko'radi" on public.janglar;
 create policy "ishtirokchilar ko'radi" on public.janglar for select to authenticated using (a = auth.uid() or b = auth.uid());
 grant select on public.janglar to authenticated;
 
@@ -108,7 +106,7 @@ language plpgsql security definer set search_path = '' as $$
 declare me uuid := auth.uid(); v_id bigint;
 begin
   if me is null or not exists (select 1 from public.profillar where id = me) then raise exception 'profil yo''q'; end if;
-  delete from public.janglar where holat = 'kutish' and faol < now() - interval '2 minutes';   -- tashlab ketilgan navbatlar
+  update public.janglar set holat = 'bekor' where holat = 'kutish' and faol < now() - interval '2 minutes';   -- tashlab ketilgan navbatlar
   -- Meni kimdir topib bo'lganmi?
   select id into v_id from public.janglar where a = me and tur = 'tasodifiy' and holat = 'davom' and boshlandi > now() - interval '30 seconds' order by id desc limit 1;
   if v_id is not null then return v_id; end if;
@@ -116,7 +114,7 @@ begin
   select id into v_id from public.janglar where holat = 'kutish' and a <> me and faol > now() - interval '6 seconds'
     order by yaratildi limit 1 for update skip locked;
   if v_id is not null then
-    delete from public.janglar where a = me and holat = 'kutish';
+    update public.janglar set holat = 'bekor' where a = me and holat = 'kutish';
     update public.janglar set b = me, holat = 'davom', boshlandi = now() + interval '4 seconds' where id = v_id;
     return v_id;
   end if;
@@ -130,23 +128,8 @@ end $$;
 
 create or replace function public.jang_qidiruvni_bekor() returns void
 language sql security definer set search_path = '' as $$
-  delete from public.janglar where a = auth.uid() and holat = 'kutish';
+  update public.janglar set holat = 'bekor' where a = auth.uid() and holat = 'kutish';
 $$;
-
--- Bot bilan bellashuv (raqib topilmasa)
-create or replace function public.jang_bot(p_savollar jsonb) returns bigint
-language plpgsql security definer set search_path = '' as $$
-declare me uuid := auth.uid(); v_id bigint; v_javob jsonb := '[]'; i int; aniq float := 0.55 + random() * 0.25;
-begin
-  if me is null or not exists (select 1 from public.profillar where id = me) then raise exception 'profil yo''q'; end if;
-  delete from public.janglar where a = me and holat = 'kutish';
-  for i in 1 .. jsonb_array_length(p_savollar) loop
-    v_javob := v_javob || jsonb_build_object('t', random() < aniq, 'ms', 2500 + floor(random() * 8500)::int);
-  end loop;
-  insert into public.janglar (a, bot, tur, holat, savollar, boshlandi, b_javob)
-    values (me, true, 'bot', 'davom', p_savollar, now() + interval '3 seconds', v_javob) returning id into v_id;
-  return v_id;
-end $$;
 
 -- Javob yozish (ketma-ket: i — nechanchi savol)
 create or replace function public.jang_javob(p_id bigint, p_i int, p_togri boolean, p_ms int) returns void
@@ -258,9 +241,11 @@ create or replace function public.onlayn_oyinchilar() returns jsonb
 language sql stable security definer set search_path = '' as $$
   select jsonb_build_object(
     'soni', (select count(*) from public.faollik where vaqt > now() - interval '3 minutes'),
-    'royxat', coalesce((select jsonb_agg(x order by x->>'vaqt' desc) from (
+    'qidiryapti', (select count(*) from public.janglar where holat = 'kutish' and faol > now() - interval '6 seconds' and a <> auth.uid()),
+    'royxat', coalesce((select jsonb_agg(x order by (x->>'qidiryapti')::boolean desc, x->>'vaqt' desc) from (
       select jsonb_build_object('id', p.id, 'kod', p.kod, 'ism', p.ism, 'taxallus', p.taxallus, 'rasm', p.rasm,
-        'ball', coalesce(r.ball, 0), 'vaqt', f.vaqt) x
+        'ball', coalesce(r.ball, 0), 'vaqt', f.vaqt,
+        'qidiryapti', exists (select 1 from public.janglar k where k.a = p.id and k.holat = 'kutish' and k.faol > now() - interval '6 seconds')) x
       from public.faollik f join public.profillar p on p.id = f.profil_id left join public.jang_reyting r on r.profil_id = p.id
       where f.vaqt > now() - interval '3 minutes' and f.profil_id <> auth.uid()
       order by f.vaqt desc limit 40) s), '[]'::jsonb));
@@ -275,9 +260,9 @@ language sql stable security definer set search_path = '' as $$
     where r.janglar > 0 order by r.ball desc, r.yutuq desc, r.yangilandi limit 50) s;
 $$;
 
-revoke execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor(), public.jang_bot(jsonb), public.jang_javob(bigint, int, boolean, int),
+revoke execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor(), public.jang_javob(bigint, int, boolean, int),
   public.jang_holati(bigint), public.jang_taklif(uuid, jsonb, bigint), public.jang_qabul(bigint), public.jang_rad(bigint),
   public.faollik_yoz(), public.onlayn_oyinchilar(), public.jang_reytingi() from public, anon;
-grant execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor(), public.jang_bot(jsonb), public.jang_javob(bigint, int, boolean, int),
+grant execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor(), public.jang_javob(bigint, int, boolean, int),
   public.jang_holati(bigint), public.jang_taklif(uuid, jsonb, bigint), public.jang_qabul(bigint), public.jang_rad(bigint),
   public.faollik_yoz(), public.onlayn_oyinchilar(), public.jang_reytingi() to authenticated;

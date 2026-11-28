@@ -1,6 +1,6 @@
 // ===== ONLAYN DUEL =====
 // #duellar — lobbi (daraja, ball, onlayn o'yinchilar, reyting, chaqiruv, mening duellarim, «Raqib qidirish»)
-// #jang/qidir — raqib qidirish (radar); topilmasa — bot bilan
+// #jang/qidir — raqib qidirish (radar): faqat saytda onlayn turgan haqiqiy o'yinchilar bilan; kutilganda — onlayn o'yinchilarni chaqirish
 // #jang/<id> — chaqiruv / 3-2-1 / o'yin (10 savol × 15 soniya) / natija (qasos olish)
 // #jang/onlayn, #jang/reyting, #jang/mening, #jang/chaqir
 // Baza: janglar, jang_reyting, faollik va jang_* funksiyalari — supabase/jang.sql. Holat har soniyada so'raladi.
@@ -63,7 +63,8 @@ async function jangLobbi() {
   const nishon = yarat("span", "jang-onlayn-son", "…"); onlayn.appendChild(nishon);
   panjara.append(onlayn, tile("#jang/reyting", "Eng zo'rlari", "Reytingni ko'ring", "oltin", "🏆"),
     tile("#jang/chaqir", "Do'stni duelga chaqirish", "", "", "👥"), tile("#jang/mening", "Mening duellarim", "", "", "📋"));
-  q.appendChild(panjara);
+  const qidiruvchi = havola("#jang/qidir", "jang-qidiruvchi yashirin", "");
+  q.append(qidiruvchi, panjara);
   q.appendChild(havola("#duellar/eski", "jang-eski", "Kitobdosh bilan navbatma-navbat duel (eski) →"));
   const boshla = havola("#jang/qidir", "jang-katta-tugma", "");
   boshla.innerHTML = QILICH; boshla.appendChild(yarat("span", "", "Raqib qidirish"));
@@ -76,6 +77,10 @@ async function jangLobbi() {
   const ball = r ? r.ball : 0, d = jangDarajasi(ball);
   stat.append(ustun(d.belgi, d.nom, "daraja"), ustun(String(ball), "ball", "ball"), ustun(String(r ? r.janglar : 0), "duellar"));
   nishon.textContent = "● " + ((on && on.soni) || 1);
+  if (on && on.qidiryapti > 0) {
+    qidiruvchi.textContent = t("🔍 {n} kishi hozir raqib qidiryapti — bosing va darhol bellashing!", { n: on.qidiryapti });
+    qidiruvchi.classList.remove("yashirin");
+  }
 }
 
 // ---------- Raqib qidirish ----------
@@ -91,26 +96,38 @@ async function jangQidir() {
   const radar = yarat("div", "jang-radar");
   radar.append(yarat("span", "jang-radar-nur"), jangAvatar(mening, 64, "jang-radar-men"));
   const vaqt = yarat("p", "jang-vaqt", "0:00");
-  const bot = yarat("button", "jang-ikkinchi yashirin", "🤖 Bot bilan o'ynash"); bot.type = "button";
+  const onlayn = yarat("div", "jang-qidiruv-onlayn yashirin");
   const bekor = yarat("button", "jang-katta-tugma", "✕ Bekor qilish"); bekor.type = "button";
   const xabar = yarat("p", "kichik-matn");
-  q.append(radar, vaqt, xabar, bot, yarat("div", "jang-pastki")); q.lastChild.appendChild(bekor);
+  q.append(radar, vaqt, xabar, onlayn, yarat("div", "jang-pastki")); q.lastChild.appendChild(bekor);
   s.appendChild(q);
   const savollar = jangSavollari();
   const t0 = Date.now();
   bekor.addEventListener("click", () => { location.hash = "#duellar"; });
-  bot.addEventListener("click", async () => {
-    bot.disabled = true;
-    clearInterval(jangQidiruv); jangQidiruv = null;
-    const { data, error } = await m.rpc("jang_bot", { p_savollar: savollar });
-    if (error || !data) { xabar.textContent = t("Boshlab bo'lmadi — qayta urinib ko'ring."); bot.disabled = false; return; }
-    location.hash = "#jang/" + data;
-  });
+  // Raqib tez topilmasa — saytda onlayn turganlarni ko'rsatamiz (to'g'ridan-to'g'ri chaqirish uchun)
+  let oxirgiRoyxat = 0;
+  const onlaynniChiz = async () => {
+    oxirgiRoyxat = Date.now();
+    const { data } = await m.rpc("onlayn_oyinchilar");
+    const r = ((data && data.royxat) || []).slice(0, 8);
+    onlayn.innerHTML = ""; onlayn.classList.remove("yashirin");
+    if (!r.length) {
+      onlayn.append(yarat("p", "kichik-matn", "Hozir saytda boshqa o'yinchi yo'q. Kimdir kirib «Raqib qidirish»ni bossa, duel o'zi boshlanadi. Do'stingizni taklif qiling:"));
+      const ul = yarat("button", "jang-ikkinchi", "✈ Telegram'da do'stni taklif qilish"); ul.type = "button";
+      ul.addEventListener("click", () => window.open("https://t.me/share/url?url=" + encodeURIComponent(SAYT_MANZILI + "#jang/qidir") + "&text=" + encodeURIComponent(t("Men bilan sitata.uz'da onlayn duel o'yna! ⚔")), "_blank", "noopener"));
+      onlayn.appendChild(ul);
+      return;
+    }
+    onlayn.appendChild(yarat("p", "jang-onlayn-sarlavha", t("Saytda hozir onlayn — chaqiring:")));
+    const q2 = yarat("div", "jang-royxat");
+    r.forEach((p) => { const b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q2.appendChild(oyinchiQatori(p, b)); });
+    onlayn.appendChild(q2);
+  };
   let band = false;
   const sora = async () => {
     const sek = Math.floor((Date.now() - t0) / 1000);
     vaqt.textContent = Math.floor(sek / 60) + ":" + String(sek % 60).padStart(2, "0");
-    if (sek >= 12) bot.classList.remove("yashirin");
+    if (sek >= 8 && Date.now() - oxirgiRoyxat > 6000) onlaynniChiz();
     if (band) return; band = true;
     try {
       const { data, error } = await m.rpc("jang_qidir", { p_savollar: savollar });
@@ -369,7 +386,7 @@ function natijaEkrani(s, st) {
 function qasosniYangila(st) {
   const b = st.qasosTugma, j = st.j;
   if (!b) return;
-  if (j.bot) { b.innerHTML = QILICH; b.appendChild(yarat("span", "", "Bot bilan qayta")); b.style.removeProperty("--qoldi"); return; }
+  if (j.bot) { b.innerHTML = QILICH; b.appendChild(yarat("span", "", "Yangi duel")); b.style.removeProperty("--qoldi"); return; }
   if (j.qasos_holat === "davom" && j.qasos_id) { clearInterval(jangTaymer); location.hash = "#jang/" + j.qasos_id; return; }
   const qoldi = Math.max(0, 1 - (Date.now() - st.qasosBoshi) / 30000);
   b.style.setProperty("--qoldi", qoldi);
@@ -383,11 +400,7 @@ function qasosniYangila(st) {
 async function qasosBos(st) {
   const j = st.j, m = st.m;
   st.qasosTugma.disabled = true;
-  if (j.bot) {
-    const { data } = await m.rpc("jang_bot", { p_savollar: jangSavollari() });
-    if (data) location.hash = "#jang/" + data; else st.qasosTugma.disabled = false;
-    return;
-  }
+  if (j.bot) { location.hash = "#jang/qidir"; return; }
   const raqibId = st.menA ? j.b : j.a;
   const { data, error } = await m.rpc("jang_taklif", { p_raqib: raqibId, p_savollar: jangSavollari(), p_oldingi: j.id });
   if (error || !data) { st.qasosTugma.disabled = false; qisqaXabar(t("Qasos taklifini yuborib bo'lmadi.")); return; }
@@ -428,9 +441,14 @@ async function jangOnlayn() {
   const { data } = await m.rpc("onlayn_oyinchilar");
   const r = (data && data.royxat) || [];
   s.appendChild(yarat("p", "kichik-matn markaz", t("Hozir saytda: {n}", { n: (data && data.soni) || 1 })));
-  if (!r.length) { s.appendChild(yarat("p", "bosh-holat", "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirishi bilan bellashasiz yoki bot bilan o'ynaysiz.")); s.appendChild(havola("#jang/qidir", "jang-katta-tugma", "Raqib qidirish")); return; }
+  if (!r.length) { s.appendChild(yarat("p", "bosh-holat", "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.")); s.appendChild(havola("#jang/qidir", "jang-katta-tugma", "Raqib qidirish")); return; }
   const q = yarat("div", "jang-royxat");
-  r.forEach((p) => { const b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q.appendChild(oyinchiQatori(p, b)); });
+  r.forEach((p) => {
+    let b;
+    if (p.qidiryapti) { b = havola("#jang/qidir", "jang-chaqir qidiryapti", "🔍 Bellashish"); }
+    else { b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); }
+    q.appendChild(oyinchiQatori(p, b));
+  });
   s.appendChild(q);
 }
 
