@@ -1573,6 +1573,17 @@ body.jang-rejim.panel-tor .yuqori { margin-left: -16px; padding-left: 16px; }
   color: var(--tm-2f7a12, #2F7A12); font: 700 15px Inter, system-ui, sans-serif; text-decoration: none; text-align: center; animation: jang-pul 1.2s ease-in-out infinite alternate; }
 .jang-chaqir.qidiryapti { background: #F0A22E; text-decoration: none; }
 
+/* Saytdagi jami onlayn (js/yuqori.js) */
+.onlayn-son { flex: none; display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px; border-radius: 999px; background: rgba(88,181,35,.12);
+  color: var(--tm-2f7a12, #2F7A12); font: 700 13px Inter, system-ui, sans-serif; text-decoration: none; white-space: nowrap; }
+.onlayn-son:hover { background: rgba(88,181,35,.2); }
+.onlayn-nuqta { width: 8px; height: 8px; border-radius: 50%; background: #3FB31F; box-shadow: 0 0 0 0 rgba(63,179,31,.6); animation: onlayn-puls 2s infinite; }
+@keyframes onlayn-puls { 70% { box-shadow: 0 0 0 6px rgba(63,179,31,0); } 100% { box-shadow: 0 0 0 0 rgba(63,179,31,0); } }
+@media (prefers-reduced-motion: reduce) { .onlayn-nuqta { animation: none; } }
+@media (max-width: 479px) { .onlayn-yozuv { display: none; } .onlayn-son { padding: 0 9px; } }
+@media (min-width: 1100px) { body.yon-menyuli .onlayn-yozuv { display: none; } body.yon-menyuli .onlayn-son { padding: 0 10px; } }
+html[data-mavzu="tun"] .onlayn-son { color: #8FD86B; }
+
 /* ===== TUN REJIMI (avto: asboblar/tun-rejimi.py) ===== */
 html[data-mavzu="tun"] {
   color-scheme: dark;

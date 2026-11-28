@@ -169,6 +169,29 @@ function kirishTugmasi() {
   return b;
 }
 
+// Saytdagi jami onlayn: «🟢 12 onlayn» — bosilsa onlayn o'yinchilar ro'yxati
+function onlaynSoni() {
+  const a = havola("#jang/onlayn", "onlayn-son yashirin", "");
+  a.setAttribute("aria-label", t("Saytda onlayn"));
+  const son = yarat("b", "", ""), yozuv = yarat("span", "onlayn-yozuv", "onlayn");
+  a.append(yarat("i", "onlayn-nuqta"), son, yozuv);
+  const yukla = async () => {
+    if (!BAZA_YOQIQ || document.hidden) return;
+    try {
+      const m = await mijozOl();
+      const { data, error } = await m.rpc("onlayn_soni");
+      if (error || data == null) return;
+      son.textContent = String(Math.max(1, data));
+      a.title = t("Saytda hozir onlayn: {n}", { n: Math.max(1, data) });
+      a.classList.remove("yashirin");
+    } catch (e) {}
+  };
+  setTimeout(yukla, 5000);                 // faollik yozilgandan keyin
+  setInterval(yukla, 60000);
+  document.addEventListener("visibilitychange", yukla);
+  return a;
+}
+
 function yuqoriniBoshla() {
   const yuqori = document.querySelector(".yuqori"), ong = yuqori && yuqori.querySelector(".yuqori-ong");
   if (!ong || yuqori.querySelector(".mavzu-tugma")) return;
@@ -176,7 +199,7 @@ function yuqoriniBoshla() {
   const qidiruv = yuqori.querySelector(".qidiruv");
   const qator = yarat("div", "yuqori-qator2");
   if (qidiruv) { yuqori.insertBefore(qator, qidiruv); qator.appendChild(qidiruv); } else yuqori.insertBefore(qator, ong);
-  qator.appendChild(obHavoTugmasi());
+  qator.append(obHavoTugmasi(), onlaynSoni());
   const qongiroq = ong.querySelector("#qongiroq");
   ong.insertBefore(tilTugmasi(), qongiroq);
   ong.insertBefore(mavzuTugmasi(), qongiroq);

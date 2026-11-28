@@ -266,3 +266,10 @@ revoke execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor
 grant execute on function public.jang_qidir(jsonb), public.jang_qidiruvni_bekor(), public.jang_javob(bigint, int, boolean, int),
   public.jang_holati(bigint), public.jang_taklif(uuid, jsonb, bigint), public.jang_qabul(bigint), public.jang_rad(bigint),
   public.faollik_yoz(), public.onlayn_oyinchilar(), public.jang_reytingi() to authenticated;
+
+-- Saytdagi jami onlayn (oxirgi 3 daqiqada faol profillar) — tepadagi «🟢 N onlayn» uchun, hamma ko'ra oladi
+create or replace function public.onlayn_soni() returns int
+language sql stable security definer set search_path = '' as $$
+  select count(*)::int from public.faollik where vaqt > now() - interval '3 minutes';
+$$;
+grant execute on function public.onlayn_soni() to anon, authenticated;

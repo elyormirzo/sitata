@@ -1001,7 +1001,10 @@ Object.assign(TARJIMA.ru, Object.assign({
   "Saytda hozir onlayn — chaqiring:": "Сейчас на сайте — вызовите:",
   "🔍 {n} kishi hozir raqib qidiryapti — bosing va darhol bellashing!": "🔍 {n} чел. ищут соперника — нажмите и сразитесь!",
   "🔍 Bellashish": "🔍 Сразиться",
-  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Пока больше никого нет. Нажмите «Найти соперника» — дуэль начнётся, как только кто-то тоже начнёт поиск."
+  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Пока больше никого нет. Нажмите «Найти соперника» — дуэль начнётся, как только кто-то тоже начнёт поиск.",
+  "onlayn": "онлайн",
+  "Saytda onlayn": "Сейчас на сайте",
+  "Saytda hozir onlayn: {n}": "Сейчас на сайте: {n}"
 }, TARJIMA.ru));
 Object.assign(TARJIMA.en, Object.assign({
   "Ulashish oynasi ochilmadi — rasmni bosib turib saqlang.": "Couldn't open the share sheet — press and hold the image to save it.",
@@ -1996,5 +1999,8 @@ Object.assign(TARJIMA.en, Object.assign({
   "Saytda hozir onlayn — chaqiring:": "Online now — challenge someone:",
   "🔍 {n} kishi hozir raqib qidiryapti — bosing va darhol bellashing!": "🔍 {n} people are looking for an opponent — tap to play now!",
   "🔍 Bellashish": "🔍 Play",
-  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Nobody else is here yet. Tap «Find an opponent» — the duel starts as soon as someone else searches too."
+  "Hozircha boshqa hech kim yo'q. «Raqib qidirish»ni bosing — kimdir kirib qidirishni boshlashi bilan duel o'zi boshlanadi.": "Nobody else is here yet. Tap «Find an opponent» — the duel starts as soon as someone else searches too.",
+  "onlayn": "online",
+  "Saytda onlayn": "Online on the site",
+  "Saytda hozir onlayn: {n}": "Online on the site now: {n}"
 }, TARJIMA.en));
