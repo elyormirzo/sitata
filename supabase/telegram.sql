@@ -11,3 +11,21 @@
 grant select, delete on public.telegram_kodlar to service_role;
 grant select, insert, update, delete on public.telegram_ulanishlar to service_role;
 grant select (id, ism, til) on public.profillar to service_role;
+
+-- ===== Saytga Telegram orqali kirish (telegram funksiyasi: kirish_kodi / kirish_holati / kirish_yakun) =====
+-- kod — 10 daqiqa amal qiladi; bot /start k_<kod> bilan tasdiqlaydi; faqat server funksiyasi (service_role) o'qiydi/yozadi.
+create table if not exists public.tg_kirish (
+  kod         text primary key check (kod ~ '^[0-9a-f]{32}$'),
+  holat       text not null default 'kutish' check (holat in ('kutish', 'tasdiq', 'ishlatildi')),
+  tg_id       bigint,
+  tg_username text,
+  tg_ism      text,
+  tg_til      text,
+  yangi_uid   uuid,
+  muddat      timestamptz not null default now() + interval '10 minutes',
+  yaratildi   timestamptz not null default now()
+);
+alter table public.tg_kirish enable row level security;
+revoke all on public.tg_kirish from anon, authenticated;
+grant select, insert, update, delete on public.tg_kirish to service_role;
+grant select, insert, update, delete on public.telegram_ulanishlar to service_role;

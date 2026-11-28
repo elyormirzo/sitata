@@ -162,8 +162,8 @@ function sahifaniKor() {
   let { nom, param } = joriyYol();
   manzilniTogrila(nom, param);
   oxirgiManzil = location.href;
-  if (nom === "telegram" || nom === "sozlamalar" || nom === "kirish") {   // qisqa manzillar → profil sozlamalari
-    param = nom === "kirish" ? "hisob" : "sozlamalar"; nom = "profilim";
+  if (nom === "telegram" || nom === "sozlamalar") {   // qisqa manzillar → profil sozlamalari (#kirish — js/tgkirish.js)
+    param = "sozlamalar"; nom = "profilim";
     history.replaceState(null, "", location.pathname + location.search + "#profilim/" + param);
   }
   if (nom === "daraja" || nom === "reyting") {          // eski manzillar → profil tablari
@@ -985,6 +985,7 @@ function profilimniChiz() {
   s.append(yarat("h2", "", "Profilim"));
   if (!BAZA_YOQIQ) { s.appendChild(yarat("p", "kichik-matn", "Profillar hali sozlanmagan.")); return; }
   s.appendChild(yarat("p", "kichik-matn", "Profil oching — natijalaringiz saqlanadi, reytingga kirasiz, kitobdoshlar orttirasiz va guruhlarga qo'shilasiz."));
+  if (typeof telegramKirishTugmasi === "function") s.appendChild(telegramKirishTugmasi());
   s.appendChild(googleKirishTugmasi("#profilim", "Google bilan kirish"));
   s.appendChild(yarat("p", "kichik-matn", "Profil Google'dagi ismingiz bilan ochiladi; ism va taxallusni keyin o'zgartirishingiz mumkin. Email boshqalarga ko'rinmaydi. Avval Google bilan kirgan bo'lsangiz — o'sha profilingiz ochiladi."));
 }

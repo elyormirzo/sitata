@@ -1401,6 +1401,39 @@ body.panel-tor .lenta-tablar { margin-left: -58px; padding-left: 42px; }
 /* Tun rejimi: to'q (endi ochiq) fon ustidagi och yozuvlar */
 html[data-mavzu="tun"] .til-tanlagich button.faol, html[data-mavzu="tun"] .qisqa-xabar, html[data-mavzu="tun"] .jonli-sanoq { color: var(--fon); }
 
+/* ===== Telegram orqali kirish (js/tgkirish.js) ===== */
+.tg-kirish { margin: 10px 0; }
+.tg-kirish-tugma { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border: 1.5px solid #2AABEE; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(42,171,238,.14), var(--tb-f2d06b-14, rgba(242,208,107,.14))); color: var(--qora); text-align: left; cursor: pointer;
+  transition: transform .1s, box-shadow .15s; }
+.tg-kirish-tugma:hover { box-shadow: 0 4px 16px rgba(42,171,238,.25); }
+.tg-kirish-tugma:active { transform: scale(.98); }
+.tg-kirish-tugma:disabled { cursor: default; }
+.tg-kirish-belgi { flex: none; display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 50%; background: #2AABEE; color: #fff; }
+.tg-kirish-tugma.kutish .tg-kirish-belgi { background: conic-gradient(#2AABEE 0 70%, rgba(42,171,238,.25) 70%); animation: tg-aylan 1s linear infinite; }
+.tg-kirish-tugma.kutish .tg-kirish-belgi svg { animation: tg-aylan 1s linear infinite reverse; }
+.tg-kirish-tugma.ok { border-color: #3FA34D; } .tg-kirish-tugma.ok .tg-kirish-belgi { background: #3FA34D; }
+.tg-kirish-tugma.xato { border-color: #B3261E; }
+@keyframes tg-aylan { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tg-kirish-tugma.kutish .tg-kirish-belgi, .tg-kirish-tugma.kutish .tg-kirish-belgi svg { animation: none; } }
+.tg-kirish-yozuv { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tg-kirish-yozuv b { font: 700 17px Inter, system-ui, sans-serif; }
+.tg-kirish-yozuv small { font: 13px/1.35 Inter, system-ui, sans-serif; color: var(--kulrang); }
+.kirish-oyna { position: fixed; inset: 0; z-index: 88; display: flex; align-items: flex-end; justify-content: center; background: rgba(30,20,10,.55); }
+.kirish-quti { position: relative; width: 100%; max-width: 460px; max-height: 92vh; overflow-y: auto; padding: 26px 20px calc(20px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0; background: var(--tb-fbf5e6, #FBF5E6); text-align: center; box-shadow: 0 -10px 40px rgba(30,20,10,.3); }
+@media (min-width: 560px) { .kirish-oyna { align-items: center; } .kirish-quti { border-radius: 22px; } }
+.kirish-quti .panel-oyna-yop { position: absolute; top: 10px; right: 10px; }
+.kirish-belgi { display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; margin: 0 auto 12px; border-radius: 24px; background: #2AABEE; color: #fff; box-shadow: 0 8px 24px rgba(42,171,238,.35); }
+.kirish-quti h3 { margin: 4px 0 6px; font: 700 24px Lora, Georgia, serif; color: var(--qora); }
+.kirish-afzal { list-style: none; margin: 16px 0 6px; padding: 0; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.kirish-afzal li { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 999px; border: 1px solid; font: 15px Inter, system-ui, sans-serif; color: var(--qora); }
+.kirish-afzal li.yashil { background: rgba(63,163,77,.1); border-color: rgba(63,163,77,.35); }
+.kirish-afzal li.kok { background: rgba(42,171,238,.1); border-color: rgba(42,171,238,.35); }
+.kirish-afzal li.sariq { background: var(--tb-d9b26a-14, rgba(217,178,106,.14)); border-color: var(--tc-d9b26a-5, rgba(217,178,106,.5)); }
+.kirish-yoki { margin: 6px 0; font: italic 13px Lora, Georgia, serif; color: var(--kulrang); }
+.kirish-shart { margin-top: 12px; }
+
 /* ===== TUN REJIMI (avto: asboblar/tun-rejimi.py) ===== */
 html[data-mavzu="tun"] {
   color-scheme: dark;
@@ -1416,6 +1449,7 @@ html[data-mavzu="tun"] {
   --chegara: #3F352A;
   --tb-d8c9a8: #28251f;
   --tb-d9b26a: #201c15;
+  --tb-d9b26a-14: rgba(32,28,21,.14);
   --tb-dcebf7: #25303a;
   --tb-e2d3b3: #2c2920;
   --tb-e7f1dd: #2f3528;
@@ -1432,6 +1466,7 @@ html[data-mavzu="tun"] {
   --tb-f1e6cc: #353023;
   --tb-f1f6ea: #32382a;
   --tb-f2d06b: #272315;
+  --tb-f2d06b-14: rgba(39,35,21,.14);
   --tb-f4b266: #271e15;
   --tb-f4ead5: #373124;
   --tb-f6d5c4: #372820;
@@ -1468,6 +1503,7 @@ html[data-mavzu="tun"] {
   --tc-cdb68a: #403a30;
   --tc-d9a08f: #453531;
   --tc-d9b26a: #3f3729;
+  --tc-d9b26a-5: rgba(63,55,41,.5);
   --tc-dadce0: #47484b;
   --tc-e0cfa8: #4b4436;
   --tc-e2b0a2: #4b3934;

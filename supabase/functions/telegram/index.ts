@@ -81,6 +81,23 @@ async function telegramXabari(u: any) {
   const [buyruq, ...qolgan] = msg.text.trim().split(/\s+/);
   const arg = qolgan.join(" ");
 
+  // Saytga Telegram orqali kirish: /start k_<kod>
+  if (buyruq === "/start" && /^k_[0-9a-f]{32}$/.test(arg)) {
+    const kod = arg.slice(2);
+    const til = await chatTili(chatId, msg.from?.language_code);
+    const { data: k } = await db.from("tg_kirish").select("holat,muddat").eq("kod", kod).maybeSingle();
+    if (!k || k.holat !== "kutish" || new Date(k.muddat) < new Date()) {
+      await yubor(chatId, m(til, "⏳ Bu kirish havolasi eskirgan. Saytda «Telegram orqali kirish» tugmasini qayta bosing."), tugma("sitata.uz", sayt(til, "#kirish")));
+      return;
+    }
+    const f = msg.from || {};
+    await db.from("tg_kirish").update({
+      holat: "tasdiq", tg_id: f.id, tg_username: f.username || null,
+      tg_ism: [f.first_name, f.last_name].filter(Boolean).join(" ").slice(0, 60) || null, tg_til: (f.language_code || "").slice(0, 5) || null,
+    }).eq("kod", kod).eq("holat", "kutish");
+    await yubor(chatId, m(til, "✅ Tasdiqlandi! Endi saytga qayting — kirish o'zi davom etadi."), tugma(m(til, "Saytga qaytish"), sayt(til, "#kirish")));
+    return;
+  }
   if (buyruq === "/start" && /^[0-9a-f]{32}$/.test(arg)) {
     const { data: k } = await db.from("telegram_kodlar").select("profil_id,muddat").eq("kod", arg).maybeSingle();
     if (!k || new Date(k.muddat) < new Date()) {
@@ -153,6 +170,101 @@ async function kechkiEslatmalar() {
   return { yuborildi };
 }
 
+// ===== Saytga Telegram orqali kirish =====
+// 1) sayt: kirish_kodi → kod; foydalanuvchi botda /start k_<kod> bosadi → bot kodni Telegram hisobi bilan tasdiqlaydi
+// 2) sayt: kirish_holati (har 2 soniyada) → tasdiqlangach:
+//    · bu Telegram'ga ulangan profil bor — o'sha profilga kirish uchun bir martalik token (magic link token_hash)
+//    · ulangan profil yo'q, lekin saytda profil ochiq — joriy profilga Telegram ulanadi
+//    · hech biri yo'q — yangi hisob ochiladi (ism Telegram'dan), sayt profil yaratib, kirish_yakun bilan ulaydi
+// Telegram hisoblari uchun Auth'da ko'rinmas texnik email: tg-<id>@telegram.sitata.uz (xat yuborilmaydi).
+const tgEmail = (id: number) => `tg-${id}@telegram.sitata.uz`;
+const hex = (n: number) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+async function chaqiruvchi(req: Request) {
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || token.split(".").length !== 3) return null;
+  const { data } = await db.auth.getUser(token);
+  return data?.user || null;
+}
+
+async function kirishKodi() {
+  await db.from("tg_kirish").delete().lt("muddat", new Date(Date.now() - 3600 * 1000).toISOString());
+  const { count } = await db.from("tg_kirish").select("kod", { count: "exact", head: true }).eq("holat", "kutish").gt("muddat", new Date().toISOString());
+  if ((count ?? 0) > 2000) return { xato: "band" };
+  const kod = hex(16);
+  const { error } = await db.from("tg_kirish").insert({ kod });
+  if (error) return { xato: "yaratilmadi" };
+  return { kod, bot: await botUsername() };
+}
+
+// Mavjud foydalanuvchini Telegram bilan belgilash (email bo'lmasa — texnik email) va kirish tokeni
+async function kirishTokeni(uid: string, tgId: number) {
+  const { data: u } = await db.auth.admin.getUserById(uid);
+  if (!u?.user) return null;
+  let email = u.user.email;
+  const meta = { ...(u.user.app_metadata || {}), telegram: tgId };
+  if (!email) {
+    email = tgEmail(tgId);
+    const { error } = await db.auth.admin.updateUserById(uid, { email, email_confirm: true, app_metadata: meta });
+    if (error) return null;
+  } else if (u.user.app_metadata?.telegram !== tgId) await db.auth.admin.updateUserById(uid, { app_metadata: meta });
+  const { data: l, error } = await db.auth.admin.generateLink({ type: "magiclink", email });
+  if (error || !l?.properties?.hashed_token) return null;
+  return l.properties.hashed_token;
+}
+
+async function kirishHolati(kod: string, req: Request) {
+  if (!/^[0-9a-f]{32}$/.test(kod)) return { holat: "eskirgan" };
+  const { data: k } = await db.from("tg_kirish").select("*").eq("kod", kod).maybeSingle();
+  if (!k || new Date(k.muddat) < new Date() || k.holat === "ishlatildi") return { holat: "eskirgan" };
+  if (k.holat === "kutish") return { holat: "kutish" };
+  // Bir martalik: tokenni faqat bir marta beramiz
+  const { data: ol } = await db.from("tg_kirish").update({ holat: "ishlatildi" }).eq("kod", kod).eq("holat", "tasdiq").select("kod");
+  if (!ol?.length) return { holat: "eskirgan" };
+  const tgId = Number(k.tg_id);
+  const men = await chaqiruvchi(req);
+  const { data: ulangan } = await db.from("telegram_ulanishlar").select("profil_id").eq("chat_id", tgId).maybeSingle();
+
+  if (ulangan) {
+    if (men && men.id === ulangan.profil_id) { await kirishTokeni(men.id, tgId); return { holat: "ulandi" }; }
+    const token = await kirishTokeni(ulangan.profil_id, tgId);
+    return token ? { holat: "kirish", token_hash: token } : { holat: "xato" };
+  }
+  // Telegram hali hech qaysi profilga ulanmagan — saytdagi joriy profilga ulaymiz
+  if (men) {
+    const { data: p } = await db.from("profillar").select("id").eq("id", men.id).maybeSingle();
+    if (p) {
+      await db.from("telegram_ulanishlar").upsert({ profil_id: men.id, chat_id: tgId, tg_username: k.tg_username, xabarlar: true }, { onConflict: "profil_id" });
+      await kirishTokeni(men.id, tgId);
+      return { holat: "ulandi" };
+    }
+  }
+  // Yangi hisob (yoki avval ochilib, profili yaratilmay qolgan hisob)
+  const email = tgEmail(tgId);
+  const { error: e1 } = await db.auth.admin.createUser({
+    email, email_confirm: true, app_metadata: { telegram: tgId },
+    user_metadata: { full_name: k.tg_ism || "Kitobxon", name: k.tg_ism || "Kitobxon" },
+  });
+  if (e1 && !/already|exists|registered/i.test(e1.message || "")) return { holat: "xato" };
+  const { data: l, error: e2 } = await db.auth.admin.generateLink({ type: "magiclink", email });
+  if (e2 || !l?.properties?.hashed_token) return { holat: "xato" };
+  await db.from("tg_kirish").update({ yangi_uid: l.user?.id || null }).eq("kod", kod);
+  return { holat: "kirish", token_hash: l.properties.hashed_token, yangi: true };
+}
+
+// Yangi hisob profil ochgach — Telegram chatini profilga ulaymiz (bildirishnomalar shu yerga keladi)
+async function kirishYakun(kod: string, req: Request) {
+  const men = await chaqiruvchi(req);
+  if (!men || !/^[0-9a-f]{32}$/.test(kod)) return { ok: false };
+  const { data: k } = await db.from("tg_kirish").select("tg_id,tg_username,yangi_uid").eq("kod", kod).maybeSingle();
+  if (!k || k.yangi_uid !== men.id) return { ok: false };
+  const { data: p } = await db.from("profillar").select("id").eq("id", men.id).maybeSingle();
+  if (!p) return { ok: false };
+  await db.from("telegram_ulanishlar").upsert({ profil_id: men.id, chat_id: Number(k.tg_id), tg_username: k.tg_username, xabarlar: true }, { onConflict: "profil_id" });
+  await db.from("tg_kirish").delete().eq("kod", kod);
+  return { ok: true };
+}
+
 // Bot buyruqlari va tavsifi — har bir til uchun (Telegram ilovasi tiliga qarab ko'rinadi)
 async function sozla() {
   const url = Deno.env.get("SUPABASE_URL") + "/functions/v1/telegram";
@@ -185,6 +297,12 @@ Deno.serve(async (req) => {
       await telegramXabari(await req.json().catch(() => ({})));
       return javob({ ok: true });
     }
+
+    // Saytga Telegram orqali kirish (ochiq: kod — maxfiy kalit)
+    const ochiq = await req.clone().json().catch(() => ({}));
+    if (ochiq.turi === "kirish_kodi") return javob(await kirishKodi());
+    if (ochiq.turi === "kirish_holati") return javob(await kirishHolati(String(ochiq.kod || ""), req));
+    if (ochiq.turi === "kirish_yakun") return javob(await kirishYakun(String(ochiq.kod || ""), req));
 
     // Ichki chaqiruvlar (SQL, trigger, cron)
     const { data: ruxsat } = await db.rpc("push_kalit_togrimi", { k: req.headers.get("x-sitata-kalit") || "" });

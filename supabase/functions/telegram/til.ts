@@ -41,6 +41,9 @@ const MATN: Record<string, [string, string]> = {
   "Xabarlarni qayta yoqish": ["Снова включить уведомления","Turn notifications back on"],
   "Bot haqida": ["О боте","About the bot"],
   "sitata.uz — kitob o'qish va iqtiboslar jamiyati. Bot saytdagi yangiliklar va o'qish eslatmalarini yuboradi.": ["sitata.uz — сообщество любителей книг и цитат. Бот присылает новости сайта и напоминания о чтении.","sitata.uz — a community for books and quotes. The bot sends site news and reading reminders."],
+  "✅ Tasdiqlandi! Endi saytga qayting — kirish o'zi davom etadi.": ["✅ Подтверждено! Вернитесь на сайт — вход продолжится сам.","✅ Confirmed! Go back to the site — sign-in will continue automatically."],
+  "⏳ Bu kirish havolasi eskirgan. Saytda «Telegram orqali kirish» tugmasini qayta bosing.": ["⏳ Ссылка для входа устарела. Нажмите на сайте «Войти через Telegram» ещё раз.","⏳ This sign-in link has expired. Tap «Sign in with Telegram» on the site again."],
+  "Saytga qaytish": ["Вернуться на сайт","Back to the site"],
 };
 
 // Bazadagi bildirishnoma matnlari (SQL triggerlar o'zbekcha yozadi)
@@ -68,6 +71,8 @@ const BILDIRISH: Record<string, [string, string]> = {
   "Kitobdoshingiz": ["Друг-читатель","A reading friend"],
   "Raqibingiz": ["Соперник","Your opponent"],
   "Kitobxon": ["Читатель","A reader"],
+  "⚔️ {0} sizni onlayn duelga chaqirdi!": ["⚔️ {0} вызывает вас на онлайн-дуэль!","⚔️ {0} challenged you to an online duel!"],
+  "🔥 {0} qasos olmoqchi — onlayn duelga chaqirdi!": ["🔥 {0} хочет реванша — вызывает на онлайн-дуэль!","🔥 {0} wants a rematch — challenged you to an online duel!"],
   "O'tgan hafta «{0}» ligasiga tushdingiz. Bu hafta qaytib chiqing!": ["На прошлой неделе вы опустились в лигу «{0}». Вернитесь на этой неделе!","Last week you dropped to the «{0}» league. Climb back this week!"],
   "Varaq": ["Страница","Page"],
   "Daftar": ["Тетрадь","Notebook"],

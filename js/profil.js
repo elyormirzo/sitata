@@ -612,7 +612,7 @@ async function anonimProfilniTekshir() {
   if (!BAZA_YOQIQ || !mening) return;
   try { if (sessionStorage.getItem("sitataBoglashKeyin")) return; } catch (e) {}
   const user = await sessiyaOl().catch(() => null);
-  if (!user || !user.is_anonymous || user.id !== mening.id) return;
+  if (!user || !user.is_anonymous || user.id !== mening.id || (user.app_metadata && user.app_metadata.telegram)) return;
   const oyna = document.createElement("div"); oyna.className = "boglash-oyna"; oyna.setAttribute("role", "dialog"); oyna.setAttribute("aria-modal", "true");
   const quti = document.createElement("div"); quti.className = "boglash-quti";
   const sar = document.createElement("h3"); sar.textContent = "Profilingizni Google'ga bog'lang";
@@ -624,7 +624,8 @@ async function anonimProfilniTekshir() {
   b.addEventListener("click", () => { b.disabled = true; googleBilanBogla(x, location.hash || "#profilim").finally(() => { b.disabled = false; }); });
   const keyin = document.createElement("button"); keyin.type = "button"; keyin.className = "matn-tugma"; keyin.textContent = "Keyinroq";
   keyin.addEventListener("click", () => { try { sessionStorage.setItem("sitataBoglashKeyin", "1"); } catch (e) {} oyna.remove(); });
-  quti.append(sar, t, b, x, keyin);
+  if (typeof telegramKirishTugmasi === "function") quti.append(sar, t, telegramKirishTugmasi("Telegram bilan bog'lash"), b, x, keyin);
+  else quti.append(sar, t, b, x, keyin);
   oyna.appendChild(quti);
   document.body.appendChild(oyna);
 }
@@ -659,9 +660,11 @@ function hisobQutisi() {
     const user = await sessiyaOl();
     if (!user) return;
     if (kirishXatosi) { xabar.textContent = kirishXatosi; kirishXatosi = null; }
-    if (user.is_anonymous) {
+    const tgHisob = !!(user.app_metadata && user.app_metadata.telegram);
+    if (user.is_anonymous && !tgHisob) {
       const p = document.createElement("p"); p.className = "kichik-matn";
-      p.textContent = "Profilingiz hozir faqat shu brauzerda saqlanadi. Google hisobingizga bog'lang — boshqa telefon yoki kompyuterdan ham kira olasiz.";
+      p.textContent = "Profilingiz hozir faqat shu brauzerda saqlanadi. Telegram yoki Google'ga bog'lang — boshqa telefon yoki kompyuterdan ham kira olasiz.";
+      const tgEl = typeof telegramKirishTugmasi === "function" ? telegramKirishTugmasi("Telegram bilan bog'lash") : document.createTextNode("");
       const b = document.createElement("button"); b.type = "button"; b.className = "google-tugma";
       b.innerHTML = '<span class="g-belgi" aria-hidden="true">G</span> Google bilan bog\'lash';
       b.addEventListener("click", () => { b.disabled = true; googleBilanBogla(xabar).finally(() => { b.disabled = false; }); });
@@ -671,13 +674,14 @@ function hisobQutisi() {
         if (!confirm("Google orqali kirsangiz, shu brauzerdagi hozirgi profil o'rniga Google'ga bog'langan profilingiz ochiladi. Davom etasizmi?")) return;
         googleBilanKir(xabar);
       });
-      quti.append(p, b, boshqa, xabar);
+      quti.append(p, tgEl, b, boshqa, xabar);
     } else {
       const p = document.createElement("p"); p.className = "kichik-matn";
-      p.textContent = "✓ Google hisobiga bog'langan" + (user.email ? ": " + user.email : "");
+      const tgEmail = /@telegram\.sitata\.uz$/.test(user.email || "");
+      p.textContent = tgHisob && (tgEmail || !user.email) ? "✓ Telegram orqali kirgan" : "✓ Google hisobiga bog'langan" + (user.email ? ": " + user.email : "");
       const chiq = document.createElement("button"); chiq.type = "button"; chiq.className = "matn-tugma"; chiq.textContent = "Shu qurilmadan chiqish";
       chiq.addEventListener("click", async () => {
-        if (!confirm("Shu qurilmadan chiqasizmi? Keyin Google orqali qayta kirishingiz mumkin.")) return;
+        if (!confirm("Shu qurilmadan chiqasizmi? Keyin Telegram yoki Google orqali qayta kirishingiz mumkin.")) return;
         const m = await mijozOl();
         await m.auth.signOut();
         mening = null;

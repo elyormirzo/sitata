@@ -149,6 +149,7 @@ function kirishTugmasi() {
   b.appendChild(yarat("span", "", "Kirish"));
   let holat = "yoq";
   b.addEventListener("click", () => {
+    if (typeof kirishOynasi === "function") { kirishOynasi(); return; }
     if (holat === "anonim") { location.hash = "#profilim/hisob"; return; }
     b.disabled = true;
     const x = { set textContent(v) { if (v) qisqaXabar(v); } };
@@ -158,9 +159,9 @@ function kirishTugmasi() {
     if (!BAZA_YOQIQ) { b.classList.add("yashirin"); return; }
     let user = null;
     try { user = await sessiyaOl(); } catch (e) {}
-    holat = !mening || !user ? "yoq" : user.is_anonymous ? "anonim" : "kirgan";
+    holat = !mening || !user ? "yoq" : (typeof hisobBoglanganmi === "function" ? !hisobBoglanganmi(user) : user.is_anonymous) ? "anonim" : "kirgan";
     b.classList.toggle("yashirin", holat === "kirgan");
-    b.title = holat === "anonim" ? t("Profilingizni Google'ga bog'lang") : t("Google bilan kirish");
+    b.title = holat === "anonim" ? t("Profilingizni Telegram yoki Google'ga bog'lang") : t("Telegram yoki Google orqali kirish");
   };
   tekshir();
   setTimeout(tekshir, 2500);
