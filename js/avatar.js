@@ -46,19 +46,20 @@ const QAHRAMONLAR = {
   ],
   // Mashhur futbolchilar — terma jamoa formasi va raqami bilan chizilgan obrazlar
   futbol: [
-    ["messi", "Lionel Messi", "Argentina · 10", { fon: "#2E6DA4", teri: 0, soch: "qisqa", sochRang: "#5A3A22", yuz: "qisqasoqol", futbolka: 1, kiyim: "#75AADB", yolli: "#FFFFFF", raqam: 10, raqamRang: "#1F1F24" }],
-    ["ronaldo", "Cristiano Ronaldo", "Portugaliya · 7", { fon: "#0B5D3B", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#C8102E", yoqa: "#0B5D3B", raqam: 7, raqamRang: "#F2D06B" }],
-    ["mbappe", "Kylian Mbappé", "Fransiya · 10", { fon: "#1B2A55", teri: 3, soch: "kal", sochRang: "#1A1410", futbolka: 1, kiyim: "#1F3A93", yoqa: "#FFFFFF", raqam: 10, raqamRang: "#FFFFFF" }],
-    ["haaland", "Erling Haaland", "Norvegiya · 9", { fon: "#0B2C5E", teri: 0, soch: "turmak", sochRang: "#E3C27A", futbolka: 1, kiyim: "#BA0C2F", yoqa: "#FFFFFF", raqam: 9, raqamRang: "#FFFFFF" }],
-    ["neymar", "Neymar", "Braziliya · 10", { fon: "#0E6B3A", teri: 1, soch: "qisqa", sochRang: "#C9A15A", yuz: "qisqasoqol", sochRang2: "#3A2A1C", futbolka: 1, kiyim: "#FEDD00", yoqa: "#009C3B", raqam: 10, raqamRang: "#0B3D91" }],
+    ["messi", "Lionel Messi", "Argentina · 10", { fon: "#2E6DA4", teri: 0, soch: "yon", sochRang: "#5A3A22", yuz: "soqol", futbolka: 1, kiyim: "#75AADB", yolli: "#FFFFFF", raqam: 10, raqamRang: "#1F1F24" }],
+    ["ronaldo", "Cristiano Ronaldo", "Portugaliya · 7", { fon: "#0B5D3B", teri: 1, soch: "tik", sochRang: "#1A1410", tabassum: 1, ingichkaQosh: 1, futbolka: 1, kiyim: "#C8102E", yoqa: "#0B5D3B", raqam: 7, raqamRang: "#F2D06B" }],
+    ["mbappe", "Kylian Mbappé", "Fransiya · 10", { fon: "#1B2A55", teri: 3, soch: "kal", sochRang: "#1A1410", tabassum: 1, futbolka: 1, kiyim: "#1F3A93", yoqa: "#FFFFFF", raqam: 10, raqamRang: "#FFFFFF" }],
+    ["haaland", "Erling Haaland", "Norvegiya · 9", { fon: "#0B2C5E", teri: 0, soch: "bogich", sochRang: "#E3C27A", keng: 1, futbolka: 1, kiyim: "#BA0C2F", yoqa: "#FFFFFF", raqam: 9, raqamRang: "#FFFFFF" }],
+    ["neymar", "Neymar", "Braziliya · 10", { fon: "#0E6B3A", teri: 1, soch: "fade", sochRang: "#D9B36A", sochRang2: "#3A2A1C", yuz: "qisqasoqol", tabassum: 1, futbolka: 1, kiyim: "#FEDD00", yoqa: "#009C3B", raqam: 10, raqamRang: "#0B3D91" }],
     ["salah", "Mohamed Salah", "Misr · 10", { fon: "#7A1F1F", teri: 2, soch: "afro", sochRang: "#1A1410", yuz: "soqol", futbolka: 1, kiyim: "#C8102E", yoqa: "#FFFFFF", raqam: 10, raqamRang: "#FFFFFF" }],
-    ["modric", "Luka Modrić", "Xorvatiya · 10", { fon: "#1F3A93", teri: 0, soch: "uzun", sochRang: "#B08A5A", lenta: "#F4EFE4", futbolka: 1, kiyim: "#FFFFFF", shaxmat: "#D52B1E", raqam: 10, raqamRang: "#1F3A93" }],
-    ["debruyne", "Kevin De Bruyne", "Belgiya · 7", { fon: "#7A0019", teri: 0, sepkil: 1, soch: "qisqa", sochRang: "#D9893B", futbolka: 1, kiyim: "#C8102E", yoqa: "#1F1F24", raqam: 7, raqamRang: "#F2D06B" }],
-    ["lewandowski", "Robert Lewandowski", "Polsha · 9", { fon: "#8A1C2B", teri: 0, soch: "qisqa", sochRang: "#5A3A22", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#DC143C", raqam: 9, raqamRang: "#DC143C" }],
+    ["modric", "Luka Modrić", "Xorvatiya · 10", { fon: "#1F3A93", teri: 0, ozgin: 1, soch: "kokil", sochRang: "#B8956A", futbolka: 1, kiyim: "#FFFFFF", shaxmat: "#D52B1E", raqam: 10, raqamRang: "#1F3A93" }],
+    ["debruyne", "Kevin De Bruyne", "Belgiya · 7", { fon: "#7A0019", teri: 0, sepkil: 1, soch: "tik", sochRang: "#D9893B", ochQosh: 1, futbolka: 1, kiyim: "#C8102E", yoqa: "#1F1F24", raqam: 7, raqamRang: "#F2D06B" }],
+    ["lewandowski", "Robert Lewandowski", "Polsha · 9", { fon: "#8A1C2B", teri: 0, soch: "yon", sochRang: "#4A3020", yuz: "tuk", keng: 1, futbolka: 1, kiyim: "#FFFFFF", yoqa: "#DC143C", raqam: 9, raqamRang: "#DC143C" }],
     ["shomurodov", "Eldor Shomurodov", "O'zbekiston · 14", { fon: "#1E5AA8", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 14, raqamRang: "#1E5AA8" }],
-    ["fayzullayev", "Abbosbek Fayzullayev", "O'zbekiston · 22", { fon: "#0099B5", teri: 0, soch: "jingalak", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 22, raqamRang: "#1E5AA8" }],
-    ["xusanov", "Abduqodir Xusanov", "O'zbekiston · 2", { fon: "#1EB53A", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#0099B5", raqam: 2, raqamRang: "#1E5AA8" }],
+    ["fayzullayev", "Abbosbek Fayzullayev", "O'zbekiston · 22", { fon: "#0099B5", teri: 0, soch: "jingalak", sochRang: "#1A1410", tabassum: 1, futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 22, raqamRang: "#1E5AA8" }],
+    ["xusanov", "Abduqodir Xusanov", "O'zbekiston · 2", { fon: "#1EB53A", teri: 2, soch: "qisqa", sochRang: "#1A1410", keng: 1, futbolka: 1, kiyim: "#FFFFFF", yoqa: "#0099B5", raqam: 2, raqamRang: "#1E5AA8" }],
   ],
+
   kino: [
     ["shumbola", "Shum bola", "«Shum bola»", { fon: "#E0A040", teri: 1, bosh: "doppi", kiyim: "#3F6E99", chiziq: "#F8F1E1", sepkil: 1, kulgi: 1 }],
     ["sharlo", "Sharlo", "ovsiz kino", { fon: "#8A8F99", teri: 0, soch: "jingalak", sochRang: "#1A1410", bosh: "kotelok", yuz: "chaplinmoylov", kiyim: "#1F1F24", yoqa: "#EDE6D6", buyum: "tayoq" }],
@@ -117,6 +118,8 @@ function qahramonSVG(t) {
   // Orqa soch (uzun)
   const sr = t.sochRang || "#2A1D14";
   if (t.soch === "ormaq") s.push(`<path d="M29 44 Q28 78 34 86 L39 86 Q36 70 37 48 Z M71 44 Q72 78 66 86 L61 86 Q64 70 63 48 Z" fill="${sr}"/>`);
+  if (t.soch === "bogich") s.push(`<path d="M31 42 Q29 58 34 62 L37 56 Q35 50 35 44 Z M69 42 Q71 58 66 62 L63 56 Q65 50 65 44 Z" fill="${sr}" opacity=".9"/><circle cx="50" cy="15" r="6.5" fill="${sr}"/><path d="M46 19 Q50 21 54 19" stroke="#B8954F" stroke-width="1.4" fill="none"/>`);
+  if (t.soch === "kokil") s.push(`<path d="M30.5 38 Q28 54 31 60 L36.5 57 Q35 50 35.5 44 Z M69.5 38 Q72 54 69 60 L63.5 57 Q65 50 64.5 44 Z" fill="${sr}"/>`);
   if (t.soch === "uzun") s.push(`<path d="M30 40 Q27 62 33 67 L38 62 Q36 52 37 44 Z M70 40 Q73 62 67 67 L62 62 Q64 52 63 44 Z" fill="${sr}"/>`);
   if (t.soch === "afro") s.push(`<path d="M27 46 Q20 32 28 22 Q32 10 45 12 Q54 6 63 12 Q76 12 76 25 Q82 34 73 46 Q70 30 50 29 Q32 30 27 46 Z" fill="${sr}"/>`);
   if (t.soch === "tartibsiz") s.push(`<path d="M24 50 Q18 30 34 22 Q42 12 54 18 Q70 12 76 28 Q86 40 76 58 Q74 46 70 40 L30 40 Q26 46 26 58 Z" fill="${sr}"/>`);
@@ -127,13 +130,19 @@ function qahramonSVG(t) {
     return svgOrami(s);
   }
   if (t.skafandr) s.push(`<circle cx="50" cy="42" r="28" fill="#E6E6E6" stroke="#B8B8B8" stroke-width="2"/>`);
-  s.push(`<ellipse cx="50" cy="42" rx="${t.ozgin ? 16 : 18}" ry="${t.ozgin ? 22 : 20}" fill="${teri}"/>`);
+  s.push(`<ellipse cx="50" cy="42" rx="${t.ozgin ? 16 : t.keng ? 19.5 : 18}" ry="${t.ozgin ? 22 : 20}" fill="${teri}"/>`);
+  if (t.keng) s.push(`<path d="M33 47 Q36 61 50 63.5 Q64 61 67 47 Z" fill="${teri}"/>`);
   s.push(`<ellipse cx="${t.ozgin ? 34 : 32}" cy="44" rx="3" ry="4.5" fill="${teri}"/><ellipse cx="${t.ozgin ? 66 : 68}" cy="44" rx="3" ry="4.5" fill="${teri}"/>`);
   // Old soch
   if (t.soch === "qisqa") s.push(`<path d="M32 40 Q31 22 50 21 Q69 22 68 40 Q64 30 50 29 Q36 30 32 40 Z" fill="${sr}"/>`);
   if (t.soch === "ortga") s.push(`<path d="M32 42 Q30 20 50 20 Q70 20 68 42 Q66 30 58 28 L50 36 L42 28 Q34 30 32 42 Z" fill="${sr}"/>`);
   if (t.soch === "jingalak") s.push(`<path d="M31 40 Q27 30 33 26 Q34 18 42 20 Q46 14 52 18 Q60 14 64 21 Q72 22 69 32 Q71 38 68 41 Q64 30 50 29 Q36 30 31 40 Z" fill="${sr}"/>`);
   if (t.soch === "tartibsiz") s.push(`<path d="M32 38 Q30 22 46 22 Q56 16 64 24 Q70 28 68 38 Q60 28 50 30 Q40 28 32 38 Z" fill="${sr}"/>`);
+  if (t.soch === "tik") s.push(`<path d="M32 40 Q31 25 40 22 Q46 17 54 18 Q63 16.5 66.5 23 Q69 30 68 40 Q65 31 50 29.5 Q36 31 32 40 Z" fill="${sr}"/><path d="M45 20.5 Q52 15 60 18.5" stroke="${sr}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`);
+  if (t.soch === "yon") s.push(`<path d="M32 41 Q30 21 50 20 Q70 21 68 41 Q66 31 60 28 Q48 30 38 34 Q34 36 32 41 Z" fill="${sr}"/><path d="M40 26 Q50 22 62 25" stroke="${t.sochRang2 || "#00000033"}" stroke-width="1" fill="none" opacity=".5"/>`);
+  if (t.soch === "fade") s.push(`<path d="M32 42 Q31 30 34 27 L66 27 Q69 30 68 42 Q66 34 62 32 L38 32 Q34 34 32 42 Z" fill="${t.sochRang2 || sr}" opacity=".85"/><path d="M36 30 Q35 18 50 16 Q65 18 64 30 Q58 26 50 26 Q42 26 36 30 Z" fill="${sr}"/>`);
+  if (t.soch === "bogich") s.push(`<path d="M32 40 Q30 20 50 19 Q70 20 68 40 Q66 28 56 25 Q50 24 44 25 Q34 28 32 40 Z" fill="${sr}"/><path d="M40 23 Q50 20 60 23 M38 27 Q50 23 62 27" stroke="#C9A45A" stroke-width="1" fill="none"/>`);
+  if (t.soch === "kokil") s.push(`<path d="M31 46 Q29 20 50 19 Q71 20 69 46 Q67 34 63 31 L60 35 L56 30 L52 35 L48 30 L44 35 L40 31 Q34 34 31 46 Z" fill="${sr}"/>`);
   if (t.soch === "kal") s.push(`<path d="M33 37 Q33 23 50 22.5 Q67 23 67 37 Q62 28.5 50 28 Q38 28.5 33 37 Z" fill="${sr}" opacity=".55"/>`);
   if (t.soch === "afro") s.push(`<path d="M31 40 Q29 30 35 28 Q42 24 50 26 Q58 24 65 28 Q71 30 69 40 Q64 31 50 30 Q36 31 31 40 Z" fill="${sr}"/><g fill="${sr}"><circle cx="34" cy="20" r="5"/><circle cx="44" cy="14" r="5.5"/><circle cx="56" cy="14" r="5.5"/><circle cx="66" cy="20" r="5"/></g>`);
   if (t.soch === "uzun") s.push(`<path d="M31 44 Q29 21 50 20 Q71 21 69 44 Q64 30 56 28 Q50 34 44 28 Q36 30 31 44 Z" fill="${sr}"/>`);
@@ -149,12 +158,13 @@ function qahramonSVG(t) {
   if (t.skafandr) {} // ko'zlar quyida
   const kz = t.mumiyo ? "#3A2A1C" : "#2A1D14";
   s.push(`<circle cx="43" cy="42" r="${t.niqob ? 1.8 : 2.4}" fill="${t.niqob ? "#F8F1E1" : kz}"/><circle cx="57" cy="42" r="${t.niqob ? 1.8 : 2.4}" fill="${t.niqob ? "#F8F1E1" : kz}"/>`);
-  if (!t.niqob && !t.mumiyo) s.push(`<path d="M39 36 Q43 34 46 36 M54 36 Q57 34 61 36" stroke="${t.rangpar ? "#141014" : sr}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
+  if (!t.niqob && !t.mumiyo) s.push(`<path d="M39 36 Q43 ${t.ingichkaQosh ? 33.5 : 34} 46 36 M54 36 Q57 ${t.ingichkaQosh ? 33.5 : 34} 61 36" stroke="${t.rangpar ? "#141014" : t.ochQosh ? "#C98A4A" : sr}" stroke-width="${t.ingichkaQosh ? 1.4 : 1.8}" fill="none" stroke-linecap="round"/>`);
   if (t.sepkil) s.push(`<g fill="#B5734A" opacity=".7"><circle cx="40" cy="48" r=".9"/><circle cx="43" cy="49.5" r=".9"/><circle cx="38" cy="50" r=".9"/><circle cx="60" cy="48" r=".9"/><circle cx="57" cy="49.5" r=".9"/><circle cx="62" cy="50" r=".9"/></g>`);
   if (t.ayol) s.push(`<circle cx="40" cy="49" r="2.6" fill="#E88A9A" opacity=".45"/><circle cx="60" cy="49" r="2.6" fill="#E88A9A" opacity=".45"/>`);
   // Og'iz
   if (t.tishlar) s.push(`<path d="M44 53 Q50 56 56 53" stroke="#5A1F1F" stroke-width="1.6" fill="none"/><path d="M46 53.6 L47 56.5 L48 54 M52 54 L53 56.5 L54 53.6" fill="#FFF"/>`);
   else if (t.kulgi) s.push(`<path d="M43 52 Q50 59 57 52 Z" fill="#7B2E2E"/>`);
+  else if (t.tabassum) s.push(`<path d="M43.5 52 Q50 58.5 56.5 52 Z" fill="#FFFFFF" stroke="#7B3E2E" stroke-width="1.2" stroke-linejoin="round"/>`);
   else if (!t.mumiyo) s.push(`<path d="M45 53 Q50 56 55 53" stroke="#7B3E2E" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
   // Soqol / mo'ylov
   if (t.yuz === "moylov") s.push(`<path d="M42 51 Q46 47 50 49.5 Q54 47 58 51 Q54 50 50 51.5 Q46 50 42 51 Z" fill="${sr}"/>`);
@@ -168,6 +178,7 @@ function qahramonSVG(t) {
     const r = t.sochRang2 || sr;
     s.push(`<path d="M33 45 Q35 62 50 66.5 Q65 62 67 45 Q63 54 57 53.5 Q50 57 43 53.5 Q37 54 33 45 Z" fill="${r}" opacity=".9"/><path d="M43 51 Q50 48.5 57 51" stroke="${r}" stroke-width="2" fill="none" stroke-linecap="round"/>`);
   }
+  if (t.yuz === "tuk") s.push(`<path d="M33 46 Q35 62 50 66 Q65 62 67 46 Q63 55 57 54 Q50 57 43 54 Q37 55 33 46 Z" fill="${sr}" opacity=".28"/>`);
   if (t.yuz === "echki") s.push(`<path d="M47 56 Q50 66 53 56 Z" fill="${t.sochRang2 || sr}"/><path d="M43 51 Q50 48 57 51" stroke="${t.sochRang2 || sr}" stroke-width="1.8" fill="none"/>`);
   // Superqahramon dubulg'alari
   if (t.boyqush) s.push(`<path d="M31 40 Q30 22 50 20 Q70 22 69 40 Q60 32 50 33 Q40 32 31 40 Z" fill="#A0703C"/><path d="M34 27 Q30 18 36 14 Q38 22 42 23 Z M66 27 Q70 18 64 14 Q62 22 58 23 Z" fill="#7A5230"/><path d="M40 26 q2 2 4 0 M48 24 q2 2 4 0 M56 26 q2 2 4 0" stroke="#F2D9A8" stroke-width="1.2" fill="none"/>`);
