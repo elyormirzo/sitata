@@ -2,9 +2,10 @@
 // profillar.rasm: 'q:<kalit>' — saytdagi tayyor qahramon (muallif portreti yoki chizilgan qahramon),
 //                 '<uid>/<uuid>.jpg' — foydalanuvchining o'z surati (ochiq «avatarlar» bucket'i).
 // Chizilgan qahramonlar — sayt uchun chizilgan oddiy SVG obrazlar (aktyorlar yoki rasmiy suratlar emas).
+// Futbolchilar — fotosurat emas: terma jamoa formasi rangidagi oddiy chizilgan obraz (klub va federatsiya gerblari chizilmaydi).
 // Superqahramonlar — sitata uchun o'ylab topilgan original obrazlar (Marvel/DC va boshqa studiyalar qahramonlari mualliflik huquqi bilan himoyalangan, ular chizilmaydi).
 
-const TERI = ["#F1C9A0", "#E0AC7E", "#C98E62"];
+const TERI = ["#F1C9A0", "#E0AC7E", "#C98E62", "#9A6440", "#6E4429"];
 
 // Qahramon tavsifi: fon, teri, soch, bosh kiyim, soqol/mo'ylov, kiyim, buyum, qo'shimchalar
 const QAHRAMONLAR = {
@@ -43,6 +44,19 @@ const QAHRAMONLAR = {
     ["qormalika", "Qorbo'ron", "sovuqqonlik — kuch", { fon: "#1B4F72", teri: 2, soch: "turmak", sochRang: "#2A1D14", kiyim: "#2E86C1", yoqa: "#FDFEFE", emblem: "qor", ayol: 1, qulogchin: 1 }],
     ["sehrgar", "Sehrgar Dono", "so'zlari sehrli", { fon: "#4A235A", teri: 1, bosh: "sehrgar", yuz: "oqsoqol", kiyim: "#5B2C6F", emblem: "yulduz", buyum: "tayoqcha" }],
   ],
+  // Mashhur futbolchilar — terma jamoa formasi va raqami bilan chizilgan obrazlar
+  futbol: [
+    ["messi", "Lionel Messi", "Argentina · 10", { fon: "#2E6DA4", teri: 0, soch: "qisqa", sochRang: "#5A3A22", yuz: "qisqasoqol", futbolka: 1, kiyim: "#75AADB", yolli: "#FFFFFF", raqam: 10, raqamRang: "#1F1F24" }],
+    ["ronaldo", "Cristiano Ronaldo", "Portugaliya · 7", { fon: "#0B5D3B", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#C8102E", yoqa: "#0B5D3B", raqam: 7, raqamRang: "#F2D06B" }],
+    ["mbappe", "Kylian Mbappé", "Fransiya · 10", { fon: "#1B2A55", teri: 3, soch: "kal", sochRang: "#1A1410", futbolka: 1, kiyim: "#1F3A93", yoqa: "#FFFFFF", raqam: 10, raqamRang: "#FFFFFF" }],
+    ["haaland", "Erling Haaland", "Norvegiya · 9", { fon: "#0B2C5E", teri: 0, soch: "turmak", sochRang: "#E3C27A", futbolka: 1, kiyim: "#BA0C2F", yoqa: "#FFFFFF", raqam: 9, raqamRang: "#FFFFFF" }],
+    ["neymar", "Neymar", "Braziliya · 10", { fon: "#0E6B3A", teri: 1, soch: "qisqa", sochRang: "#C9A15A", yuz: "qisqasoqol", sochRang2: "#3A2A1C", futbolka: 1, kiyim: "#FEDD00", yoqa: "#009C3B", raqam: 10, raqamRang: "#0B3D91" }],
+    ["salah", "Mohamed Salah", "Misr · 10", { fon: "#7A1F1F", teri: 2, soch: "afro", sochRang: "#1A1410", yuz: "soqol", futbolka: 1, kiyim: "#C8102E", yoqa: "#FFFFFF", raqam: 10, raqamRang: "#FFFFFF" }],
+    ["modric", "Luka Modrić", "Xorvatiya · 10", { fon: "#1F3A93", teri: 0, soch: "uzun", sochRang: "#B08A5A", lenta: "#F4EFE4", futbolka: 1, kiyim: "#FFFFFF", shaxmat: "#D52B1E", raqam: 10, raqamRang: "#1F3A93" }],
+    ["debruyne", "Kevin De Bruyne", "Belgiya · 7", { fon: "#7A0019", teri: 0, sepkil: 1, soch: "qisqa", sochRang: "#D9893B", futbolka: 1, kiyim: "#C8102E", yoqa: "#1F1F24", raqam: 7, raqamRang: "#F2D06B" }],
+    ["lewandowski", "Robert Lewandowski", "Polsha · 9", { fon: "#8A1C2B", teri: 0, soch: "qisqa", sochRang: "#5A3A22", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#DC143C", raqam: 9, raqamRang: "#DC143C" }],
+    ["shomurodov", "Eldor Shomurodov", "O'zbekiston · 14", { fon: "#1E5AA8", teri: 1, soch: "qisqa", sochRang: "#1A1410", yuz: "qisqasoqol", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 14, raqamRang: "#1E5AA8" }],
+  ],
   kino: [
     ["shumbola", "Shum bola", "«Shum bola»", { fon: "#E0A040", teri: 1, bosh: "doppi", kiyim: "#3F6E99", chiziq: "#F8F1E1", sepkil: 1, kulgi: 1 }],
     ["sharlo", "Sharlo", "ovsiz kino", { fon: "#8A8F99", teri: 0, soch: "jingalak", sochRang: "#1A1410", bosh: "kotelok", yuz: "chaplinmoylov", kiyim: "#1F1F24", yoqa: "#EDE6D6", buyum: "tayoq" }],
@@ -69,8 +83,17 @@ function qahramonSVG(t) {
   else if (t.robot) s.push(`<path d="M18 100 L22 74 L78 74 L82 100 Z" fill="${t.kiyim}"/><rect x="40" y="80" width="20" height="10" rx="2" fill="#2A4357"/><circle cx="45" cy="85" r="2" fill="#6BE06B"/><circle cx="55" cy="85" r="2" fill="#E04040"/>`);
   else {
     s.push(`<path d="M${t.ozgin ? 20 : 14} 100 Q${t.ozgin ? 22 : 16} 70 50 68 Q${t.ozgin ? 78 : 84} 70 ${t.ozgin ? 80 : 86} 100 Z" fill="${t.kiyim}"/>`);
+    if (t.futbolka) {
+      const shakl = "M14 100 Q16 70 50 68 Q84 70 86 100 Z";
+      const naqsh = [];
+      if (t.yolli) for (let x = 22; x < 80; x += 12) naqsh.push(`<rect x="${x}" y="66" width="6" height="36" fill="${t.yolli}"/>`);
+      if (t.shaxmat) for (let y = 66, r = 0; y < 100; y += 6, r++) for (let x = 14 + (r % 2) * 6; x < 86; x += 12) naqsh.push(`<rect x="${x}" y="${y}" width="6" height="6" fill="${t.shaxmat}"/>`);
+      if (naqsh.length) s.push(`<clipPath id="futbolka-${t.raqam}-${(t.kiyim || "").slice(1)}"><path d="${shakl}"/></clipPath><g clip-path="url(#futbolka-${t.raqam}-${(t.kiyim || "").slice(1)})">${naqsh.join("")}</g>`);
+      if (t.yoqa) s.push(`<path d="M39 69.5 L50 78 L61 69.5" stroke="${t.yoqa}" stroke-width="3" fill="none" stroke-linejoin="round"/>`);
+      if (t.raqam) s.push(`<text x="50" y="96" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="14" fill="${t.raqamRang || "#FFF"}" stroke="${t.yolli || t.shaxmat ? "#FFFFFF" : "none"}" stroke-width="${t.yolli || t.shaxmat ? 2.5 : 0}" paint-order="stroke">${t.raqam}</text>`);
+    }
+    if (t.yoqa && !t.futbolka) s.push(`<path d="M38 70 L50 82 L62 70 Z" fill="${t.yoqa}"/>`);
     if (t.chiziq) for (let x = 24; x <= 76; x += 9) s.push(`<path d="M${x} 100 Q${x + 1} 84 ${x + (x < 50 ? 4 : -4)} 72" stroke="${t.chiziq}" stroke-width="2" fill="none" opacity=".75"/>`);
-    if (t.yoqa) s.push(`<path d="M38 70 L50 82 L62 70 Z" fill="${t.yoqa}"/>`);
     if (t.mumiyo) s.push(`<path d="M18 86 L82 80 M16 94 L84 90" stroke="#C9BC9C" stroke-width="3"/>`);
     if (t.sovutKiyim) for (let yy = 76; yy < 100; yy += 6) s.push(`<path d="M${22 + (yy - 76) * 0.2} ${yy} Q50 ${yy + 4} ${78 - (yy - 76) * 0.2} ${yy}" stroke="#4A5A68" stroke-width="1.5" fill="none"/>`);
   }
@@ -92,6 +115,8 @@ function qahramonSVG(t) {
   // Orqa soch (uzun)
   const sr = t.sochRang || "#2A1D14";
   if (t.soch === "ormaq") s.push(`<path d="M29 44 Q28 78 34 86 L39 86 Q36 70 37 48 Z M71 44 Q72 78 66 86 L61 86 Q64 70 63 48 Z" fill="${sr}"/>`);
+  if (t.soch === "uzun") s.push(`<path d="M30 40 Q27 62 33 67 L38 62 Q36 52 37 44 Z M70 40 Q73 62 67 67 L62 62 Q64 52 63 44 Z" fill="${sr}"/>`);
+  if (t.soch === "afro") s.push(`<path d="M27 46 Q20 32 28 22 Q32 10 45 12 Q54 6 63 12 Q76 12 76 25 Q82 34 73 46 Q70 30 50 29 Q32 30 27 46 Z" fill="${sr}"/>`);
   if (t.soch === "tartibsiz") s.push(`<path d="M24 50 Q18 30 34 22 Q42 12 54 18 Q70 12 76 28 Q86 40 76 58 Q74 46 70 40 L30 40 Q26 46 26 58 Z" fill="${sr}"/>`);
   // Bosh
   if (t.robot) {
@@ -107,6 +132,10 @@ function qahramonSVG(t) {
   if (t.soch === "ortga") s.push(`<path d="M32 42 Q30 20 50 20 Q70 20 68 42 Q66 30 58 28 L50 36 L42 28 Q34 30 32 42 Z" fill="${sr}"/>`);
   if (t.soch === "jingalak") s.push(`<path d="M31 40 Q27 30 33 26 Q34 18 42 20 Q46 14 52 18 Q60 14 64 21 Q72 22 69 32 Q71 38 68 41 Q64 30 50 29 Q36 30 31 40 Z" fill="${sr}"/>`);
   if (t.soch === "tartibsiz") s.push(`<path d="M32 38 Q30 22 46 22 Q56 16 64 24 Q70 28 68 38 Q60 28 50 30 Q40 28 32 38 Z" fill="${sr}"/>`);
+  if (t.soch === "kal") s.push(`<path d="M33 37 Q33 23 50 22.5 Q67 23 67 37 Q62 28.5 50 28 Q38 28.5 33 37 Z" fill="${sr}" opacity=".55"/>`);
+  if (t.soch === "afro") s.push(`<path d="M31 40 Q29 30 35 28 Q42 24 50 26 Q58 24 65 28 Q71 30 69 40 Q64 31 50 30 Q36 31 31 40 Z" fill="${sr}"/><g fill="${sr}"><circle cx="34" cy="20" r="5"/><circle cx="44" cy="14" r="5.5"/><circle cx="56" cy="14" r="5.5"/><circle cx="66" cy="20" r="5"/></g>`);
+  if (t.soch === "uzun") s.push(`<path d="M31 44 Q29 21 50 20 Q71 21 69 44 Q64 30 56 28 Q50 34 44 28 Q36 30 31 44 Z" fill="${sr}"/>`);
+  if (t.lenta) s.push(`<path d="M31.5 32 Q50 25 68.5 32" stroke="${t.lenta}" stroke-width="3" fill="none" stroke-linecap="round"/>`);
   if (t.soch === "ormaq" || t.soch === "turmak") s.push(`<path d="M32 42 Q30 22 50 21 Q70 22 68 42 Q62 28 50 28 Q38 28 32 42 Z" fill="${sr}"/>`);
   if (t.soch === "turmak") s.push(`<circle cx="50" cy="18" r="9" fill="${sr}"/>`);
   if (t.mumiyo) s.push(`<path d="M32 30 L68 26 M31 38 L69 35 M32 50 L68 47 M34 58 L66 56" stroke="#C9BC9C" stroke-width="4"/>`);
@@ -132,6 +161,10 @@ function qahramonSVG(t) {
     const r = t.yuz === "oqsoqol" ? "#F2EEE6" : sr;
     s.push(`<path d="M32 44 Q34 66 50 72 Q66 66 68 44 Q64 56 58 54 Q50 58 42 54 Q36 56 32 44 Z" fill="${r}"/><path d="M42 51 Q46 47 50 49.5 Q54 47 58 51 Q54 50 50 51.5 Q46 50 42 51 Z" fill="${r}"/>`);
     if (t.kulgi) s.push(`<path d="M44 54 Q50 59 56 54 Z" fill="#7B2E2E"/>`);
+  }
+  if (t.yuz === "qisqasoqol") {
+    const r = t.sochRang2 || sr;
+    s.push(`<path d="M33 45 Q35 62 50 66.5 Q65 62 67 45 Q63 54 57 53.5 Q50 57 43 53.5 Q37 54 33 45 Z" fill="${r}" opacity=".9"/><path d="M43 51 Q50 48.5 57 51" stroke="${r}" stroke-width="2" fill="none" stroke-linecap="round"/>`);
   }
   if (t.yuz === "echki") s.push(`<path d="M47 56 Q50 66 53 56 Z" fill="${t.sochRang2 || sr}"/><path d="M43 51 Q50 48 57 51" stroke="${t.sochRang2 || sr}" stroke-width="1.8" fill="none"/>`);
   // Superqahramon dubulg'alari
@@ -309,7 +342,7 @@ function avatarTanlash(profil, saqlandi) {
     return true;
   };
 
-  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["kino", "🎬 Kino qahramonlari"], ["tarix", "⚔ Tarixiy qahramonlar"], ["jadidlar", "📜 Jadidlar"], ["super", "🦸 Superqahramonlar"]];
+  const TABLAR = [["telefon", "📷 Telefondan"], ["mualliflar", "✒ Mualliflar"], ["asar", "📚 Asar qahramonlari"], ["futbol", "⚽ Futbolchilar"], ["kino", "🎬 Kino qahramonlari"], ["tarix", "⚔ Tarixiy qahramonlar"], ["jadidlar", "📜 Jadidlar"], ["super", "🦸 Superqahramonlar"]];
   let joriy = "asar";
   const katak = (kalit, nom, izoh, el) => {
     const b = yarat("button", "avatar-katak" + (profil.rasm === "q:" + kalit ? " tanlangan" : "")); b.type = "button";
