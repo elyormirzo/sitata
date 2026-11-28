@@ -55,7 +55,7 @@ const QAHRAMONLAR = {
     ["modric", "Luka Modrić", "Xorvatiya · 10", { fon: "#1F3A93", teri: 0, soch: "uzun", sochRang: "#B08A5A", lenta: "#F4EFE4", futbolka: 1, kiyim: "#FFFFFF", shaxmat: "#D52B1E", raqam: 10, raqamRang: "#1F3A93" }],
     ["debruyne", "Kevin De Bruyne", "Belgiya · 7", { fon: "#7A0019", teri: 0, sepkil: 1, soch: "qisqa", sochRang: "#D9893B", futbolka: 1, kiyim: "#C8102E", yoqa: "#1F1F24", raqam: 7, raqamRang: "#F2D06B" }],
     ["lewandowski", "Robert Lewandowski", "Polsha · 9", { fon: "#8A1C2B", teri: 0, soch: "qisqa", sochRang: "#5A3A22", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#DC143C", raqam: 9, raqamRang: "#DC143C" }],
-    ["shomurodov", "Eldor Shomurodov", "O'zbekiston · 14", { fon: "#1E5AA8", teri: 1, soch: "qisqa", sochRang: "#1A1410", yuz: "qisqasoqol", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 14, raqamRang: "#1E5AA8" }],
+    ["shomurodov", "Eldor Shomurodov", "O'zbekiston · 14", { fon: "#1E5AA8", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 14, raqamRang: "#1E5AA8" }],
     ["fayzullayev", "Abbosbek Fayzullayev", "O'zbekiston · 22", { fon: "#0099B5", teri: 0, soch: "jingalak", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#1EB53A", raqam: 22, raqamRang: "#1E5AA8" }],
     ["xusanov", "Abduqodir Xusanov", "O'zbekiston · 2", { fon: "#1EB53A", teri: 1, soch: "qisqa", sochRang: "#1A1410", futbolka: 1, kiyim: "#FFFFFF", yoqa: "#0099B5", raqam: 2, raqamRang: "#1E5AA8" }],
   ],
