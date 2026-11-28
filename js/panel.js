@@ -204,7 +204,7 @@ function saqlashniChiz(b) {
   b.innerHTML = bor ? PIKON.saqlandi : PIKON.saqla;
   b.classList.toggle("tanlangan", bor); b.setAttribute("aria-pressed", String(bor));
 }
-function saqlash(b) {
+function sahifaniSaqla(b) {
   const y = panelYoli();
   let r = saqlanganlar();
   if (r.some((s) => s.yol === y)) { r = r.filter((s) => s.yol !== y); saqlanganlarniYoz(r); saqlashniChiz(b); qisqaXabar(t("Saqlanganlardan olib tashlandi.")); return; }
@@ -265,7 +265,7 @@ function yonPanel() {
   fikr.addEventListener("click", fikrOynasi);
   tg.addEventListener("click", telegramdaYubor);
   ul.addEventListener("click", sahifaniUlash);
-  saqla.addEventListener("click", () => saqlash(saqla));
+  saqla.addEventListener("click", () => sahifaniSaqla(saqla));
   p.append(uchqun, yoqdi, yoqmadi, fikr, yarat("hr", "yon-panel-chiziq"), tg, ul, saqla);
 
   panelYangila = () => {

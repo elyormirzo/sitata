@@ -899,7 +899,9 @@ Object.assign(TARJIMA.ru, Object.assign({
   "Kunduzgi rejim": "Светлая тема",
   "Tungi rejim": "Тёмная тема",
   "Kirish": "Войти",
-  "Google bilan kirish": "Войти через Google"
+  "Google bilan kirish": "Войти через Google",
+  "Harfni bosing — ismda bo'lsa, o'z katagiga o'zi tushadi. Xohlasangiz, sudrab ham qo'yishingiz mumkin.": "Нажмите на букву — если она есть в имени, сама встанет на место. Можно и перетащить.",
+  "Pastdagi harfni bosing: ismda bo'lsa, o'z katagiga o'zi tushadi. Ismda yo'q harfni bossangiz — xato hisoblanadi. Xohlasangiz, harfni sudrab kerakli katakka ham qo'yishingiz mumkin.": "Нажмите на букву внизу: если она есть в имени, сама встанет в свою клетку. Буква, которой нет в имени, — ошибка. Можно также перетащить букву в нужную клетку."
 }, TARJIMA.ru));
 Object.assign(TARJIMA.en, Object.assign({
   "Ulashish oynasi ochilmadi — rasmni bosib turib saqlang.": "Couldn't open the share sheet — press and hold the image to save it.",
@@ -1796,5 +1798,7 @@ Object.assign(TARJIMA.en, Object.assign({
   "Kunduzgi rejim": "Light mode",
   "Tungi rejim": "Dark mode",
   "Kirish": "Sign in",
-  "Google bilan kirish": "Sign in with Google"
+  "Google bilan kirish": "Sign in with Google",
+  "Harfni bosing — ismda bo'lsa, o'z katagiga o'zi tushadi. Xohlasangiz, sudrab ham qo'yishingiz mumkin.": "Tap a letter — if it's in the name, it drops into place by itself. You can also drag it.",
+  "Pastdagi harfni bosing: ismda bo'lsa, o'z katagiga o'zi tushadi. Ismda yo'q harfni bossangiz — xato hisoblanadi. Xohlasangiz, harfni sudrab kerakli katakka ham qo'yishingiz mumkin.": "Tap a letter below: if it's in the name, it drops into its box by itself. Tapping a letter that isn't in the name counts as a mistake. You can also drag a letter into a box."
 }, TARJIMA.en));

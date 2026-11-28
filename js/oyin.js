@@ -257,8 +257,19 @@ function joyla(k, h) {
   }
 }
 
-// Sudrash: barmoq yoki sichqoncha bilan harfni katakka olib borish.
-// Joyidan deyarli qimirlamasa — oddiy bosish deb hisoblanadi (harf tanlanadi).
+// Harfni bosish: ismda (bo'sh katakda) bo'lsa — birinchi mos katakka o'zi tushadi;
+// bo'lmasa — xato hisoblanadi (birinchi bo'sh katakda qizarib, qaytadi).
+function harfniBos(id) {
+  if (holat.tugadi) return;
+  const h = HARFLAR[id];
+  const boshlar = [...Array(BOLAKLAR_SONI).keys()].filter((k) => !holat.joylangan.includes(k));
+  if (!boshlar.length) return;
+  const mos = boshlar.find((k) => katakHarfi(k) === h);
+  joyla(mos !== undefined ? mos : boshlar[0], h);
+}
+
+// Sudrash: barmoq yoki sichqoncha bilan harfni katakka olib borish (xohlagan katakka).
+// Joyidan deyarli qimirlamasa — oddiy bosish: harf o'z joyiga o'zi tushadi.
 function sudrashBoshla(e, id) {
   if (holat.tugadi) return;
   e.preventDefault();
@@ -297,8 +308,8 @@ function sudrashBoshla(e, id) {
       tugma.classList.remove("sudralmoqda");
       if (ustidagi) { ustidagi.classList.remove("ustida"); joyla(Number(ustidagi.dataset.k), HARFLAR[id]); }
     } else if (ev.type === "pointerup") {
-      tanlanganId = tanlanganId === id ? null : id;  // bosish: tanlash / bekor qilish
-      chiz();
+      tanlanganId = null;
+      harfniBos(id);
     }
   };
   document.addEventListener("pointermove", harakat);
@@ -306,14 +317,17 @@ function sudrashBoshla(e, id) {
   document.addEventListener("pointercancel", tugash);
 }
 
-// Kompyuterda: harf tugmasini yozsangiz, o'sha harf tanlanadi; keyin katakni bosasiz
+// Kompyuterda: harf tugmasini yozsangiz — o'sha harf bosilgandek o'z joyiga tushadi
 document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey || e.metaKey || e.altKey || holat.tugadi) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || holat.tugadi) return;
+  const el = document.activeElement;
+  if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;   // qidiruv va boshqa maydonlarda yozilganda emas
+  if (!$("oyin") || $("oyin").offsetParent === null) return;                                     // faqat o'yin ko'rinib turganda
   if (e.key === "Escape") { tanlanganId = null; chiz(); return; }
   const h = e.key.toUpperCase();
   const ishlatilgan = ishlatilganlar();
   const id = HARFLAR.findIndex((x, i) => x === h && !ishlatilgan[i]);
-  if (id >= 0) { tanlanganId = id; chiz(); }
+  if (id >= 0) harfniBos(id);
 });
 
 // ===== 8. NATIJANI ULASHISH =====
