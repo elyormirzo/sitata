@@ -8,7 +8,7 @@
 const JANG_SAVOL_SONI = 10, JANG_SOniya = 15;
 const JANG_DARAJALAR = [[0, "Bronza", "🥉"], [50, "Kumush", "🥈"], [150, "Oltin", "🥇"], [300, "Platina", "💠"], [500, "Brilliant", "💎"]];
 const jangDarajasi = (ball) => { let d = JANG_DARAJALAR[0]; JANG_DARAJALAR.forEach((x) => { if ((ball || 0) >= x[0]) d = x; }); return { nom: d[1], belgi: d[2], min: d[0] }; };
-const QILICH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4M5 21l-2-2"/></svg>';
+const QILICH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/><g transform="matrix(-1 0 0 1 24 0)"><path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/></g></svg>';   // ikki kesishgan qalam — duel belgisi
 
 let jangTaymer = null, jangQidiruv = null;
 function jangniTozala() {
@@ -114,13 +114,13 @@ async function jangQidir() {
     if (!r.length) {
       onlayn.append(yarat("p", "kichik-matn", "Hozir saytda boshqa o'yinchi yo'q. Kimdir kirib «Raqib qidirish»ni bossa, duel o'zi boshlanadi. Do'stingizni taklif qiling:"));
       const ul = yarat("button", "jang-ikkinchi", "✈ Telegram'da do'stni taklif qilish"); ul.type = "button";
-      ul.addEventListener("click", () => window.open("https://t.me/share/url?url=" + encodeURIComponent(SAYT_MANZILI + "#jang/qidir") + "&text=" + encodeURIComponent(t("Men bilan sitata.uz'da onlayn duel o'yna! ⚔")), "_blank", "noopener"));
+      ul.addEventListener("click", () => window.open("https://t.me/share/url?url=" + encodeURIComponent(SAYT_MANZILI + "#jang/qidir") + "&text=" + encodeURIComponent(t("Men bilan sitata.uz'da onlayn duel o'yna! ✒️")), "_blank", "noopener"));
       onlayn.appendChild(ul);
       return;
     }
     onlayn.appendChild(yarat("p", "jang-onlayn-sarlavha", t("Saytda hozir onlayn — chaqiring:")));
     const q2 = yarat("div", "jang-royxat");
-    r.forEach((p) => { const b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q2.appendChild(oyinchiQatori(p, b)); });
+    r.forEach((p) => { const b = yarat("button", "jang-chaqir", "✒️ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q2.appendChild(oyinchiQatori(p, b)); });
     onlayn.appendChild(q2);
   };
   let band = false;
@@ -315,7 +315,7 @@ function chaqiruvEkrani(s, st) {
   q.append(jangAvatar(u, 84, "jang-av-katta"));
   if (meniChaqirdi) {
     q.append(yarat("h3", "", `${u.ism} ${t(j.tur === "qasos" ? "qasos olmoqchi!" : "sizni onlayn duelga chaqirdi!")}`), yarat("p", "kichik-matn", "10 ta savol · har biriga 15 soniya"), yarat("p", "jang-vaqt", qoldi + " s"));
-    const ha = yarat("button", "jang-katta-tugma", "⚔ Qabul qilish"); ha.type = "button";
+    const ha = yarat("button", "jang-katta-tugma", "✒️ Qabul qilish"); ha.type = "button";
     const yoq = yarat("button", "jang-ikkinchi", "Rad etish"); yoq.type = "button";
     ha.addEventListener("click", async () => { ha.disabled = true; const { data } = await st.m.rpc("jang_qabul", { p_id: st.id }); if (!data) { st.ekran = ""; } });
     yoq.addEventListener("click", async () => { await st.m.rpc("jang_rad", { p_id: st.id }); location.hash = "#duellar"; });
@@ -446,7 +446,7 @@ async function jangOnlayn() {
   r.forEach((p) => {
     let b;
     if (p.qidiryapti) { b = havola("#jang/qidir", "jang-chaqir qidiryapti", "🔍 Bellashish"); }
-    else { b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); }
+    else { b = yarat("button", "jang-chaqir", "✒️ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); }
     q.appendChild(oyinchiQatori(p, b));
   });
   s.appendChild(q);
@@ -505,6 +505,6 @@ async function jangChaqir() {
   const { data: rey } = await m.from("jang_reyting").select("profil_id,ball").in("profil_id", dostlar.map((p) => p.id));
   const ball = {}; (rey || []).forEach((r) => { ball[r.profil_id] = r.ball; });
   const q = yarat("div", "jang-royxat");
-  dostlar.forEach((p) => { const b = yarat("button", "jang-chaqir", "⚔ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q.appendChild(oyinchiQatori({ ...p, ball: ball[p.id] || 0 }, b)); });
+  dostlar.forEach((p) => { const b = yarat("button", "jang-chaqir", "✒️ Chaqirish"); b.type = "button"; b.addEventListener("click", () => chaqirish(m, p, b)); q.appendChild(oyinchiQatori({ ...p, ball: ball[p.id] || 0 }, b)); });
   s.appendChild(q);
 }
