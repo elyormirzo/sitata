@@ -214,7 +214,9 @@ function chiz() {
     $("klaviatura").appendChild(b);
   });
 
-  // O'yin tugaganmi?
+  // O'yin tugaganmi? Tugagach yuqoridagi o'yin kartasi (iqtibos, portret, xatolar, ism) yashiriladi —
+  // ularning hammasi natija kartasida bor, ikki marta ko'rinmasin
+  $("oyinSahifa").classList.toggle("tugagan", !!holat.tugadi);
   if (holat.tugadi) {
     $("oyin").classList.add("yashirin");
     $("natija").classList.remove("yashirin");

@@ -1584,6 +1584,9 @@ body.jang-rejim.panel-tor .yuqori { margin-left: -16px; padding-left: 16px; }
 @media (min-width: 1100px) { body.yon-menyuli .onlayn-yozuv { display: none; } body.yon-menyuli .onlayn-son { padding: 0 10px; } }
 html[data-mavzu="tun"] .onlayn-son { color: #8FD86B; }
 
+/* «Kim aytgan?» tugagach — faqat natija kartasi (iqtibos, portret va xatolar takrorlanmasin) */
+#oyinSahifa.tugagan > .karta, #oyinSahifa.tugagan > .ism, #oyinSahifa.tugagan > .ishoralar, #oyinSahifa.tugagan > header > p { display: none; }
+
 /* ===== TUN REJIMI (avto: asboblar/tun-rejimi.py) ===== */
 html[data-mavzu="tun"] {
   color-scheme: dark;
