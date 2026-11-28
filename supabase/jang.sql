@@ -222,7 +222,7 @@ begin
     select ism into v_ism from public.profillar where id = new.a;
     insert into public.bildirishnomalar (kimga, matn, havola)
     values (new.b, case when new.tur = 'qasos' then '🔥 ' || coalesce(v_ism, 'Raqibingiz') || ' qasos olmoqchi — onlayn duelga chaqirdi!'
-                         else '⚔️ ' || coalesce(v_ism, 'Kitobxon') || ' sizni onlayn duelga chaqirdi!' end, '#jang/' || new.id);
+                         else '✒️ ' || coalesce(v_ism, 'Kitobxon') || ' sizni onlayn duelga chaqirdi!' end, '#jang/' || new.id);
   end if;
   return new;
 end $$;

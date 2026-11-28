@@ -6,7 +6,7 @@ const YON_MENYU = [
   ["lenta", "Lenta", '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
   ["kim-aytgan", "Kim aytgan?", '<path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6"/>'],
   ["viktorina", "Viktorina", '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'],
-  ["duellar", "Duellar", '<path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/><g transform="matrix(-1 0 0 1 24 0)"><path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/></g>'],
+  ["duellar", "Duellar", '<circle cx="12" cy="12" r="7.6" fill="currentColor" fill-opacity=".14" stroke-width="1.5"/><circle cx="12" cy="12" r="5" stroke-width=".9" stroke-opacity=".45"/><g fill="currentColor" stroke="none"><path d="M1.6 3.2 3.2 1.6 14.9 13.3 13.3 14.9Z"/><path d="M13.3 14.9 14.9 13.3 21.6 21.6Z"/><path d="M1.6 3.2 3.2 1.6 5 3.4 3.4 5Z" fill-opacity=".5"/></g><g transform="matrix(-1 0 0 1 24 0)"><g fill="currentColor" stroke="none"><path d="M1.6 3.2 3.2 1.6 14.9 13.3 13.3 14.9Z"/><path d="M13.3 14.9 14.9 13.3 21.6 21.6Z"/><path d="M1.6 3.2 3.2 1.6 5 3.4 3.4 5Z" fill-opacity=".5"/></g></g>'],
   ["javon", "Kitob javonim", '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>'],
   ["guruhlar", "Guruhlar", '<path d="M12 7V2.5l4 1.6-4 1.6M2 21h20M4 21v-9l8-5 8 5v9"/><path d="M10 21v-4h4v4M7.5 13.5h1M15.5 13.5h1"/>'],
   ["kitobdoshlar", "Kitobdoshlar", '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.7 3 2.5 3.5 5.2"/>'],

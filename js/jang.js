@@ -8,7 +8,7 @@
 const JANG_SAVOL_SONI = 10, JANG_SOniya = 15;
 const JANG_DARAJALAR = [[0, "Bronza", "🥉"], [50, "Kumush", "🥈"], [150, "Oltin", "🥇"], [300, "Platina", "💠"], [500, "Brilliant", "💎"]];
 const jangDarajasi = (ball) => { let d = JANG_DARAJALAR[0]; JANG_DARAJALAR.forEach((x) => { if ((ball || 0) >= x[0]) d = x; }); return { nom: d[1], belgi: d[2], min: d[0] }; };
-const QILICH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/><g transform="matrix(-1 0 0 1 24 0)"><path d="M2.5 5.5 5.5 2.5 15.5 12.5 12.5 15.5Z"/><path d="M12.5 15.5 15.5 12.5 21 21Z"/><path d="M4.5 7.5l3-3"/></g></svg>';   // ikki kesishgan qalam — duel belgisi
+const QILICH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.6" fill="currentColor" fill-opacity=".14" stroke-width="1.5"/><circle cx="12" cy="12" r="5" stroke-width=".9" stroke-opacity=".45"/><g fill="currentColor" stroke="none"><path d="M1.6 3.2 3.2 1.6 14.9 13.3 13.3 14.9Z"/><path d="M13.3 14.9 14.9 13.3 21.6 21.6Z"/><path d="M1.6 3.2 3.2 1.6 5 3.4 3.4 5Z" fill-opacity=".5"/></g><g transform="matrix(-1 0 0 1 24 0)"><g fill="currentColor" stroke="none"><path d="M1.6 3.2 3.2 1.6 14.9 13.3 13.3 14.9Z"/><path d="M13.3 14.9 14.9 13.3 21.6 21.6Z"/><path d="M1.6 3.2 3.2 1.6 5 3.4 3.4 5Z" fill-opacity=".5"/></g></g></svg>';   // ikki kesishgan qalam — duel belgisi
 
 let jangTaymer = null, jangQidiruv = null;
 function jangniTozala() {
